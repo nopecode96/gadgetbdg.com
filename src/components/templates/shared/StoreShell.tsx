@@ -89,17 +89,17 @@ export function StoreShell({
 
               <div className="min-w-0">
                 <div className="flex items-center">
-                  <h1 className="text-slate-950 dark:text-white font-black text-base leading-tight truncate">
+                  <h1 className="font-black text-base tracking-tight text-slate-950 dark:text-white leading-tight truncate">
                     {store.name}
                   </h1>
                   <span
-                    className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-950 animate-pulse inline-block ml-1.5 shrink-0"
+                    className="w-2.5 h-2.5 rounded-full bg-emerald-600 ring-2 ring-emerald-200 animate-pulse shrink-0 inline-block ml-1.5"
                     title="Toko Buka Siap COD"
                   />
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
                   <MapPin className="w-3.5 h-3.5 text-rose-600 shrink-0 fill-rose-600" />
-                  <span className="text-slate-700 dark:text-slate-300 font-bold text-xs truncate max-w-[220px] sm:max-w-xs leading-tight">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px] sm:max-w-xs leading-tight">
                     {locationLabel}
                   </span>
                 </div>

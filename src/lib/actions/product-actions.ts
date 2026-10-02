@@ -42,13 +42,18 @@ export async function createProductAction(formData: FormData) {
     const priceRaw = formData.get("price") as string;
     const ramRom = formData.get("ramRom") as string;
     const batteryHealthRaw = formData.get("batteryHealth") as string;
-    const imeiStatus = formData.get("imeiStatus") as string;
+    const imeiStatusRaw = formData.get("imeiStatus") as string;
+    const imeiNumber = (formData.get("imeiNumber") as string)?.trim() || "";
     const completeness = formData.get("completeness") as string;
     const condition = formData.get("condition") as string;
     const minusNotes = (formData.get("minusNotes") as string) || null;
     const imageUrl = (formData.get("imageUrl") as string) || null;
 
-    if (!name || !brand || !priceRaw || !ramRom || !imeiStatus || !completeness || !condition) {
+    const imeiStatus = imeiNumber
+      ? `${imeiStatusRaw} [IMEI: ${imeiNumber}]`
+      : imeiStatusRaw;
+
+    if (!name || !brand || !priceRaw || !ramRom || !imeiStatusRaw || !completeness || !condition) {
       return { success: false, error: "Mohon lengkapi seluruh field wajib." };
     }
 

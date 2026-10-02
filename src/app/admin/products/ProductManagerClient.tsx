@@ -12,9 +12,12 @@ import {
   AlertCircle,
   PackageX,
   Zap,
+  Camera,
+  Scan,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 import { toggleProductStatus, createProductAction, deleteProductAction } from "@/lib/actions";
+import { BarcodeScannerModal } from "@/components/admin/BarcodeScannerModal";
 
 interface Product {
   id: string;
@@ -71,6 +74,8 @@ export function ProductManagerClient({
   const [loading, setLoading] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannedImei, setScannedImei] = useState("");
 
   // Live active count based on current local state
   const liveActiveCount = products.filter(
@@ -126,6 +131,7 @@ export function ProductManagerClient({
     if (res.success && res.product) {
       setProducts((prev) => [res.product as any, ...prev]);
       setIsFormOpen(false);
+      setScannedImei("");
       (e.target as HTMLFormElement).reset();
     } else {
       setFormError(res.error || "Gagal menambahkan unit.");
@@ -284,8 +290,8 @@ export function ProductManagerClient({
               </div>
             </div>
 
-            {/* Row 2: RAM/ROM / Battery Health / IMEI */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Row 2: RAM/ROM / Battery Health */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">RAM / Storage *</label>
                 <input
@@ -309,12 +315,49 @@ export function ProductManagerClient({
                   className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
                 />
               </div>
+            </div>
+
+            {/* Row 3: Barcode / IMEI Scanner & Status IMEI */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-cyan-50/50 border border-cyan-100">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Status IMEI *</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                    <Scan className="w-3.5 h-3.5 text-cyan-600" />
+                    Nomor IMEI (15 Digit)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsScannerOpen(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-cyan-600 hover:bg-cyan-700 shadow-sm shadow-cyan-600/20 px-2.5 py-1 rounded-lg transition"
+                    title="Buka Kamera Scanner Barcode Dus / IMEI"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Scan Dus / Barcode</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="imeiNumber"
+                    value={scannedImei}
+                    onChange={(e) => setScannedImei(e.target.value.replace(/[^0-9]/g, "").slice(0, 15))}
+                    placeholder="Scan atau ketik IMEI 15 digit..."
+                    maxLength={15}
+                    className="w-full px-3 py-2 rounded-xl border border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white font-mono text-slate-800 tracking-wider text-xs"
+                  />
+                  {scannedImei && (
+                    <span className="absolute right-2 top-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800 border border-cyan-200">
+                      {scannedImei.length}/15
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Status Legalitas IMEI *</label>
                 <select
                   name="imeiStatus"
                   required
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full px-3 py-2 rounded-xl border border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white text-xs"
                 >
                   <option value="Resmi iBox / Kemenperin Aman">Resmi iBox / Kemenperin Aman</option>
                   <option value="Resmi SEIN / Resmi Indonesia">Resmi SEIN / Resmi Indonesia</option>
@@ -532,6 +575,15 @@ export function ProductManagerClient({
           )}
         </div>
       </div>
+
+      {/* Barcode / IMEI Scanner Camera Modal */}
+      <BarcodeScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={(decodedImei) => {
+          setScannedImei(decodedImei);
+        }}
+      />
     </div>
   );
 }

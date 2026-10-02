@@ -15,6 +15,15 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/gadgetbdg?schema=public
       - NEXTAUTH_SECRET=gadgetbdg_secret_key_production_change_me
       - NEXT_PUBLIC_MAIN_DOMAIN=gadgetbdg.com
+    networks:
+      - default
+      - locallytrip_net
 
 volumes:
   postgres_data:
+
+networks:
+  default:
+  locallytrip_net:
+    name: locallytrip-network-prod
+    external: true

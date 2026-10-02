@@ -4,24 +4,19 @@ import React, { useState, useMemo } from "react";
 import {
   Search,
   Filter,
-  BatteryCharging,
-  ShieldCheck,
-  MessageCircle,
-  X,
   SlidersHorizontal,
   Smartphone,
-  CheckCircle,
-  AlertCircle,
 } from "lucide-react";
 import { StoreData, ProductData } from "./types";
-import { formatRupiah } from "@/lib/utils";
+import { getTemplateConfig } from "@/lib/constants/templates";
+import { ProductCard } from "./ProductCard";
 
 interface StoreListViewProps {
   store: StoreData;
   products: ProductData[];
   selectedBrand?: string;
   onBrandChange?: (brand: string) => void;
-  theme?: "minimal-clean" | "dark-gaming";
+  theme?: string;
 }
 
 export function StoreListView({
@@ -29,9 +24,13 @@ export function StoreListView({
   products,
   selectedBrand: initialBrand = "ALL",
   onBrandChange,
-  theme = "minimal-clean",
+  theme,
 }: StoreListViewProps) {
-  const isDark = theme === "dark-gaming";
+  const currentThemeId = theme || store.templateId || "minimal-clean";
+  const themeConfig = getTemplateConfig(currentThemeId);
+  const { colors } = themeConfig;
+  const isDark = colors.isDark;
+
   const displayProducts = Array.isArray(products) ? products : [];
 
   const [search, setSearch] = useState("");
@@ -98,56 +97,59 @@ export function StoreListView({
     selectedRam !== "ALL" ||
     selectedStorage !== "ALL" ||
     selectedCondition !== "ALL" ||
-    search !== "";
-
-  let cleanWa = (store.whatsapp || "").replace(/\D/g, "");
-  if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
+    search.trim().length > 0;
 
   return (
-    <div className="p-4 space-y-4 animate-fade-in">
-      {/* 1. Search Bar + Filter Toggle */}
+    <div className="p-4 space-y-4 animate-fade-in text-xs">
+      {/* 1. Search Bar & Filter Toggle */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-2.5" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari iPhone, Samsung, RAM/ROM..."
-            className={`w-full pl-9 pr-8 py-2 rounded-xl text-xs focus:outline-none focus:ring-2 transition ${
+            placeholder="Cari iPhone, Samsung, RAM, IMEI..."
+            className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs focus:outline-none transition ${
               isDark
-                ? "bg-slate-950 text-slate-100 placeholder:text-slate-500 border border-slate-700/80 focus:ring-emerald-500"
-                : "bg-neutral-100 text-neutral-800 placeholder:text-neutral-400 border border-neutral-200 focus:ring-blue-600"
+                ? "bg-slate-900 border-slate-800 text-white placeholder-slate-500 focus:border-emerald-500"
+                : "bg-white border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:border-blue-500 shadow-sm"
             }`}
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-2.5 top-2.5 text-neutral-400 hover:text-neutral-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs"
             >
-              <X className="w-3.5 h-3.5" />
+              ✕
             </button>
           )}
         </div>
 
         <button
           onClick={() => setShowFilterPanel(!showFilterPanel)}
-          className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border ${
-            hasActiveFilters
+          className={`p-2.5 rounded-xl border font-bold flex items-center gap-1.5 transition shrink-0 ${
+            showFilterPanel || hasActiveFilters
               ? isDark
-                ? "bg-emerald-500 text-slate-950 border-emerald-400"
-                : "bg-blue-600 text-white border-blue-600"
+                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500"
+                : "bg-blue-50 text-blue-700 border-blue-400"
               : isDark
-              ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-750"
-              : "bg-neutral-100 text-neutral-700 border-neutral-200 hover:bg-neutral-200"
+              ? "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800"
+              : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50 shadow-sm"
           }`}
+          title="Filter Lengkap"
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          <span>Filter</span>
+          <SlidersHorizontal className="w-4 h-4" />
+          <span className="hidden sm:inline">Filter</span>
+          {hasActiveFilters && (
+            <span
+              className={`w-2 h-2 rounded-full ${isDark ? "bg-emerald-400" : "bg-blue-600"}`}
+            />
+          )}
         </button>
       </div>
 
-      {/* 2. Brand Horizontal Scroll Pills */}
+      {/* 2. Brand Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
         {allBrands.map((b) => (
           <button
@@ -156,14 +158,14 @@ export function StoreListView({
               setBrand(b);
               if (onBrandChange) onBrandChange(b);
             }}
-            className={`px-3 py-1.5 rounded-full font-bold text-xs whitespace-nowrap transition border ${
+            className={`px-3 py-1.5 rounded-full font-bold tracking-wide shrink-0 transition border ${
               brand === b
                 ? isDark
-                  ? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-sm"
-                  : "bg-neutral-900 text-white border-neutral-900"
+                  ? `${colors.accent} text-slate-950 border-transparent shadow`
+                  : "bg-neutral-900 text-white border-neutral-900 shadow-sm"
                 : isDark
-                ? "bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200"
-                : "bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200"
+                ? "bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200"
+                : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300"
             }`}
           >
             {b === "ALL" ? "Semua Merk" : b}
@@ -171,20 +173,26 @@ export function StoreListView({
         ))}
       </div>
 
-      {/* 3. Expandable Multi-Dimensional Filter Drawer */}
+      {/* 3. Collapsible Advanced Filter Drawer/Card */}
       {showFilterPanel && (
         <div
-          className={`rounded-2xl p-4 border text-xs space-y-3.5 animate-fade-in ${
-            isDark ? "bg-slate-950 border-slate-800" : "bg-neutral-50 border-neutral-200"
+          className={`p-4 rounded-2xl border space-y-3.5 animate-fade-in shadow-sm ${
+            isDark ? "bg-slate-950/80 border-slate-800" : "bg-neutral-50 border-neutral-200"
           }`}
         >
-          <div className="flex items-center justify-between border-b pb-2 border-neutral-200 dark:border-slate-800">
-            <span className="font-bold">Filter Lanjutan</span>
-            {hasActiveFilters && (
-              <button onClick={resetFilters} className="text-[11px] font-bold text-rose-500 hover:underline">
-                Reset Semua
-              </button>
-            )}
+          <div className="flex items-center justify-between border-b border-neutral-200/60 dark:border-slate-800 pb-2">
+            <span className="font-bold text-xs flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5" />
+              <span>Filter Detail Spesifikasi</span>
+            </span>
+            <button
+              onClick={resetFilters}
+              className={`text-[11px] font-semibold hover:underline ${
+                isDark ? "text-emerald-400" : "text-blue-600"
+              }`}
+            >
+              Reset Semua
+            </button>
           </div>
 
           {/* Price Range */}
@@ -270,13 +278,13 @@ export function StoreListView({
           Katalog ({filteredProducts.length} Unit)
         </span>
         {hasActiveFilters && (
-          <button onClick={resetFilters} className="text-[11px] text-blue-600 dark:text-emerald-400 hover:underline">
+          <button onClick={resetFilters} className={`text-[11px] hover:underline ${colors.accentText}`}>
             Reset Filter
           </button>
         )}
       </div>
 
-      {/* 5. 2-Column Mobile-First Product Grid */}
+      {/* 5. 2-Column Mobile-First Product Grid with Modular ProductCard */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-16 bg-neutral-50 dark:bg-slate-950/60 rounded-3xl border border-dashed border-neutral-300 dark:border-slate-800 p-6 space-y-2">
           <Smartphone className="w-10 h-10 text-neutral-300 dark:text-slate-700 mx-auto" />
@@ -287,7 +295,7 @@ export function StoreListView({
           <button
             onClick={resetFilters}
             className={`mt-2 px-4 py-1.5 rounded-xl font-bold text-xs transition ${
-              isDark ? "bg-emerald-500 text-slate-950" : "bg-neutral-900 text-white"
+              isDark ? `${colors.accent} text-slate-950` : "bg-neutral-900 text-white"
             }`}
           >
             Reset Filter
@@ -295,108 +303,14 @@ export function StoreListView({
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {filteredProducts.map((p) => {
-            const currentOrigin = typeof window !== "undefined" ? window.location.origin : "https://gadgetbdg.com";
-            const productUrl = `${currentOrigin}/${store.slug}#${p.id}`;
-            const waMessage = encodeURIComponent(
-              `Halo ${store.name}, saya berminat dengan unit ini:\n\n` +
-                `*${p.name}*\n` +
-                `• Spek: ${p.ramRom}\n` +
-                `• Harga: ${formatRupiah(p.price)}\n` +
-                `• Kondisi: ${p.condition}\n` +
-                `• Status IMEI: ${p.imeiStatus}\n` +
-                (p.batteryHealth ? `• Battery Health: ${p.batteryHealth}%\n` : "") +
-                (p.minusNotes ? `• Catatan: ${p.minusNotes}\n` : "") +
-                `\nLink: ${productUrl}\n\nApakah unit ini masih ready kak?`
-            );
-
-            return (
-              <div
-                key={p.id}
-                id={p.id}
-                className={`rounded-2xl p-3 border transition flex flex-col justify-between space-y-2.5 ${
-                  isDark
-                    ? "bg-slate-950/70 border-slate-800 hover:border-emerald-500/40"
-                    : "bg-white border-neutral-200 hover:border-blue-300 shadow-sm"
-                }`}
-              >
-                <div>
-                  {/* Thumbnail Image with Watermark */}
-                  <div className="aspect-square rounded-xl bg-neutral-100 dark:bg-slate-900 overflow-hidden relative border border-neutral-200/50 dark:border-slate-800 mb-2">
-                    {p.images && p.images.length > 0 ? (
-                      <img
-                        src={p.images[0]}
-                        alt={p.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400">
-                        No Pic
-                      </div>
-                    )}
-
-                    {/* Condition badge */}
-                    <span
-                      className={`absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded shadow ${
-                        isDark ? "bg-emerald-500 text-slate-950" : "bg-neutral-900 text-white"
-                      }`}
-                    >
-                      {p.condition.slice(0, 10)}
-                    </span>
-
-                    {/* Store Watermark on Image */}
-                    <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[8px] font-mono px-1 py-0.5 rounded opacity-80">
-                      @{store.slug}
-                    </div>
-                  </div>
-
-                  {/* Brand & Name */}
-                  <span className={`text-[9px] font-bold uppercase tracking-wider ${isDark ? "text-emerald-400" : "text-blue-600"}`}>
-                    {p.brand}
-                  </span>
-                  <h3 className="font-bold text-xs line-clamp-1 leading-snug">{p.name}</h3>
-
-                  {/* Price */}
-                  <div className={`font-black text-sm mt-0.5 ${isDark ? "text-emerald-400 font-mono" : "text-blue-700"}`}>
-                    {formatRupiah(p.price)}
-                  </div>
-                  <div className={`text-[10px] ${isDark ? "text-slate-400 font-mono" : "text-neutral-500"}`}>
-                    {p.ramRom}
-                  </div>
-
-                  {/* Badges: BH & IMEI */}
-                  <div className="flex flex-wrap gap-1 mt-1.5">
-                    {p.batteryHealth !== null && (
-                      <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-                        <BatteryCharging className="w-2.5 h-2.5 text-amber-600" />
-                        <span>BH {p.batteryHealth}%</span>
-                      </span>
-                    )}
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300">
-                      <ShieldCheck className="w-2.5 h-2.5" />
-                      <span className="truncate max-w-[85px]">{p.imeiStatus}</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Direct WA Order Button */}
-                <a
-                  href={`https://wa.me/${cleanWa}?text=${waMessage}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`w-full py-1.5 rounded-lg text-center text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition ${
-                    isDark
-                      ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  }`}
-                >
-                  <MessageCircle className="w-3 h-3 fill-current" />
-                  <span>Order WA</span>
-                </a>
-              </div>
-            );
-          })}
+          {filteredProducts.map((p) => (
+            <ProductCard
+              key={p.id}
+              product={p}
+              store={store}
+              themeConfig={themeConfig}
+            />
+          ))}
         </div>
       )}
     </div>

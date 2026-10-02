@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
@@ -7,6 +8,67 @@ interface StorePageProps {
 }
 
 export const revalidate = 0; // Dynamic server component
+
+export async function generateMetadata({ params }: StorePageProps): Promise<Metadata> {
+  const resolvedParams = await Promise.resolve(params);
+  const storeSlug = (resolvedParams?.store || "").trim();
+
+  const store = await prisma.store.findFirst({
+    where: {
+      slug: {
+        equals: storeSlug,
+        mode: "insensitive",
+      },
+    },
+    select: {
+      name: true,
+      address: true,
+      bannerUrl: true,
+      logoUrl: true,
+      products: {
+        take: 3,
+        select: { name: true, price: true },
+      },
+    },
+  });
+
+  if (!store) {
+    return {
+      title: "Toko Tidak Ditemukan - GadgetBdg",
+    };
+  }
+
+  const title = `${store.name} - Katalog HP Bekas Resmi Bandung | GadgetBdg`;
+  const productPreview = store.products.map((p) => p.name).join(", ");
+  const description = `Katalog HP second berkualitas di ${store.name}. Stok siap COD & kirim: ${
+    productPreview || "iPhone & Android teruji bergaransi"
+  }. WhatsApp langsung tanpa perantara.`;
+  const image = store.bannerUrl || store.logoUrl || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: store.name,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function StorePage({ params }: StorePageProps) {
   // Safe params unwrap (handles Promise in Next.js 14/15 and plain object)
@@ -51,6 +113,7 @@ export default async function StorePage({ params }: StorePageProps) {
     logoUrl: rawStore.logoUrl ? String(rawStore.logoUrl) : null,
     tier: String(rawStore.tier || "STARTER"),
     templateId: String(rawStore.templateId || "minimal-clean"),
+    hasWatermark: Boolean(rawStore.hasWatermark || rawStore.tier !== "STARTER"),
   };
 
   const productsData = (rawStore.products || []).map((p) => ({

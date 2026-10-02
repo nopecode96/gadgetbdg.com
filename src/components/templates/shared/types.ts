@@ -10,6 +10,7 @@ export interface StoreData {
   logoUrl: string | null;
   tier: string;
   templateId: string;
+  hasWatermark?: boolean;
 }
 
 export interface ProductData {

@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
@@ -7,6 +8,58 @@ interface CustomDomainPageProps {
 }
 
 export const revalidate = 0;
+
+export async function generateMetadata({ params }: CustomDomainPageProps): Promise<Metadata> {
+  const resolvedParams = await Promise.resolve(params);
+  const customDomain = (resolvedParams?.domain || "").trim();
+
+  const store = await prisma.store.findFirst({
+    where: {
+      customDomain: {
+        equals: customDomain,
+        mode: "insensitive",
+      },
+    },
+    select: {
+      name: true,
+      bannerUrl: true,
+      logoUrl: true,
+      products: {
+        take: 3,
+        select: { name: true },
+      },
+    },
+  });
+
+  if (!store) {
+    return {
+      title: "Store Not Found",
+    };
+  }
+
+  const title = `${store.name} - Storefront Resmi`;
+  const productPreview = store.products.map((p) => p.name).join(", ");
+  const description = `Katalog HP second berkualitas di ${store.name}. Unit teruji & bergaransi: ${
+    productPreview || "Katalog HP Second Resmi"
+  }.`;
+  const image = store.bannerUrl || store.logoUrl || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: image, width: 1200, height: 630, alt: store.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function CustomDomainPage({ params }: CustomDomainPageProps) {
   const resolvedParams = await Promise.resolve(params);
@@ -49,6 +102,7 @@ export default async function CustomDomainPage({ params }: CustomDomainPageProps
     logoUrl: rawStore.logoUrl ? String(rawStore.logoUrl) : null,
     tier: String(rawStore.tier || "STARTER"),
     templateId: String(rawStore.templateId || "minimal-clean"),
+    hasWatermark: Boolean(rawStore.hasWatermark || rawStore.tier !== "STARTER"),
   };
 
   const productsData = (rawStore.products || []).map((p) => ({

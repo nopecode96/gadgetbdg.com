@@ -14,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { updateStoreSettingsAction } from "@/lib/actions";
+import { getAvailableTemplatesForTier, TEMPLATE_REGISTRY } from "@/lib/constants/templates";
 
 interface SettingsClientProps {
   store?: any;
@@ -24,6 +25,7 @@ export function SettingsClient({ store }: SettingsClientProps) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState(store?.templateId || "minimal-clean");
+  const availableTemplates = getAvailableTemplatesForTier(store?.tier);
 
   if (!store) {
     return (
@@ -147,62 +149,58 @@ export function SettingsClient({ store }: SettingsClientProps) {
             <span className="text-[11px] font-semibold text-slate-500">1-Klik Ganti Tema</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Minimal Clean Card */}
-            <div
-              onClick={() => setSelectedTemplate("minimal-clean")}
-              className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-3 ${
-                selectedTemplate === "minimal-clean"
-                  ? "border-blue-600 bg-blue-50/50 shadow-md ring-1 ring-blue-600"
-                  : "border-slate-200 hover:border-slate-300 bg-white"
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm text-slate-900">Minimal Clean</h3>
-                  {selectedTemplate === "minimal-clean" && (
-                    <span className="text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full">
-                      Dipilih
-                    </span>
-                  )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-1">
+            {availableTemplates.map((t) => {
+              const isSelected = selectedTemplate === t.id;
+              const isDark = t.colors.isDark;
+
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTemplate(t.id)}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-3 ${
+                    isSelected
+                      ? isDark
+                        ? "border-emerald-500 bg-slate-900 text-white shadow-md ring-1 ring-emerald-500"
+                        : "border-blue-600 bg-blue-50/50 shadow-md ring-1 ring-blue-600 text-slate-900"
+                      : isDark
+                      ? "border-slate-800 hover:border-slate-700 bg-slate-950 text-slate-100"
+                      : "border-slate-200 hover:border-slate-300 bg-white text-slate-900"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-bold text-sm">{t.name}</h3>
+                        {t.badge && (
+                          <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">
+                            {t.badge}
+                          </span>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            isDark ? "bg-emerald-500 text-slate-950" : "bg-blue-600 text-white"
+                          }`}
+                        >
+                          Dipilih
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      {t.description}
+                    </p>
+                  </div>
+
+                  <div
+                    className={`h-12 rounded-xl border p-2 flex items-center justify-center text-xs font-semibold ${t.colors.heroGradient} ${t.colors.heroBorder}`}
+                  >
+                    Preview: {t.name}
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Desain cerah, elegan, putih bersih. Sangat cocok untuk toko spesialis iPhone resmi iBox & Android flagship.
-                </p>
-              </div>
-
-              <div className="h-16 rounded-xl bg-slate-100 border border-slate-200 p-2 flex items-center justify-center text-xs font-semibold text-slate-600">
-                Preview: Light Theme Clean
-              </div>
-            </div>
-
-            {/* Dark Gaming Card */}
-            <div
-              onClick={() => setSelectedTemplate("dark-gaming")}
-              className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-3 ${
-                selectedTemplate === "dark-gaming"
-                  ? "border-emerald-500 bg-slate-900 text-white shadow-md ring-1 ring-emerald-500"
-                  : "border-slate-200 hover:border-slate-300 bg-white text-slate-900"
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm">Dark Gaming Cyber</h3>
-                  {selectedTemplate === "dark-gaming" && (
-                    <span className="text-[10px] font-bold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full">
-                      Dipilih
-                    </span>
-                  )}
-                </div>
-                <p className={`text-xs mt-1 ${selectedTemplate === "dark-gaming" ? "text-slate-400" : "text-slate-500"}`}>
-                  Nuansa hitam futuristik dengan aksen neon hijau emerald. Populer untuk HP gaming ROG, iQOO, dan POCO.
-                </p>
-              </div>
-
-              <div className="h-16 rounded-xl bg-slate-950 border border-emerald-500/30 p-2 flex items-center justify-center text-xs font-mono text-emerald-400">
-                Preview: Cyber Dark High FPS
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
 

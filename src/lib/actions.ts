@@ -76,6 +76,12 @@ import {
   updateStoreSettings as guardedUpdateStoreSettings,
 } from "./actions/store-actions";
 
+import { trackWhatsAppClickAction as baseTrackWhatsAppClickAction } from "./actions/analytics-actions";
+
+export async function trackWhatsAppClickAction(productId: string, storeId: string) {
+  return baseTrackWhatsAppClickAction(productId, storeId);
+}
+
 export async function createProduct(formData: FormData) {
   return guardedCreateProduct(formData);
 }

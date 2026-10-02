@@ -1,0 +1,227 @@
+const { PrismaClient } = require("@prisma/client");
+
+const prisma = new PrismaClient();
+
+async function ensureDemoData() {
+  console.log("🌱 Ensuring demo stores and products exist (Upsert Mode)...");
+
+  // 1. Berkah Cell (Minimal-Clean theme, Pro Tier)
+  const berkahCell = await prisma.store.upsert({
+    where: { slug: "berkahcell" },
+    update: {
+      name: "Berkah Cell Gadget",
+      tier: "PRO",
+      templateId: "minimal-clean",
+      whatsapp: "6281234567890",
+      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-05, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      primaryColor: "#2563eb",
+      logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      isActive: true,
+    },
+    create: {
+      name: "Berkah Cell Gadget",
+      slug: "berkahcell",
+      customDomain: null,
+      whatsapp: "6281234567890",
+      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-05, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      tier: "PRO",
+      templateId: "minimal-clean",
+      primaryColor: "#2563eb",
+      logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      isActive: true,
+    },
+  });
+
+  const berkahCount = await prisma.product.count({ where: { storeId: berkahCell.id } });
+  if (berkahCount === 0) {
+    await prisma.product.createMany({
+      data: [
+        {
+          storeId: berkahCell.id,
+          name: "iPhone 13 Pro 128GB Sierra Blue",
+          brand: "Apple",
+          price: 11450000,
+          ramRom: "6GB / 128GB",
+          batteryHealth: 86,
+          imeiStatus: "Resmi iBox (Kemenperin Aman)",
+          completeness: "Fullset Original Box & Kabel",
+          condition: "98% Mulus Like New",
+          minusNotes: "Fisik istimewa terawat, 3uTools hijau semua, TrueTone & FaceID normal",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+        {
+          storeId: berkahCell.id,
+          name: "iPhone 12 128GB White",
+          brand: "Apple",
+          price: 6850000,
+          ramRom: "4GB / 128GB",
+          batteryHealth: 82,
+          imeiStatus: "All Operator Terdaftar",
+          completeness: "Unit Only + Bonus Charger 20W OEM",
+          condition: "93% Fisik Pemakaian Wajar",
+          minusNotes: "Ada lecet pemakaian tipis di bezel kiri bawah, kamera jernih, layar aman",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+        {
+          storeId: berkahCell.id,
+          name: "Samsung Galaxy S22 Ultra 12/256GB Burgundy",
+          brand: "Samsung",
+          price: 8900000,
+          ramRom: "12GB / 256GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi SEIN Indonesia",
+          completeness: "Unit + Stylus S-Pen Original (Batangan)",
+          condition: "90% Fisik Normal",
+          minusNotes: "Layar ada shadow tipis samar di background putih, fungsi 100% lancar, kamera joss 100x zoom",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+        {
+          storeId: berkahCell.id,
+          name: "Xiaomi 13T 12/256GB Leica Meadow Green",
+          brand: "Xiaomi",
+          price: 5450000,
+          ramRom: "12GB / 256GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi Xiaomi Indonesia",
+          completeness: "Fullset Original 67W Turbo Charger",
+          condition: "99% Seperti Baru (Plastik Bezel Nempel)",
+          minusNotes: "No minus mulus total, garansi resmi aktif s/d November 2026",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+      ],
+    });
+  }
+
+  // 2. Gamers Gadget (Dark-Gaming theme, Starter Tier)
+  const gamersGadget = await prisma.store.upsert({
+    where: { slug: "gamersgadget" },
+    update: {
+      name: "Gamers Gadget Bandung",
+      tier: "STARTER",
+      templateId: "dark-gaming",
+      whatsapp: "6289876543210",
+      address: "ITC Kebon Kelapa Lantai 3 Blok F No. 8, Jl. Moh. Toha, Bandung",
+      mapsUrl: "https://maps.google.com/?q=ITC+Kebon+Kelapa+Bandung",
+      primaryColor: "#10b981",
+      logoUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&auto=format&fit=crop&q=80",
+      isActive: true,
+    },
+    create: {
+      name: "Gamers Gadget Bandung",
+      slug: "gamersgadget",
+      customDomain: null,
+      whatsapp: "6289876543210",
+      address: "ITC Kebon Kelapa Lantai 3 Blok F No. 8, Jl. Moh. Toha, Bandung",
+      mapsUrl: "https://maps.google.com/?q=ITC+Kebon+Kelapa+Bandung",
+      tier: "STARTER",
+      templateId: "dark-gaming",
+      primaryColor: "#10b981",
+      logoUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&auto=format&fit=crop&q=80",
+      isActive: true,
+    },
+  });
+
+  const gamersCount = await prisma.product.count({ where: { storeId: gamersGadget.id } });
+  if (gamersCount === 0) {
+    await prisma.product.createMany({
+      data: [
+        {
+          storeId: gamersGadget.id,
+          name: "ASUS ROG Phone 6 12/256GB Phantom Black",
+          brand: "ASUS ROG",
+          price: 7200000,
+          ramRom: "12GB / 256GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi ASUS Indonesia",
+          completeness: "Fullset Box + AeroActive Cooler 6 + 65W HyperCharge",
+          condition: "96% Terawat Mulus",
+          minusNotes: "AirTrigger normal responsif, RGB Matrix nyala normal, baterai 6000mAh super awet",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+        {
+          storeId: gamersGadget.id,
+          name: "iQOO 12 16/512GB Legend Edition (BMW M Motorsport)",
+          brand: "iQOO",
+          price: 8600000,
+          ramRom: "16GB / 512GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi iQOO Indonesia",
+          completeness: "Fullset Original 120W FlashCharge",
+          condition: "99% Mulus Like New",
+          minusNotes: "Snapdragon 8 Gen 3 beast gaming, no minus sama sekali, garansi on",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+        {
+          storeId: gamersGadget.id,
+          name: "iPhone 13 256GB Starlight (Gaming Rig Edition)",
+          brand: "Apple",
+          price: 9300000,
+          ramRom: "4GB / 256GB",
+          batteryHealth: 88,
+          imeiStatus: "Resmi Digimap (Kemenperin Aktif)",
+          completeness: "Fullset Box Original",
+          condition: "97% Mulus",
+          minusNotes: "Layar mulus sudah pasang tempered glass matte gaming, no dent",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+        {
+          storeId: gamersGadget.id,
+          name: "Poco F5 Pro 12/512GB Black",
+          brand: "POCO",
+          price: 5200000,
+          ramRom: "12GB / 512GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi POCO Indonesia",
+          completeness: "Unit + Kabel Data Fast Charging (Batangan)",
+          condition: "92% Pemakaian Harian",
+          minusNotes: "Bezel ada bintik jamur bekas casing case ketat, layar & performa gaming 100% buas",
+          status: "AVAILABLE",
+          images: [
+            "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600&auto=format&fit=crop&q=80",
+          ],
+        },
+      ],
+    });
+  }
+
+  console.log("✅ Demo stores and products are guaranteed to exist!");
+}
+
+if (require.main === module) {
+  ensureDemoData()
+    .catch((err) => {
+      console.error("Demo data ensure error:", err);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
+
+module.exports = { ensureDemoData };

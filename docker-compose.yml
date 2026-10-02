@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    container_name: gadgetbdg_app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./data/uploads:/app/public/uploads
+      - ./data/backups:/app/data/backups
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/gadgetbdg?schema=public
+      - NEXTAUTH_SECRET=gadgetbdg_secret_key_production_change_me
+      - NEXT_PUBLIC_MAIN_DOMAIN=gadgetbdg.com
+
+volumes:
+  postgres_data:

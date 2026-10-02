@@ -1,0 +1,282 @@
+"use client";
+
+import React, { useState } from "react";
+import { RefreshCw, Send, CheckCircle2, AlertCircle, Smartphone, DollarSign, HelpCircle } from "lucide-react";
+import { StoreData } from "./types";
+import { createTradeInOffer } from "@/lib/actions";
+
+interface StoreTradeInViewProps {
+  store: StoreData;
+  theme?: "minimal-clean" | "dark-gaming";
+}
+
+export function StoreTradeInView({ store, theme = "minimal-clean" }: StoreTradeInViewProps) {
+  const isDark = theme === "dark-gaming";
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    formData.append("storeId", store.id);
+    formData.append("storeSlug", store.slug);
+
+    const res = await createTradeInOffer(formData);
+    setLoading(false);
+
+    if (res.success) {
+      setSuccess(true);
+
+      const customerName = formData.get("customerName") as string;
+      const deviceModel = formData.get("deviceModel") as string;
+      const ramStorage = formData.get("ramStorage") as string;
+      const conditionDesc = formData.get("conditionDesc") as string;
+      const completeness = formData.get("completeness") as string;
+      const minusNotes = formData.get("minusNotes") as string;
+      const expectedPrice = formData.get("expectedPrice") as string;
+
+      const waMessage = encodeURIComponent(
+        `Halo ${store.name}, saya ingin mengajukan *TUKAR TAMBAH / JUAL HP*:\n\n` +
+          `• *Nama Pengirim:* ${customerName}\n` +
+          `• *Tipe HP Lama:* ${deviceModel} (${ramStorage})\n` +
+          `• *Kondisi Fisik:* ${conditionDesc}\n` +
+          `• *Kelengkapan:* ${completeness}\n` +
+          (minusNotes ? `• *Catatan Minus:* ${minusNotes}\n` : "") +
+          (expectedPrice ? `• *Ekspektasi Harga:* Rp ${expectedPrice}\n\n` : "\n") +
+          `Mohon ditaksir estimasi harga tertingginya ya kak, terima kasih!`
+      );
+
+      let cleanWa = (store.whatsapp || "").replace(/\D/g, "");
+      if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
+
+      setTimeout(() => {
+        window.open(`https://wa.me/${cleanWa}?text=${waMessage}`, "_blank");
+      }, 800);
+    } else {
+      setError(res.error || "Gagal memproses form penawaran tukar tambah.");
+    }
+  }
+
+  return (
+    <div className="p-4 space-y-4 animate-fade-in">
+      {/* Header Banner */}
+      <div
+        className={`rounded-2xl p-4 border text-center space-y-1.5 ${
+          isDark
+            ? "bg-slate-950 border-emerald-500/30 text-white"
+            : "bg-emerald-50 border-emerald-200 text-emerald-950"
+        }`}
+      >
+        <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto">
+          <RefreshCw className="w-5 h-5" />
+        </div>
+        <h2 className="font-extrabold text-base">Formulir Tukar Tambah / Jual HP</h2>
+        <p className={`text-xs ${isDark ? "text-slate-400" : "text-emerald-700"}`}>
+          Taksir HP bekasmu dengan harga tertinggi se-Bandung. COD toko atau kurir jemput unit.
+        </p>
+      </div>
+
+      {success ? (
+        <div
+          className={`rounded-2xl p-8 text-center space-y-3 border ${
+            isDark ? "bg-slate-950 border-slate-800" : "bg-white border-neutral-200 shadow-sm"
+          }`}
+        >
+          <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
+          <h3 className="font-bold text-base text-emerald-600">Penawaran Berhasil Dicatat!</h3>
+          <p className="text-xs text-neutral-500 dark:text-slate-400">
+            Membuka obrolan WhatsApp resmi {store.name} untuk negosiasi harga dan jadwal pengecekan unit...
+          </p>
+          <button
+            onClick={() => setSuccess(false)}
+            className={`mt-4 px-4 py-2 rounded-xl text-xs font-bold ${
+              isDark ? "bg-slate-800 text-slate-200" : "bg-neutral-100 text-neutral-800"
+            }`}
+          >
+            Ajukan HP Lain
+          </button>
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className={`rounded-2xl p-5 border space-y-3.5 text-xs ${
+            isDark ? "bg-slate-950 border-slate-800 text-slate-100" : "bg-white border-neutral-200 shadow-sm text-neutral-900"
+          }`}
+        >
+          {error && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Device Model & RAM/Storage */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold mb-1">Merk & Tipe HP Lama *</label>
+              <input
+                type="text"
+                name="deviceModel"
+                required
+                placeholder="Contoh: iPhone 11 / Samsung S21"
+                className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                    : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+                }`}
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold mb-1">Varian RAM & Internal Storage *</label>
+              <select
+                name="ramStorage"
+                required
+                className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                    : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+                }`}
+              >
+                <option value="4GB / 64GB">4GB / 64GB</option>
+                <option value="4GB / 128GB">4GB / 128GB</option>
+                <option value="6GB / 128GB">6GB / 128GB</option>
+                <option value="8GB / 128GB">8GB / 128GB</option>
+                <option value="8GB / 256GB">8GB / 256GB</option>
+                <option value="12GB / 256GB">12GB / 256GB</option>
+                <option value="12GB / 512GB">12GB / 512GB</option>
+                <option value="16GB / 512GB">16GB / 512GB</option>
+                <option value="Lainnya">Varian Lainnya</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Condition & Completeness */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold mb-1">Kondisi Fisik *</label>
+              <select
+                name="conditionDesc"
+                required
+                className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                    : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+                }`}
+              >
+                <option value="Mulus Like New (98-99%)">Mulus Like New (98-99%)</option>
+                <option value="Pemakaian Wajar / Dent Tipis (90-95%)">Pemakaian Wajar / Dent Tipis (90-95%)</option>
+                <option value="Ada Jamur / Lecet Bezel (85-90%)">Ada Jamur / Lecet Bezel (85-90%)</option>
+                <option value="Layar Retak / Minus Fungsi">Layar Retak / Minus Fungsi</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-bold mb-1">Kelengkapan Paket *</label>
+              <select
+                name="completeness"
+                required
+                className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                    : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+                }`}
+              >
+                <option value="Fullset Original (Box + Kabel Bawaan)">Fullset Original (Box + Kabel Bawaan)</option>
+                <option value="Fullset OEM (Box Bukan Bawaan)">Fullset OEM (Box Bukan Bawaan)</option>
+                <option value="Batangan / HP Saja (Unit Only)">Batangan / HP Saja (Unit Only)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Minus notes & Expected price */}
+          <div>
+            <label className="block font-bold mb-1">Catatan Minus / Riwayat Servis (Jika Ada)</label>
+            <textarea
+              name="minusNotes"
+              rows={2}
+              placeholder="Contoh: Battery Health 78%, TrueTone off, kamera normal, layar original"
+              className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                isDark
+                  ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                  : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+              }`}
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold mb-1">Ekspektasi Harga Taksiran (Rp)</label>
+            <input
+              type="number"
+              name="expectedPrice"
+              placeholder="Contoh: 3500000"
+              className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                isDark
+                  ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                  : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+              }`}
+            />
+          </div>
+
+          {/* Contact details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-neutral-200 dark:border-slate-800">
+            <div>
+              <label className="block font-bold mb-1">Nama Lengkap Anda *</label>
+              <input
+                type="text"
+                name="customerName"
+                required
+                placeholder="Nama Anda"
+                className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                    : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+                }`}
+              />
+            </div>
+            <div>
+              <label className="block font-bold mb-1">Nomor WhatsApp Anda *</label>
+              <input
+                type="tel"
+                name="customerWa"
+                required
+                placeholder="081234567890"
+                className={`w-full px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white focus:ring-emerald-500"
+                    : "bg-neutral-50 border-neutral-200 text-neutral-900 focus:ring-blue-500"
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* Submit CTA */}
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 shadow-md transition disabled:opacity-50 ${
+                isDark
+                  ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+              }`}
+            >
+              {loading ? (
+                "Memproses..."
+              ) : (
+                <>
+                  <Send className="w-4 h-4" /> Kirim Penawaran ke WhatsApp Toko
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}

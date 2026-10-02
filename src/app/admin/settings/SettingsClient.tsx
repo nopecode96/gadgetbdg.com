@@ -1,0 +1,292 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Store,
+  Palette,
+  Globe,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  Sparkles,
+  ExternalLink,
+  ShieldCheck,
+} from "lucide-react";
+import { updateStoreSettingsAction } from "@/lib/actions";
+
+interface SettingsClientProps {
+  store?: any;
+}
+
+export function SettingsClient({ store }: SettingsClientProps) {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(store?.templateId || "minimal-clean");
+
+  if (!store) {
+    return (
+      <div className="bg-white rounded-2xl p-12 text-center text-slate-400 text-xs border border-slate-200">
+        Data toko tidak ditemukan.
+      </div>
+    );
+  }
+
+  const isProOrAdvance = store.tier === "PRO" || store.tier === "ADVANCE";
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    formData.append("storeId", store.id);
+    formData.append("templateId", selectedTemplate);
+
+    const res = await updateStoreSettingsAction(formData);
+    setLoading(false);
+
+    if (res.success) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } else {
+      setError(res.error || "Gagal menyimpan perubahan pengaturan.");
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Pengaturan Toko & Custom Domain</h1>
+        <p className="text-xs text-slate-500 mt-1">
+          Kustomisasi identitas toko, nomor kontak WhatsApp, tema storefront, dan konfigurasi domain pribadi.
+        </p>
+      </div>
+
+      {success && (
+        <div className="p-4 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>Pengaturan toko berhasil disimpan dan langsung diterapkan ke storefront!</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Section 1: Profil Toko */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+            <Store className="w-4 h-4 text-blue-600" />
+            <span>Identitas & Kontak Toko</span>
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Nama Toko *</label>
+              <input
+                type="text"
+                name="name"
+                defaultValue={store.name}
+                required
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Nomor WhatsApp Admin (Closing & Order) *</label>
+              <input
+                type="tel"
+                name="whatsapp"
+                defaultValue={store.whatsapp}
+                required
+                placeholder="6281234567890"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3 text-xs">
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Alamat Toko Fisik (BEC / Mall / Ruko)</label>
+              <input
+                type="text"
+                name="address"
+                defaultValue={store.address || ""}
+                placeholder="Bandung Electronic Center (BEC) Lantai 1 Blok C-05"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Link Google Maps Toko</label>
+              <input
+                type="url"
+                name="mapsUrl"
+                defaultValue={store.mapsUrl || ""}
+                placeholder="https://maps.google.com/?q=..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section 2: Pemilihan Template Storefront */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <Palette className="w-4 h-4 text-purple-600" />
+              <span>Pilihan Desain Template Storefront</span>
+            </h2>
+            <span className="text-[11px] font-semibold text-slate-500">1-Klik Ganti Tema</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Minimal Clean Card */}
+            <div
+              onClick={() => setSelectedTemplate("minimal-clean")}
+              className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-3 ${
+                selectedTemplate === "minimal-clean"
+                  ? "border-blue-600 bg-blue-50/50 shadow-md ring-1 ring-blue-600"
+                  : "border-slate-200 hover:border-slate-300 bg-white"
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-sm text-slate-900">Minimal Clean</h3>
+                  {selectedTemplate === "minimal-clean" && (
+                    <span className="text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                      Dipilih
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Desain cerah, elegan, putih bersih. Sangat cocok untuk toko spesialis iPhone resmi iBox & Android flagship.
+                </p>
+              </div>
+
+              <div className="h-16 rounded-xl bg-slate-100 border border-slate-200 p-2 flex items-center justify-center text-xs font-semibold text-slate-600">
+                Preview: Light Theme Clean
+              </div>
+            </div>
+
+            {/* Dark Gaming Card */}
+            <div
+              onClick={() => setSelectedTemplate("dark-gaming")}
+              className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-3 ${
+                selectedTemplate === "dark-gaming"
+                  ? "border-emerald-500 bg-slate-900 text-white shadow-md ring-1 ring-emerald-500"
+                  : "border-slate-200 hover:border-slate-300 bg-white text-slate-900"
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-sm">Dark Gaming Cyber</h3>
+                  {selectedTemplate === "dark-gaming" && (
+                    <span className="text-[10px] font-bold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full">
+                      Dipilih
+                    </span>
+                  )}
+                </div>
+                <p className={`text-xs mt-1 ${selectedTemplate === "dark-gaming" ? "text-slate-400" : "text-slate-500"}`}>
+                  Nuansa hitam futuristik dengan aksen neon hijau emerald. Populer untuk HP gaming ROG, iQOO, dan POCO.
+                </p>
+              </div>
+
+              <div className="h-16 rounded-xl bg-slate-950 border border-emerald-500/30 p-2 flex items-center justify-center text-xs font-mono text-emerald-400">
+                Preview: Cyber Dark High FPS
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Custom Domain Settings */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-indigo-600" />
+              <span>Pengaturan Custom Domain Sendiri</span>
+            </h2>
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                isProOrAdvance ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {isProOrAdvance ? `Tier ${store.tier} (Aktif)` : "Terkunci (Perlu Tier PRO / ADVANCE)"}
+            </span>
+          </div>
+
+          {isProOrAdvance ? (
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">
+                  Nama Domain Pribadi (contoh: tokoberkahbandung.com)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    name="customDomain"
+                    defaultValue={store.customDomain || ""}
+                    placeholder="tokoberkah.com"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Gunakan domain sendiri tanpa embel-embel .gadgetbdg.com untuk branding eksklusif.
+                </p>
+              </div>
+
+              {/* DNS Instruction Guide */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Instruksi Pengaturan DNS Ramah Pemula:</span>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  Buka panel tempat Anda membeli domain (misal: Rumahweb, Niagahoster, Domainesia, atau Cloudflare),
+                  lalu tambahkan DNS Record berikut:
+                </p>
+
+                <div className="bg-white border border-slate-200 rounded-lg p-3 font-mono text-[11px] space-y-1">
+                  <div><b>Type:</b> A</div>
+                  <div><b>Name / Host:</b> @</div>
+                  <div><b>Target IP:</b> 103.189.xxx.xxx (IP Server GadgetBdg Bandung)</div>
+                  <div className="pt-1 border-t border-slate-100 text-slate-400">Atau gunakan CNAME: cname.gadgetbdg.com</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 space-y-2">
+              <div className="font-bold flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-amber-600" />
+                <span>Fitur Custom Domain Terkunci pada Paket STARTER</span>
+              </div>
+              <p>
+                Saat ini tokomu aktif di subdomain resmi: <b>{store.slug}.gadgetbdg.com</b>. Untuk menghubungkan nama
+                domain .com / .id pribadi, silakan upgrade ke paket PRO (Rp 500rb/bln) via Super-Admin atau hubungi CS.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-3 rounded-xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 flex items-center gap-2 transition disabled:opacity-50"
+          >
+            <Save className="w-4 h-4" />
+            <span>{loading ? "Menyimpan Perubahan..." : "Simpan Pengaturan Toko"}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

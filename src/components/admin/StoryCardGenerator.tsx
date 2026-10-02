@@ -1,0 +1,381 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Download, Sparkles, Smartphone, Image as ImageIcon, Check } from "lucide-react";
+import { formatRupiah } from "@/lib/utils";
+
+interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  price: number;
+  ramRom: string;
+  batteryHealth: number | null;
+  imeiStatus: string;
+  completeness: string;
+  condition: string;
+  minusNotes: string | null;
+  status: string;
+  images: string[];
+}
+
+interface StoryCardGeneratorProps {
+  store?: {
+    name: string;
+    slug: string;
+    address: string | null;
+    whatsapp: string;
+    templateId?: string;
+  };
+  product: Product;
+}
+
+export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [rendered, setRendered] = useState(false);
+
+  const storeName = store?.name || "Berkah Cell Gadget";
+  const storeSlug = store?.slug || "berkahcell";
+  const storeAddress = store?.address || "BEC Lantai 1 Blok C-05 Bandung";
+  const storeWa = store?.whatsapp || "081234567890";
+
+  useEffect(() => {
+    drawStoryCanvas();
+  }, [product, store]);
+
+  function drawStoryCanvas() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Canvas Dimensions 9:16 (1080 x 1920)
+    const W = 1080;
+    const H = 1920;
+    canvas.width = W;
+    canvas.height = H;
+
+    const isGaming = store?.templateId === "dark-gaming";
+
+    // 1. Draw Background
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, H);
+    if (isGaming) {
+      bgGradient.addColorStop(0, "#090d16");
+      bgGradient.addColorStop(0.5, "#0f172a");
+      bgGradient.addColorStop(1, "#020617");
+    } else {
+      bgGradient.addColorStop(0, "#0f172a");
+      bgGradient.addColorStop(0.3, "#1e293b");
+      bgGradient.addColorStop(1, "#0f172a");
+    }
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, W, H);
+
+    // Decorative Glow Circles
+    ctx.save();
+    ctx.filter = "blur(120px)";
+    ctx.fillStyle = isGaming ? "rgba(16, 185, 129, 0.25)" : "rgba(37, 99, 235, 0.3)";
+    ctx.beginPath();
+    ctx.arc(W / 2, 400, 300, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = isGaming ? "rgba(6, 182, 212, 0.2)" : "rgba(147, 51, 234, 0.25)";
+    ctx.beginPath();
+    ctx.arc(W / 2, 1400, 350, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 2. Header Section
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 52px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(storeName.toUpperCase(), W / 2, 120);
+
+    ctx.fillStyle = isGaming ? "#34d399" : "#93c5fd";
+    ctx.font = "600 30px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(`📍 ${storeAddress}`, W / 2, 175);
+
+    // Status Ribbon
+    ctx.fillStyle = isGaming ? "#10b981" : "#2563eb";
+    roundRect(ctx, W / 2 - 190, 215, 380, 52, 26);
+    ctx.fill();
+
+    ctx.fillStyle = isGaming ? "#022c22" : "#ffffff";
+    ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("READY STOCK • UNIT TERUJI", W / 2, 250);
+
+    // 3. Main Product Image (Card Container)
+    const imgX = 80;
+    const imgY = 300;
+    const imgW = W - 160;
+    const imgH = 680;
+
+    // Draw container shadow & background
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 20;
+    ctx.fillStyle = "#1e293b";
+    roundRect(ctx, imgX, imgY, imgW, imgH, 36);
+    ctx.fill();
+    ctx.restore();
+
+    const fallbackDraw = () => {
+      ctx.fillStyle = "#334155";
+      roundRect(ctx, imgX, imgY, imgW, imgH, 36);
+      ctx.fill();
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "bold 44px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("FOTO UNIT HP SECOND", W / 2, imgY + imgH / 2);
+      renderDetails();
+    };
+
+    if (product.images && product.images.length > 0) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = product.images[0];
+      img.onload = () => {
+        ctx.save();
+        roundRect(ctx, imgX, imgY, imgW, imgH, 36);
+        ctx.clip();
+        ctx.drawImage(img, imgX, imgY, imgW, imgH);
+        ctx.restore();
+        renderDetails();
+      };
+      img.onerror = () => {
+        fallbackDraw();
+      };
+    } else {
+      fallbackDraw();
+    }
+
+    function renderDetails() {
+      if (!ctx) return;
+
+      // 4. Product Name & Price
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 58px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(product.name, W / 2, 1050);
+
+      // Price Tag Box
+      ctx.fillStyle = isGaming ? "#10b981" : "#3b82f6";
+      ctx.font = "900 68px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(formatRupiah(product.price), W / 2, 1140);
+
+      // 5. Specification Badges (Grid of 4 badges)
+      const badgeY = 1200;
+      const badgeH = 80;
+      const badgeW = 440;
+
+      // Badge 1: IMEI Status
+      drawBadge(
+        ctx,
+        80,
+        badgeY,
+        badgeW,
+        badgeH,
+        "STATUS IMEI",
+        product.imeiStatus,
+        isGaming ? "#064e3b" : "#1e3a8a",
+        isGaming ? "#34d399" : "#60a5fa"
+      );
+
+      // Badge 2: RAM / Internal Storage
+      drawBadge(
+        ctx,
+        560,
+        badgeY,
+        badgeW,
+        badgeH,
+        "STORAGE / RAM",
+        product.ramRom,
+        "#334155",
+        "#f8fafc"
+      );
+
+      // Badge 3: Kondisi Fisik
+      drawBadge(
+        ctx,
+        80,
+        badgeY + 100,
+        badgeW,
+        badgeH,
+        "KONDISI FISIK",
+        product.condition,
+        "#334155",
+        "#38bdf8"
+      );
+
+      // Badge 4: Battery Health or Kelengkapan
+      const bhText = product.batteryHealth ? `BH ${product.batteryHealth}%` : "Tested Normal";
+      drawBadge(
+        ctx,
+        560,
+        badgeY + 100,
+        badgeW,
+        badgeH,
+        product.batteryHealth ? "BATTERY HEALTH" : "KELENGKAPAN",
+        product.batteryHealth ? bhText : product.completeness,
+        product.batteryHealth && product.batteryHealth < 80 ? "#78350f" : "#14532d",
+        product.batteryHealth && product.batteryHealth < 80 ? "#fcd34d" : "#4ade80"
+      );
+
+      // 6. Minus Notes Bar (Transparan)
+      const minusY = 1420;
+      ctx.fillStyle = "rgba(30, 41, 59, 0.85)";
+      roundRect(ctx, 80, minusY, W - 160, 110, 24);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.stroke();
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#cbd5e1";
+      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("📋 KELENGKAPAN & CATATAN UNIT:", 110, minusY + 45);
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "500 24px -apple-system, BlinkMacSystemFont, sans-serif";
+      const note = product.minusNotes || "No minus, siap pakai, bergaransi toko 30 hari!";
+      ctx.fillText(`• ${product.completeness} • ${note}`, 110, minusY + 85, W - 220);
+
+      // 7. Footer CTA Box
+      const ctaY = 1570;
+      const ctaGrad = ctx.createLinearGradient(80, ctaY, W - 80, ctaY);
+      if (isGaming) {
+        ctaGrad.addColorStop(0, "#059669");
+        ctaGrad.addColorStop(1, "#10b981");
+      } else {
+        ctaGrad.addColorStop(0, "#2563eb");
+        ctaGrad.addColorStop(1, "#4f46e5");
+      }
+      ctx.fillStyle = ctaGrad;
+      roundRect(ctx, 80, ctaY, W - 160, 240, 36);
+      ctx.fill();
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 40px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("MINAT? SCREENSHOT STORY INI & HUBUNGI:", W / 2, ctaY + 70);
+
+      ctx.fillStyle = "#fef08a";
+      ctx.font = "900 52px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(`WhatsApp: ${storeWa}`, W / 2, ctaY + 135);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.font = "600 28px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(`Katalog Online Lengkap: ${storeSlug}.gadgetbdg.com`, W / 2, ctaY + 195);
+
+      setRendered(true);
+    }
+  }
+
+  function drawBadge(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    label: string,
+    val: string,
+    bgColor: string,
+    textColor: string
+  ) {
+    ctx.fillStyle = bgColor;
+    roundRect(ctx, x, y, w, h, 20);
+    ctx.fill();
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+    ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(label, x + 24, y + 32);
+
+    ctx.fillStyle = textColor;
+    ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(val, x + 24, y + 66, w - 48);
+  }
+
+  function roundRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number
+  ) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function downloadStory() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setDownloading(true);
+
+    const link = document.createElement("a");
+    const cleanName = product.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+    link.download = `story-${storeSlug}-${cleanName}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+    setTimeout(() => setDownloading(false), 1500);
+  }
+
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-600 flex items-center justify-center">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm text-slate-900">Poster Story Medsos (9:16 HD)</h3>
+            <p className="text-[11px] text-slate-500">
+              Format portrait 1080x1920 siap share ke WhatsApp Story & Instagram Story
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={downloadStory}
+          disabled={!rendered || downloading}
+          className="px-4 py-2 bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md transition disabled:opacity-50"
+        >
+          {downloading ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-emerald-300" />
+              <span>Mengunduh...</span>
+            </>
+          ) : (
+            <>
+              <Download className="w-3.5 h-3.5" />
+              <span>Download Poster (PNG)</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Canvas Preview Container (Scaled Down for UI) */}
+      <div className="flex justify-center bg-slate-900/90 rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="relative shadow-2xl rounded-2xl overflow-hidden border border-slate-700/60 max-w-[280px] sm:max-w-[320px]">
+          <canvas
+            ref={canvasRef}
+            className="w-full h-auto block select-none pointer-events-none"
+            style={{ aspectRatio: "9/16" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

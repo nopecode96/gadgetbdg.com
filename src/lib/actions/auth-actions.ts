@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { isReservedSlug } from "@/lib/constants/reserved-slugs";
+import { sendWhatsAppMessage } from "@/lib/services/whatsapp-service";
 
 // ---------------------------------------------------------------
 // Tier quota: maks jumlah user (termasuk STORE_OWNER)
@@ -139,6 +140,29 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
       return { store, user, payment };
     });
 
+    // Notifikasi WhatsApp instan ke Super Admin Platform (Non-blocking)
+    try {
+      const superAdminWa = process.env.SUPERADMIN_WHATSAPP;
+      if (superAdminWa) {
+        const amountFormatted = (TIER_PRICE[tier] || 0).toLocaleString("id-ID");
+        const adminAlertMsg =
+          `🔔 *PEMBAYARAN QRIS BARU*\n\n` +
+          `Toko: *${name}*\n` +
+          `Paket: *${tier}* (Rp ${amountFormatted})\n` +
+          `No WA: ${cleanWa}\n\n` +
+          `Mohon verifikasi di: https://admin.gadgetbdg.com/billing`;
+
+        sendWhatsAppMessage({
+          target: superAdminWa,
+          message: adminAlertMsg,
+        }).catch((err) => {
+          console.warn("Non-blocking WA notification to superadmin failed:", err);
+        });
+      }
+    } catch (err) {
+      console.warn("Error preparing WA notification to superadmin:", err);
+    }
+
     revalidatePath("/super-admin");
     revalidatePath("/super-admin/billing");
     revalidatePath("/super-admin/leads");
@@ -163,6 +187,7 @@ export async function approvePaymentAction(paymentId: string) {
             id: true,
             name: true,
             slug: true,
+            customDomain: true,
             whatsapp: true,
             tier: true,
             salesUserId: true,
@@ -208,6 +233,29 @@ export async function approvePaymentAction(paymentId: string) {
         });
       }
     });
+
+    // 4. Kirim pesan selamat dan panduan login langsung ke nomor WhatsApp merchant (Non-blocking)
+    try {
+      if (payment.store.whatsapp) {
+        const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";
+        const storeUrl = payment.store.customDomain || `${payment.store.slug}.${mainDomain}`;
+        const approvalMsg =
+          `🎉 *Selamat! Toko Anda Telah Aktif di GadgetBdg.com*\n\n` +
+          `Pembayaran paket *${payment.tier}* untuk *${payment.store.name}* telah berhasil diverifikasi.\n\n` +
+          `🌐 *Website Toko (PWA):*\nhttps://${storeUrl}\n\n` +
+          `🔐 *Login Panel Admin Toko:*\nhttps://toko.${mainDomain}\n\n` +
+          `Silakan login menggunakan email & kata sandi yang Anda buat saat pendaftaran. Selamat berjualan!`;
+
+        sendWhatsAppMessage({
+          target: payment.store.whatsapp,
+          message: approvalMsg,
+        }).catch((err) => {
+          console.warn("Non-blocking WA notification to merchant failed:", err);
+        });
+      }
+    } catch (err) {
+      console.warn("Error preparing WA notification to merchant:", err);
+    }
 
     revalidatePath("/super-admin/billing");
     revalidatePath("/super-admin/stores");

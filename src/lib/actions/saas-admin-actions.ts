@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sendWhatsAppMessage } from "@/lib/services/whatsapp-service";
 
 /**
  * 1. Reset kata sandi akun STORE_OWNER yang terikat ke storeId
@@ -294,6 +295,29 @@ export async function manualActivateStoreAction(storeId: string, days: number = 
         });
       }
     });
+
+    // Notifikasi WhatsApp ke merchant (Non-blocking)
+    try {
+      if (store.whatsapp) {
+        const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";
+        const storeUrl = store.customDomain || `${store.slug}.${mainDomain}`;
+        const activationMsg =
+          `🎉 *Selamat! Toko Anda Telah Aktif di GadgetBdg.com*\n\n` +
+          `Aktivasi toko *${store.name}* (Paket ${store.tier}) selama ${days} hari telah berhasil diproses oleh Super Admin.\n\n` +
+          `🌐 *Website Toko (PWA):*\nhttps://${storeUrl}\n\n` +
+          `🔐 *Login Panel Admin Toko:*\nhttps://toko.${mainDomain}\n\n` +
+          `Silakan login menggunakan email & kata sandi akun Anda. Selamat berjualan!`;
+
+        sendWhatsAppMessage({
+          target: store.whatsapp,
+          message: activationMsg,
+        }).catch((err) => {
+          console.warn("Non-blocking WA notification to merchant failed:", err);
+        });
+      }
+    } catch (err) {
+      console.warn("Error preparing WA notification on manual activation:", err);
+    }
 
     revalidatePath("/super-admin/leads");
     revalidatePath("/super-admin/stores");

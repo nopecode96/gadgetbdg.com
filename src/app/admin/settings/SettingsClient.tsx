@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { updateStoreSettingsAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier, TEMPLATE_REGISTRY } from "@/lib/constants/templates";
+import { DomainSettingsSection } from "./DomainSettingsSection";
 
 interface SettingsClientProps {
   store?: any;
@@ -268,74 +269,8 @@ export function SettingsClient({ store }: SettingsClientProps) {
           </div>
         </div>
 
-        {/* Section 3: Custom Domain Settings */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-indigo-600" />
-              <span>Pengaturan Custom Domain Sendiri</span>
-            </h2>
-            <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                isProOrAdvance ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              {isProOrAdvance ? `Tier ${store.tier} (Aktif)` : "Terkunci (Perlu Tier PRO / ADVANCE)"}
-            </span>
-          </div>
-
-          {isProOrAdvance ? (
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-slate-700 mb-1">
-                  Nama Domain Pribadi (contoh: tokoberkahbandung.com)
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    name="customDomain"
-                    defaultValue={store.customDomain || ""}
-                    placeholder="tokoberkah.com"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                  />
-                </div>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Gunakan domain sendiri tanpa embel-embel .gadgetbdg.com untuk branding eksklusif.
-                </p>
-              </div>
-
-              {/* DNS Instruction Guide */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-                <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Instruksi Pengaturan DNS Ramah Pemula:</span>
-                </div>
-                <p className="text-slate-600 leading-relaxed">
-                  Buka panel tempat Anda membeli domain (misal: Rumahweb, Niagahoster, Domainesia, atau Cloudflare),
-                  lalu tambahkan DNS Record berikut:
-                </p>
-
-                <div className="bg-white border border-slate-200 rounded-lg p-3 font-mono text-[11px] space-y-1">
-                  <div><b>Type:</b> A</div>
-                  <div><b>Name / Host:</b> @</div>
-                  <div><b>Target IP:</b> 103.189.xxx.xxx (IP Server GadgetBdg Bandung)</div>
-                  <div className="pt-1 border-t border-slate-100 text-slate-400">Atau gunakan CNAME: cname.gadgetbdg.com</div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 space-y-2">
-              <div className="font-bold flex items-center gap-1.5">
-                <AlertCircle className="w-4 h-4 text-amber-600" />
-                <span>Fitur Custom Domain Terkunci pada Paket STARTER</span>
-              </div>
-              <p>
-                Saat ini tokomu aktif di subdomain resmi: <b>{store.slug}.gadgetbdg.com</b>. Untuk menghubungkan nama
-                domain .com / .id pribadi, silakan upgrade ke paket PRO (Rp 500rb/bln) via Super-Admin atau hubungi CS.
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Section 3: Custom Domain Settings & Real-Time DNS Verifier */}
+        <DomainSettingsSection store={store} />
 
         {/* Submit Button */}
         <div className="flex justify-end">

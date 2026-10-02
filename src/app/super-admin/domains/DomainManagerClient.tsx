@@ -10,6 +10,8 @@ import {
   Server,
   Clock,
 } from "lucide-react";
+import { superAdminCheckDomainDnsAction } from "@/lib/actions/domain-actions";
+import type { VerifyDnsResult } from "@/lib/services/dns-service";
 
 interface StoreDomainItem {
   id: string;
@@ -31,21 +33,33 @@ function formatDate(iso: string) {
 
 export function DomainManagerClient({ stores }: { stores: StoreDomainItem[] }) {
   const [checkingDomain, setCheckingDomain] = useState<string | null>(null);
-  const [resolvedStatus, setResolvedStatus] = useState<Record<string, "RESOLVED" | "PENDING">>({});
+  const [dnsResults, setDnsResults] = useState<Record<string, VerifyDnsResult>>({});
 
   const storesWithDomain = stores.filter((s) => s.customDomain);
   const storesWithoutDomain = stores.filter((s) => !s.customDomain);
 
-  function simulateVerifyDns(domain: string) {
+  async function handleVerifyDns(domain: string) {
     setCheckingDomain(domain);
-    // Simulate async DNS check (1.2 seconds)
-    setTimeout(() => {
-      setResolvedStatus((prev) => ({
+    try {
+      const res = await superAdminCheckDomainDnsAction(domain);
+      setDnsResults((prev) => ({
         ...prev,
-        [domain]: "RESOLVED",
+        [domain]: res,
       }));
+    } catch (err: any) {
+      setDnsResults((prev) => ({
+        ...prev,
+        [domain]: {
+          success: false,
+          cleanDomain: domain,
+          resolvedIps: [],
+          isMatched: false,
+          message: err?.message || "Gagal memeriksa DNS domain.",
+        },
+      }));
+    } finally {
       setCheckingDomain(null);
-    }, 1200);
+    }
   }
 
   return (
@@ -71,10 +85,9 @@ export function DomainManagerClient({ stores }: { stores: StoreDomainItem[] }) {
         </div>
         <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center">
           <div className="text-2xl font-black text-emerald-400">
-            {Object.values(resolvedStatus).filter((v) => v === "RESOLVED").length +
-              storesWithDomain.filter((s) => !resolvedStatus[s.customDomain!]).length}
+            {Object.values(dnsResults).filter((v) => v.isMatched).length}
           </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">DNS Resolved</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">DNS Terverifikasi</div>
         </div>
         <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center">
           <div className="text-2xl font-black text-amber-400">{storesWithoutDomain.length}</div>
@@ -93,7 +106,7 @@ export function DomainManagerClient({ stores }: { stores: StoreDomainItem[] }) {
             <span className="text-slate-400 text-[11px] block font-sans font-bold">Opsi 1: A Record (Root Domain)</span>
             <div className="text-slate-300">Type: <b className="text-emerald-400">A</b></div>
             <div className="text-slate-300">Name: <b className="text-emerald-400">@</b></div>
-            <div className="text-slate-300">Target Value: <b className="text-emerald-400">103.189.xxx.xxx</b> (IP Server Nginx)</div>
+            <div className="text-slate-300">Target Value: <b className="text-emerald-400">72.62.75.149</b> (IP Server Nginx)</div>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700 space-y-1">
@@ -129,8 +142,6 @@ export function DomainManagerClient({ stores }: { stores: StoreDomainItem[] }) {
                 </tr>
               ) : (
                 storesWithDomain.map((store) => {
-                  const status = resolvedStatus[store.customDomain!] ?? "RESOLVED";
-
                   return (
                     <tr key={store.id} className="hover:bg-slate-750/50 transition">
                       <td className="px-5 py-4 font-bold text-white">
@@ -177,37 +188,41 @@ export function DomainManagerClient({ stores }: { stores: StoreDomainItem[] }) {
                       </td>
 
                       <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            status === "RESOLVED"
-                              ? "bg-emerald-950 text-emerald-400 border border-emerald-800"
-                              : "bg-amber-950 text-amber-400 border border-amber-800"
-                          }`}
-                        >
-                          {status === "RESOLVED" ? (
-                            <>
-                              <CheckCircle2 className="w-3 h-3" /> CNAME Resolved &amp; Active
-                            </>
+                        {dnsResults[store.customDomain!] ? (
+                          dnsResults[store.customDomain!].isMatched ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+                              <CheckCircle2 className="w-3 h-3" /> Terverifikasi &amp; Aktif
+                            </span>
+                          ) : dnsResults[store.customDomain!].resolvedIps.length > 0 ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">
+                              <Clock className="w-3 h-3" /> Propagasi ({dnsResults[store.customDomain!].resolvedIps[0]})
+                            </span>
                           ) : (
-                            <>
-                              <AlertCircle className="w-3 h-3" /> Pending DNS Propagation
-                            </>
-                          )}
-                        </span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800">
+                              <AlertCircle className="w-3 h-3" /> DNS Tidak Cocok / Belum Terarah
+                            </span>
+                          )
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                            <Clock className="w-3 h-3" /> Siap Dicek
+                          </span>
+                        )}
                       </td>
 
                       <td className="px-5 py-4 text-right">
                         <button
-                          onClick={() => simulateVerifyDns(store.customDomain!)}
+                          type="button"
+                          onClick={() => handleVerifyDns(store.customDomain!)}
                           disabled={checkingDomain === store.customDomain}
-                          className="px-3 py-1.5 rounded-xl font-bold bg-slate-700 hover:bg-slate-600 text-white transition inline-flex items-center gap-1.5 disabled:opacity-50"
+                          className="px-3 py-1.5 rounded-xl font-bold bg-slate-700 hover:bg-slate-600 text-white transition inline-flex items-center gap-1.5 disabled:opacity-50 text-xs"
+                          title="Periksa Ulang DNS Domain Toko"
                         >
                           <RefreshCw
                             className={`w-3.5 h-3.5 ${
                               checkingDomain === store.customDomain ? "animate-spin text-indigo-400" : ""
                             }`}
                           />
-                          <span>{checkingDomain === store.customDomain ? "Checking..." : "Cek DNS"}</span>
+                          <span>{checkingDomain === store.customDomain ? "Mengecek..." : "Periksa Ulang DNS"}</span>
                         </button>
                       </td>
                     </tr>

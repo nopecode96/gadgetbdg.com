@@ -73,12 +73,31 @@ model Store {
   products      Product[]
   tradeInOffers TradeInOffer[]
   users         User[]
+  branches      Branch[]
   payments      SubscriptionPayment[]
   commissions   SalesCommissionLog[]
 
   @@index([slug])
   @@index([customDomain])
   @@index([salesUserId])
+}
+
+model Branch {
+  id          String    @id @default(cuid())
+  storeId     String
+  name        String    // Contoh: "BEC Lantai 1 Blok C-05"
+  address     String    // Alamat lengkap rute fisik
+  phone       String?   // No WA spesifik cabang
+  mapsUrl     String?   // Link Google Maps cabang
+  isMain      Boolean   @default(false) // Cabang pusat
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  store       Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  products    Product[]
+  users       User[]
+
+  @@index([storeId])
 }
 
 model User {
@@ -89,11 +108,13 @@ model User {
   phone        String?
   role         Role     @default(STORE_STAFF)
   storeId      String?
+  branchId     String?
   referralCode String?  @unique
   bankName     String?
   bankNumber   String?
   bankHolder   String?
   store        Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  branch       Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -102,12 +123,14 @@ model User {
 
   @@index([email])
   @@index([storeId])
+  @@index([branchId])
   @@index([referralCode])
 }
 
 model Product {
   id            String        @id @default(cuid())
   storeId       String
+  branchId      String?
   name          String
   brand         String
   price         Int
@@ -124,8 +147,10 @@ model Product {
   updatedAt     DateTime      @updatedAt
 
   store         Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  branch        Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
   @@index([storeId])
+  @@index([branchId])
   @@index([status])
 }
 

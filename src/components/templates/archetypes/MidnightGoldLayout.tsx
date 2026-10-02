@@ -54,18 +54,25 @@ export function MidnightGoldLayout({ store, products }: ArchetypeLayoutProps) {
   return (
     <div className="min-h-screen bg-[#080705] text-[#f7ecd6] font-serif selection:bg-amber-600 selection:text-black">
       {/* ── Top Gold Luxury Header ── */}
-      <header className="sticky top-0 z-40 bg-[#080705]/95 backdrop-blur-md border-b border-amber-900/40 px-4 sm:px-8 py-4">
+      <header className="sticky top-0 z-40 bg-[#080705]/95 backdrop-blur-md border-b border-amber-900/40 px-4 sm:px-8 py-3.5">
         <div className="max-w-5xl mx-auto flex items-center justify-between font-sans">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 text-black flex items-center justify-center font-black shadow-md shadow-amber-500/20">
-              <Crown className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 text-black flex items-center justify-center font-black shadow-md shadow-amber-500/20 overflow-hidden shrink-0 border border-amber-400/40">
+              {store.logoUrl ? (
+                <img src={store.logoUrl} alt={store.name} className="w-full h-full object-cover" />
+              ) : (
+                <Crown className="w-4 h-4 text-black" />
+              )}
             </div>
             <div>
-              <h1 className="text-base sm:text-lg font-black tracking-wider text-amber-200 uppercase font-serif">
-                {store.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base sm:text-lg font-black tracking-wider text-amber-200 uppercase font-serif">
+                  {store.name}
+                </h1>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              </div>
               <p className="text-[9px] text-amber-500/80 uppercase tracking-widest font-mono">
-                HAUTE SMARTPHONE BOUTIQUE
+                📍 {store.address ? store.address.split(",")[0] : "BEC BANDUNG"} • HAUTE BOUTIQUE
               </p>
             </div>
           </div>
@@ -75,7 +82,7 @@ export function MidnightGoldLayout({ store, products }: ArchetypeLayoutProps) {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition ${
+                className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition ${
                   activeTab === tab
                     ? "bg-gradient-to-r from-amber-400 to-amber-600 text-black shadow-md shadow-amber-500/20"
                     : "text-amber-300/60 hover:text-amber-200"
@@ -84,6 +91,15 @@ export function MidnightGoldLayout({ store, products }: ArchetypeLayoutProps) {
                 {tab === "home" ? "Salon" : tab === "list" ? "Katalog" : "Concierge"}
               </button>
             ))}
+            <a
+              href={`https://wa.me/${(store.whatsapp || "").replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="p-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-black font-black transition shadow-md shadow-amber-500/20"
+              title="Concierge WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 fill-current" />
+            </a>
           </div>
         </div>
       </header>

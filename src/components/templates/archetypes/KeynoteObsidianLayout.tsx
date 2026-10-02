@@ -57,19 +57,35 @@ export function KeynoteObsidianLayout({ store, products }: ArchetypeLayoutProps)
   return (
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans selection:bg-zinc-800">
       {/* Dynamic Island Floating Notification Header */}
-      <header className="sticky top-3 z-40 max-w-md mx-auto px-4">
-        <div className="bg-black/80 border border-zinc-800/80 backdrop-blur-xl rounded-full px-4 py-2.5 flex items-center justify-between shadow-2xl ring-1 ring-white/10">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
-            <span className="font-extrabold text-xs tracking-tight text-white truncate">
-              {store.name}
-            </span>
+      <header className="sticky top-3 z-40 max-w-xl mx-auto px-4">
+        <div className="bg-black/90 border border-zinc-800 backdrop-blur-xl rounded-full px-3 sm:px-4 py-2 flex items-center justify-between shadow-2xl ring-1 ring-white/10">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Logo / Initial Avatar */}
+            <div className="w-8 h-8 rounded-full bg-zinc-800 text-white flex items-center justify-center shrink-0 border border-zinc-700 overflow-hidden font-black text-xs">
+              {store.logoUrl ? (
+                <img src={store.logoUrl} alt={store.name} className="w-full h-full object-cover" />
+              ) : (
+                store.name.slice(0, 2).toUpperCase()
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                <span className="font-extrabold text-xs tracking-tight text-white truncate">
+                  {store.name}
+                </span>
+              </div>
+              <div className="text-[9px] text-zinc-400 truncate">
+                📍 {store.address ? store.address.split(",")[0] : "BEC Bandung"}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5 text-[11px] font-semibold">
             <button
               onClick={() => setActiveTab("home")}
-              className={`px-3 py-1 rounded-full transition ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full transition ${
                 activeTab === "home" ? "bg-white text-black font-bold" : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -77,20 +93,21 @@ export function KeynoteObsidianLayout({ store, products }: ArchetypeLayoutProps)
             </button>
             <button
               onClick={() => setActiveTab("list")}
-              className={`px-3 py-1 rounded-full transition ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full transition ${
                 activeTab === "list" ? "bg-white text-black font-bold" : "text-zinc-400 hover:text-white"
               }`}
             >
-              Stok
+              Katalog
             </button>
-            <button
-              onClick={() => setActiveTab("trade-in")}
-              className={`px-3 py-1 rounded-full transition ${
-                activeTab === "trade-in" ? "bg-white text-black font-bold" : "text-zinc-400 hover:text-white"
-              }`}
+            <a
+              href={`https://wa.me/${(store.whatsapp || "").replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="p-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
+              title="Chat WhatsApp"
             >
-              Trade-In
-            </button>
+              <MessageCircle className="w-3.5 h-3.5 fill-current" />
+            </a>
           </div>
         </div>
       </header>

@@ -65,25 +65,38 @@ export function StoreShell({
               : "bg-white/95 border-slate-200/90 text-slate-900 shadow-xs"
           }`}
         >
-          {/* Baris 1: Ikon Lokasi GPS + Teks Alamat Konter Fisik + WA Hotline */}
+          {/* Baris 1: Logo Toko Asli + Nama Toko + Ikon Lokasi GPS Konter Fisik + WA Hotline */}
           <div className="flex items-center justify-between gap-2.5">
             <div
-              className="flex items-center gap-1.5 min-w-0 cursor-pointer group"
+              className="flex items-center gap-2.5 min-w-0 cursor-pointer group"
               onClick={() => onTabChange("about")}
-              title="Lihat peta lokasi toko"
+              title="Lihat profil dan peta lokasi toko"
             >
-              <div className="w-7 h-7 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center shrink-0 border border-rose-200/60 dark:border-rose-900/60">
-                <MapPin className="w-3.5 h-3.5 fill-rose-500 text-white" />
+              {/* Store Real Logo / Initial Avatar */}
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-900 to-indigo-900 text-white flex items-center justify-center shrink-0 border-2 border-indigo-500/40 shadow-sm overflow-hidden">
+                {store.logoUrl ? (
+                  <img
+                    src={store.logoUrl}
+                    alt={store.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="font-black text-xs uppercase tracking-tighter">
+                    {store.name.slice(0, 2)}
+                  </span>
+                )}
               </div>
+
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-extrabold truncate text-slate-900 dark:text-white leading-tight">
-                    {locationLabel}
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                  <h1 className="text-xs sm:text-[13px] font-black truncate text-slate-950 dark:text-white leading-tight">
+                    {store.name}
+                  </h1>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" title="Toko Buka" />
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate leading-tight">
-                  {store.name} • Siap COD Hari Ini
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1 truncate leading-tight mt-0.5">
+                  <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0 fill-rose-500" />
+                  <span className="truncate">{locationLabel}</span>
                 </div>
               </div>
             </div>
@@ -95,11 +108,11 @@ export function StoreShell({
               )},%20saya%20ingin%20tanya%20stok%20HP%20second`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 active:scale-95 transition shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 active:scale-95 transition shrink-0"
               title="Hubungi WhatsApp Toko"
             >
               <MessageCircle className="w-3.5 h-3.5 fill-current" />
-              <span className="hidden xs:inline">Hotline</span>
+              <span className="hidden xs:inline">WhatsApp</span>
             </a>
           </div>
 

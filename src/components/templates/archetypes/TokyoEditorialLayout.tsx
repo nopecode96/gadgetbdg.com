@@ -65,15 +65,29 @@ export function TokyoEditorialLayout({ store, products }: ArchetypeLayoutProps) 
       </div>
 
       {/* ── Editorial Header ── */}
-      <header className="sticky top-0 z-40 bg-[#f4f1ea]/90 backdrop-blur-md border-b border-[#dfd8cc] px-4 sm:px-8 py-4">
+      <header className="sticky top-0 z-40 bg-[#f4f1ea]/90 backdrop-blur-md border-b border-[#dfd8cc] px-4 sm:px-8 py-3.5">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-baseline gap-3">
-            <h1 className="text-xl sm:text-2xl font-black tracking-tighter uppercase">
-              {store.name}
-            </h1>
-            <span className="text-[10px] uppercase font-mono tracking-widest text-[#736c62] hidden sm:inline">
-              ISSUE Nº 024 — ARCHIVE
-            </span>
+          <div className="flex items-center gap-3">
+            {/* Store Real Logo / Avatar */}
+            <div className="w-9 h-9 rounded-full bg-[#1c1a17] text-[#f4f1ea] flex items-center justify-center font-black text-xs shrink-0 overflow-hidden border border-[#dfd8cc]">
+              {store.logoUrl ? (
+                <img src={store.logoUrl} alt={store.name} className="w-full h-full object-cover" />
+              ) : (
+                store.name.slice(0, 2).toUpperCase()
+              )}
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base sm:text-xl font-black tracking-tighter uppercase text-[#1c1a17]">
+                  {store.name}
+                </h1>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              </div>
+              <p className="text-[10px] text-[#736c62] font-semibold flex items-center gap-1">
+                📍 {store.address ? store.address.split(",")[0] : "BEC Lt. 1, Bandung"}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -90,6 +104,15 @@ export function TokyoEditorialLayout({ store, products }: ArchetypeLayoutProps) 
                 {tab === "home" ? "Editorial" : tab === "list" ? "Index" : "Exchange"}
               </button>
             ))}
+            <a
+              href={`https://wa.me/${(store.whatsapp || "").replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="p-2 rounded-full bg-[#d94823] text-white hover:bg-[#bc3b1a] transition shadow-xs"
+              title="Chat WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 fill-current" />
+            </a>
           </div>
         </div>
       </header>

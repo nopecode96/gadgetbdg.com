@@ -187,6 +187,38 @@ function MinimalCleanScreen() {
           </div>
         </div>
 
+        {/* Unit Pilihan Minggu Ini (Horizontal Snap Slider) */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[8px] font-extrabold text-slate-800">
+            <span>⚡ Unit Pilihan Minggu Ini</span>
+            <span className="text-[7px] text-slate-400">Geser →</span>
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
+            {MOCK_PRODUCTS.slice(0, 3).map((p) => (
+              <div
+                key={`snap-${p.name}`}
+                className="w-40 shrink-0 p-2 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1"
+              >
+                <div className="w-full h-14 rounded-xl bg-slate-50 p-1 flex items-center justify-center relative overflow-hidden">
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                  <span className="absolute top-1 left-1 text-[5.5px] font-black uppercase bg-slate-900 text-white px-1 py-0.2 rounded">
+                    {p.brand}
+                  </span>
+                  <span className="absolute top-1 right-1 text-[5.5px] font-bold bg-amber-400 text-slate-950 px-1 py-0.2 rounded">
+                    BH 94%
+                  </span>
+                </div>
+                <div className="text-[7.5px] font-black text-slate-900 truncate">{p.name}</div>
+                <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                  <span className="text-[7.5px] font-black text-blue-700">{p.price}</span>
+                  <span className="text-[6.5px] font-bold text-emerald-600 bg-emerald-50 px-1 py-0.2 rounded">COD</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 2-Column Product Grid (Pilar D: Rounded-3xl + Plus Button) */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[8px]">

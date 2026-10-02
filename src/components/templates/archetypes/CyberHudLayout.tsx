@@ -72,8 +72,12 @@ export function CyberHudLayout({ store, products }: ArchetypeLayoutProps) {
       <header className="sticky top-0 z-40 bg-[#05070a]/90 backdrop-blur-md border-b border-cyan-900/60 px-4 sm:px-6 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-cyan-950 border border-cyan-500 text-cyan-400 flex items-center justify-center font-black text-sm shadow-[0_0_12px_rgba(6,182,212,0.4)]">
-              &gt;_
+            <div className="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-500 text-cyan-400 flex items-center justify-center font-black text-sm shadow-[0_0_12px_rgba(6,182,212,0.4)] overflow-hidden shrink-0">
+              {store.logoUrl ? (
+                <img src={store.logoUrl} alt={store.name} className="w-full h-full object-cover" />
+              ) : (
+                <span>&gt;_</span>
+              )}
             </div>
             <div>
               <div className="font-black text-sm text-cyan-100 tracking-wider">
@@ -81,7 +85,7 @@ export function CyberHudLayout({ store, products }: ArchetypeLayoutProps) {
               </div>
               <div className="text-[9px] text-cyan-500 flex items-center gap-1 font-sans">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-                CONSOLE READY • KASIR BEC
+                <span>📍 {store.address ? store.address.split(",")[0] : "KASIR BEC BANDUNG"}</span>
               </div>
             </div>
           </div>
@@ -100,6 +104,15 @@ export function CyberHudLayout({ store, products }: ArchetypeLayoutProps) {
                 {tab === "home" ? "HQ HUD" : tab === "list" ? "INVENTORY" : "TRADE-IN"}
               </button>
             ))}
+            <a
+              href={`https://wa.me/${(store.whatsapp || "").replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="p-1.5 rounded bg-cyan-500 hover:bg-cyan-400 text-black transition shadow-[0_0_10px_rgba(6,182,212,0.4)]"
+              title="WhatsApp Hotline"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </a>
           </div>
         </div>
       </header>

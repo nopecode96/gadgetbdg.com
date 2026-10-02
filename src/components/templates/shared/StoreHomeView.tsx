@@ -264,6 +264,93 @@ export function StoreHomeView({
         </div>
       </div>
 
+      {/* ── 3.5. UNIT PILIHAN MINGGU INI (Horizontal Snap Slider dengan Foto Luas & Badge BH) ── */}
+      {displayProducts.length > 0 && (
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between text-xs px-0.5">
+            <div className="flex items-center gap-1.5 font-black">
+              <span className="text-amber-500">⚡</span>
+              <span className={isDark ? "text-white" : "text-slate-950"}>
+                Unit Pilihan Minggu Ini
+              </span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-bold">
+              Geser ke samping →
+            </span>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-1">
+            {displayProducts.slice(0, 5).map((item) => {
+              let cleanWa = (store.whatsapp || "").replace(/\D/g, "");
+              if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
+              const waHref = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
+                store.name
+              )},%20saya%20tertarik%20dengan%20unit%20pilihan%20*${encodeURIComponent(
+                item.name
+              )}*%20(${encodeURIComponent(formatRupiah(item.price))}).%20Bisa%20cek%20kondisinya?`;
+
+              return (
+                <div
+                  key={`spotlight-${item.id}`}
+                  className={`w-64 sm:w-72 shrink-0 snap-start p-3.5 rounded-3xl border transition-all shadow-sm ${
+                    isDark
+                      ? "bg-slate-900 border-slate-800 text-white"
+                      : "bg-white border-slate-200 text-slate-950"
+                  }`}
+                >
+                  <a href={`/${store.slug}/product/${item.id}`} className="block">
+                    <div className="relative aspect-video rounded-2xl bg-neutral-50 dark:bg-slate-950/70 p-2 flex items-center justify-center overflow-hidden border border-neutral-100 dark:border-slate-800">
+                      <img
+                        src={item.images?.[0] || "/images/items/iphone-15-pro.png"}
+                        alt={item.name}
+                        className="w-full h-full object-contain"
+                      />
+                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-slate-900/90 text-white font-black text-[9px] uppercase tracking-wider backdrop-blur-xs">
+                        {item.brand}
+                      </span>
+                      {item.batteryHealth !== null && (
+                        <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-amber-500/90 text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-sm">
+                          <BatteryCharging className="w-2.5 h-2.5" />
+                          <span>BH {item.batteryHealth}%</span>
+                        </span>
+                      )}
+                    </div>
+                  </a>
+
+                  <div className="mt-2.5 space-y-1">
+                    <a href={`/${store.slug}/product/${item.id}`} className="block">
+                      <h4 className="font-black text-xs truncate hover:underline">
+                        {item.name}
+                      </h4>
+                    </a>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold truncate">
+                      {item.condition || "98% Mulus"} • {item.ramRom || "Fullset"}
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="text-[8px] text-slate-400 uppercase font-mono">Harga Spesial</div>
+                      <div className={`font-black text-xs sm:text-sm ${isDark ? "text-emerald-400" : "text-blue-700"}`}>
+                        {formatRupiah(item.price)}
+                      </div>
+                    </div>
+                    <a
+                      href={waHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black transition flex items-center gap-1"
+                    >
+                      Beli Unit
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── 4. PRODUCT CARD GRID (Pilar D: Modern Rounded-3xl Cards) ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs px-0.5">

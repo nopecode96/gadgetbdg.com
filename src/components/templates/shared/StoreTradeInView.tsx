@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { RefreshCw, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { StoreData } from "./types";
-import { createTradeInOffer } from "@/lib/actions";
+import { submitTradeInOfferAction } from "@/lib/actions/tradein-actions";
 import { getTemplateConfig } from "@/lib/constants/templates";
 
 interface StoreTradeInViewProps {
@@ -28,39 +28,17 @@ export function StoreTradeInView({ store, theme }: StoreTradeInViewProps) {
 
     const formData = new FormData(e.currentTarget);
     formData.append("storeId", store.id);
-    formData.append("storeSlug", store.slug);
 
-    const res = await createTradeInOffer(formData);
+    const res = await submitTradeInOfferAction(formData);
     setLoading(false);
 
     if (res.success) {
       setSuccess(true);
-
-      const customerName = formData.get("customerName") as string;
-      const deviceModel = formData.get("deviceModel") as string;
-      const ramStorage = formData.get("ramStorage") as string;
-      const conditionDesc = formData.get("conditionDesc") as string;
-      const completeness = formData.get("completeness") as string;
-      const minusNotes = formData.get("minusNotes") as string;
-      const expectedPrice = formData.get("expectedPrice") as string;
-
-      const waMessage = encodeURIComponent(
-        `Halo ${store.name}, saya ingin mengajukan *TUKAR TAMBAH / JUAL HP*:\n\n` +
-          `• *Nama Pengirim:* ${customerName}\n` +
-          `• *Tipe HP Lama:* ${deviceModel} (${ramStorage})\n` +
-          `• *Kondisi Fisik:* ${conditionDesc}\n` +
-          `• *Kelengkapan:* ${completeness}\n` +
-          (minusNotes ? `• *Catatan Minus:* ${minusNotes}\n` : "") +
-          (expectedPrice ? `• *Ekspektasi Harga:* Rp ${expectedPrice}\n\n` : "\n") +
-          `Mohon ditaksir estimasi harga tertingginya ya kak, terima kasih!`
-      );
-
-      let cleanWa = (store.whatsapp || "").replace(/\D/g, "");
-      if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
-
-      setTimeout(() => {
-        window.open(`https://wa.me/${cleanWa}?text=${waMessage}`, "_blank");
-      }, 800);
+      if (res.whatsappUrl) {
+        setTimeout(() => {
+          window.open(res.whatsappUrl, "_blank");
+        }, 800);
+      }
     } else {
       setError(res.error || "Gagal memproses form penawaran tukar tambah.");
     }

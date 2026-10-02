@@ -89,6 +89,9 @@ export default async function StorePage({ params }: StorePageProps) {
     },
     include: {
       products: {
+        where: {
+          status: { in: ["AVAILABLE", "BOOKED"] },
+        },
         orderBy: {
           createdAt: "desc",
         },

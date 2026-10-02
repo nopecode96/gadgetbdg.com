@@ -78,6 +78,9 @@ export default async function CustomDomainPage({ params }: CustomDomainPageProps
     },
     include: {
       products: {
+        where: {
+          status: { in: ["AVAILABLE", "BOOKED"] },
+        },
         orderBy: {
           createdAt: "desc",
         },

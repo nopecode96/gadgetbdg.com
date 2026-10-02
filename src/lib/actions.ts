@@ -66,6 +66,12 @@ export async function createTradeInOffer(formData: FormData) {
   }
 }
 
+import { submitTradeInOfferAction as baseSubmitTradeInOfferAction } from "./actions/tradein-actions";
+
+export async function submitTradeInOfferAction(formData: FormData) {
+  return baseSubmitTradeInOfferAction(formData);
+}
+
 import {
   createProductAction as guardedCreateProduct,
   updateProductStatusAction as guardedUpdateProductStatus,

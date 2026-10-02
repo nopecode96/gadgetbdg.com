@@ -41,65 +41,91 @@ export function StoreHomeView({
 
   return (
     <div className="space-y-5 p-4 animate-fade-in text-xs">
-      {/* 1. Hero Promo Banner Card */}
-      <div
-        className={`rounded-3xl p-5 relative overflow-hidden shadow-lg border ${colors.heroGradient} ${colors.heroBorder}`}
-      >
-        <div className="relative z-10 space-y-2">
-          {/* Badge — dark theme: white/20 glass; light theme: dark solid contrast */}
-          <div
-            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${
-              isDark
-                ? "bg-white/20 backdrop-blur-sm"
-                : "bg-black/70 text-white"
-            }`}
-          >
-            <Sparkles className="w-3 h-3 text-amber-300" />
-            <span>Spesialis HP Second Terpercaya</span>
+      {/* 1. Hero Promo Banner Card (100% Kontras Sempurna Baik Dark Maupun Clean) */}
+      {isDark ? (
+        <div
+          className={`rounded-3xl p-5 relative overflow-hidden shadow-lg border ${colors.heroGradient} ${colors.heroBorder}`}
+        >
+          <div className="relative z-10 space-y-2">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm">
+              <Sparkles className="w-3 h-3 text-emerald-300" />
+              <span>SPESIALIS HP SECOND TERPERCAYA</span>
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-xl font-black text-white tracking-tight leading-snug">
+              Gear Flagship &amp; HP High-Spec Murah
+            </h2>
+
+            {/* Description */}
+            <p className="text-xs leading-relaxed max-w-[280px] text-slate-300 font-medium">
+              Semua unit telah lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
+            </p>
+
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                onClick={() => onNavigateTab("list")}
+                className={`px-4 py-2 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-1.5 ${colors.accent} text-slate-950 ${colors.accentHover}`}
+              >
+                <span>Jelajahi Stok</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => onNavigateTab("trade-in")}
+                className="px-3.5 py-2 rounded-xl font-semibold text-xs transition border border-white/30 bg-black/20 hover:bg-black/30 text-white"
+              >
+                Tukar Tambah HP
+              </button>
+            </div>
           </div>
 
-          {/* Heading — inherits heroGradient text color, always has high contrast */}
-          <h2 className="text-xl font-black tracking-tight leading-snug">
-            {isDark ? "Gear Flagship & HP High-Spec Murah" : "Katalog iPhone & Android Istimewa"}
-          </h2>
-
-          {/* Description — use opacity-90 which relies on inherited text color from heroGradient */}
-          <p className="text-xs leading-relaxed max-w-[280px] opacity-90">
-            Semua unit telah lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
-          </p>
-
-          <div className="pt-2 flex items-center gap-2">
-            {/* Jelajahi Stok button */}
-            <button
-              onClick={() => onNavigateTab("list")}
-              className={`px-4 py-2 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-1.5 ${
-                isDark
-                  ? `${colors.accent} text-slate-950 ${colors.accentHover}`
-                  : "bg-slate-900 text-white hover:bg-slate-800"
-              }`}
-            >
-              <span>Jelajahi Stok</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-
-            {/* Tukar Tambah — dark: semi-transparent white; light: white opaque with dark text */}
-            <button
-              onClick={() => onNavigateTab("trade-in")}
-              className={`px-3.5 py-2 rounded-xl font-semibold text-xs transition ${
-                isDark
-                  ? "border border-white/30 bg-black/20 hover:bg-black/30 text-white"
-                  : "border border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
-              }`}
-            >
-              Tukar Tambah HP
-            </button>
-          </div>
+          {/* Decorative backdrop shapes */}
+          <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         </div>
+      ) : (
+        /* TEMA TERANG / CLEAN: Background Gradien Gelap Solid Premium agar Teks Judul Putih & Badge Selalu 100% Kontras & Elegan */
+        <div className="rounded-3xl p-5 relative overflow-hidden shadow-lg bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white border border-slate-800/40">
+          <div className="relative z-10 space-y-2">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm">
+              <Sparkles className="w-3 h-3 text-emerald-300" />
+              <span>SPESIALIS HP SECOND TERPERCAYA</span>
+            </div>
 
-        {/* Decorative backdrop shapes */}
-        <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+            {/* Heading */}
+            <h2 className="text-xl font-black text-white tracking-tight leading-snug">
+              Katalog iPhone &amp; Android Istimewa
+            </h2>
 
-      </div>
+            {/* Description */}
+            <p className="text-xs leading-relaxed max-w-[280px] text-slate-200/90 font-medium">
+              Semua unit telah lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
+            </p>
+
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                onClick={() => onNavigateTab("list")}
+                className="px-4 py-2 rounded-xl font-black text-xs shadow-md transition flex items-center gap-1.5 bg-white text-slate-950 hover:bg-slate-100"
+              >
+                <span>Jelajahi Stok</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => onNavigateTab("trade-in")}
+                className="px-3.5 py-2 rounded-xl font-semibold text-xs transition border border-white/30 bg-white/10 hover:bg-white/20 text-white"
+              >
+                Tukar Tambah HP
+              </button>
+            </div>
+          </div>
+
+          {/* Decorative backdrop shapes */}
+          <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
+        </div>
+      )}
 
       {/* 2. Quick Brand Chips */}
       {popularBrands.length > 0 && (

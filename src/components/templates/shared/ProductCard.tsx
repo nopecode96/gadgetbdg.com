@@ -53,12 +53,12 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
     >
       <div>
         {/* Thumbnail Image with Automatic Watermark Protection */}
-        <div className="aspect-square rounded-xl bg-neutral-100 dark:bg-slate-900 overflow-hidden relative border border-neutral-200/50 dark:border-slate-800 mb-2 select-none">
+        <div className="aspect-square rounded-xl bg-neutral-100 dark:bg-slate-900 overflow-hidden relative border border-neutral-200/50 dark:border-slate-800 mb-2 select-none flex items-center justify-center p-1">
           {product.images && product.images.length > 0 ? (
             <img
               src={product.images[0]}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain p-0.5 transition-transform duration-200 hover:scale-105"
               loading="lazy"
             />
           ) : (
@@ -97,12 +97,12 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
         <span className={`text-[9px] font-bold uppercase tracking-wider ${colors.accentText}`}>
           {product.brand}
         </span>
-        <h3 className={`font-bold text-xs line-clamp-1 leading-snug ${colors.textPrimary}`}>
+        <h3 className={`font-bold text-xs line-clamp-1 leading-snug ${isDark ? "text-white" : "text-slate-950"}`}>
           {product.name}
         </h3>
 
         {/* Price */}
-        <div className={`font-black text-sm mt-0.5 ${colors.priceText}`}>
+        <div className={`font-black text-sm mt-0.5 ${isDark ? colors.priceText : "text-blue-700 font-extrabold"}`}>
           {formatRupiah(product.price)}
         </div>
         <div className={`text-[10px] ${colors.textSecondary} font-mono`}>

@@ -13,6 +13,7 @@ import {
   BarChart3,
   BadgeCheck,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { StoreRegistrationModal } from "@/components/saas/StoreRegistrationModal";
 import { TemplateShowcase } from "@/components/saas/TemplateShowcase";
@@ -195,37 +196,44 @@ export default function SaaSlandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition">
-              <div className="w-12 h-12 rounded-xl bg-blue-600/10 text-blue-600 flex items-center justify-center mb-6">
+          <div className="grid md:grid-cols-4 gap-6">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition">
+              <div className="w-12 h-12 rounded-xl bg-blue-600/10 text-blue-600 flex items-center justify-center mb-5">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Transparansi Status IMEI & BH</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Tandai unit Kemenperin, Bea Cukai, atau Smartfren Only. Cantumkan persentase Battery Health dan riwayat
-                pergantian part secara jujur untuk meminimalisir komplain.
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Katalog Spesial HP Second</h3>
+              <p className="text-slate-600 text-xs leading-relaxed">
+                Tampilkan persentase Battery Health, status IMEI Kemenperin, kondisi fisik, dan catatan minus secara transparan untuk meminimalisir komplain.
               </p>
             </div>
 
-            <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition">
-              <div className="w-12 h-12 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center mb-6">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-400 transition">
+              <div className="w-12 h-12 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center mb-5">
                 <Zap className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Formulir Tukar Tambah (Trade-In)</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Calon pembeli bisa input tipe HP lama mereka, foto kondisi, dan minus untuk ditaksir harga secara cepat
-                langsung via WhatsApp tokomu.
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Cegah Foto Dicuri Kompetitor</h3>
+              <p className="text-slate-600 text-xs leading-relaxed">
+                Proteksi watermark otomatis nama toko di atas foto unit HP untuk paket Pro & Advance. Foto fisik motret sendiri tetap aman dari pencurian.
               </p>
             </div>
 
-            <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition">
-              <div className="w-12 h-12 rounded-xl bg-purple-600/10 text-purple-600 flex items-center justify-center mb-6">
-                <Store className="w-6 h-6" />
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-pink-400 transition">
+              <div className="w-12 h-12 rounded-xl bg-pink-600/10 text-pink-600 flex items-center justify-center mb-5">
+                <BarChart3 className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Multi-Tenant Subdomain & Domain Sendiri</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Gunakan nama tokomu di [namatoko].gadgetbdg.com atau pasang domain pribadimu (misal: tokohpbandung.com)
-                dengan setup instan.
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Generator Story Siap Posting</h3>
+              <p className="text-slate-600 text-xs leading-relaxed">
+                Download poster story 9:16 HD 1-klik dengan watermark dan preset promo Flash Sale / Promo Gajian, lengkap dengan caption siap copas ke Facebook & IG.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-purple-400 transition">
+              <div className="w-12 h-12 rounded-xl bg-purple-600/10 text-purple-600 flex items-center justify-center mb-5">
+                <RefreshCw className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Form Tukar Tambah Direct WA</h3>
+              <p className="text-slate-600 text-xs leading-relaxed">
+                Calon pembeli bisa input tipe HP lama mereka dan kondisi minus untuk ditaksir harga secara cepat langsung masuk ke WhatsApp tokomu.
               </p>
             </div>
           </div>

@@ -2,157 +2,210 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Smartphone, ExternalLink, CheckCircle2, Sparkles, Zap, ShieldCheck } from "lucide-react";
+import {
+  Smartphone,
+  ExternalLink,
+  Sparkles,
+  Zap,
+  Filter,
+} from "lucide-react";
+import {
+  TEMPLATE_LIST,
+  TemplateThemeConfig,
+  getAvailableTemplatesForTier,
+} from "@/lib/constants/templates";
 
 export function TemplateShowcase() {
-  const [activeTab, setActiveTab] = useState<"minimal-clean" | "dark-gaming">("minimal-clean");
+  const [filterTier, setFilterTier] = useState<"ALL" | "STARTER" | "PRO" | "ADVANCE">("ALL");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("minimal-clean");
+
+  const templatesToDisplay =
+    filterTier === "ALL"
+      ? TEMPLATE_LIST
+      : filterTier === "STARTER"
+      ? getAvailableTemplatesForTier("STARTER")
+      : filterTier === "PRO"
+      ? getAvailableTemplatesForTier("PRO")
+      : TEMPLATE_LIST;
+
+  const activeTemplate =
+    TEMPLATE_LIST.find((t) => t.id === selectedTemplateId) || TEMPLATE_LIST[0];
+
+  // Target demo URL: jika minimal-clean -> /berkahcell, jika dark-gaming -> /gamersgadget, lainnya -> /berkahcell
+  const liveDemoUrl =
+    activeTemplate.id === "dark-gaming" ? "/gamersgadget" : "/berkahcell";
 
   return (
     <section id="showcase" className="py-24 bg-gradient-to-b from-slate-50 to-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" /> Live Interactive Preview
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" /> Katalog Koleksi 30 Template Storefront
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
             Pilihan Desain Website Toko Anda
           </h2>
-          <p className="mt-3 text-slate-600 text-base">
-            Dirancang khusus dengan rasio tampilan mobile-first (PWA), siap dipasang nama toko, logo, dan katalog HP Anda dalam hitungan detik.
+          <p className="mt-3 text-slate-600 text-sm">
+            Tersedia 30 varian template mobile-first (PWA) mulai dari desain minimalis bersih, tema cyberpunk dark gaming, hingga preset promo festival musiman.
           </p>
 
-          {/* Template Switcher Tabs */}
-          <div className="inline-flex p-1.5 rounded-2xl bg-slate-200/80 mt-8 shadow-inner">
+          {/* Tier Filter Tabs */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
             <button
-              onClick={() => setActiveTab("minimal-clean")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 ${
-                activeTab === "minimal-clean"
-                  ? "bg-white text-slate-900 shadow-md"
-                  : "text-slate-600 hover:text-slate-900"
+              onClick={() => setFilterTier("ALL")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+                filterTier === "ALL"
+                  ? "bg-slate-900 text-white border-slate-900 shadow-md"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
               }`}
             >
-              <Smartphone className="w-4 h-4 text-blue-600" />
-              <span>1. Minimal Clean (Berkah Cell)</span>
+              Semua Template (30)
             </button>
             <button
-              onClick={() => setActiveTab("dark-gaming")}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 ${
-                activeTab === "dark-gaming"
-                  ? "bg-slate-900 text-white shadow-md"
-                  : "text-slate-600 hover:text-slate-900"
+              onClick={() => setFilterTier("STARTER")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+                filterTier === "STARTER"
+                  ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
               }`}
             >
-              <Zap className="w-4 h-4 text-emerald-400" />
-              <span>2. Dark Gaming (Gamers Gadget)</span>
+              Paket Starter (2)
+            </button>
+            <button
+              onClick={() => setFilterTier("PRO")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+                filterTier === "PRO"
+                  ? "bg-purple-600 text-white border-purple-600 shadow-md"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              Paket Pro (10)
+            </button>
+            <button
+              onClick={() => setFilterTier("ADVANCE")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+                filterTier === "ADVANCE"
+                  ? "bg-amber-600 text-white border-amber-600 shadow-md"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              Paket Advance (30)
             </button>
           </div>
         </div>
 
-        {/* Interactive Device Mockup Frame */}
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-12 max-w-5xl mx-auto">
-          {/* Smartphone Hardware Frame */}
-          <div className="relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[640px] w-[320px] sm:w-[350px] shadow-2xl">
-            {/* Top speaker & notch */}
-            <div className="w-[140px] h-[18px] bg-gray-800 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-[1rem] z-30 flex items-center justify-center">
-              <div className="w-10 h-1 bg-gray-600 rounded-full" />
+        {/* 2-Column Section: Live Smartphone Mockup & Template Grid */}
+        <div className="grid lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
+          {/* Smartphone Hardware Frame (Left Sticky) */}
+          <div className="lg:col-span-5 flex flex-col items-center">
+            <div className="sticky top-24 relative border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[600px] w-[300px] sm:w-[330px] shadow-2xl">
+              {/* Notch */}
+              <div className="w-[120px] h-[16px] bg-gray-800 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-[0.8rem] z-30 flex items-center justify-center">
+                <div className="w-8 h-1 bg-gray-600 rounded-full" />
+              </div>
+
+              {/* Screen Content Iframe Container */}
+              <div className="rounded-[2rem] overflow-hidden w-full h-full bg-white relative">
+                <iframe
+                  key={activeTemplate.id}
+                  src={liveDemoUrl}
+                  title="Live Storefront Preview"
+                  className="w-full h-full border-none no-scrollbar"
+                  loading="lazy"
+                />
+              </div>
             </div>
 
-            {/* Side buttons */}
-            <div className="h-[46px] w-[3px] bg-gray-800 absolute -start-[17px] top-[124px] rounded-s-lg" />
-            <div className="h-[46px] w-[3px] bg-gray-800 absolute -start-[17px] top-[178px] rounded-s-lg" />
-            <div className="h-[64px] w-[3px] bg-gray-800 absolute -end-[17px] top-[142px] rounded-e-lg" />
-
-            {/* Screen Content Iframe Container */}
-            <div className="rounded-[2rem] overflow-hidden w-full h-full bg-white relative">
-              <iframe
-                key={activeTab}
-                src={activeTab === "minimal-clean" ? "/berkahcell" : "/gamersgadget"}
-                title="Live Storefront Preview"
-                className="w-full h-full border-none no-scrollbar"
-                loading="lazy"
-              />
+            <div className="mt-4 text-center space-y-2">
+              <span className="text-[11px] font-bold text-slate-500 block">
+                Sedang dipratinjau: <b>{activeTemplate.name}</b> ({activeTemplate.category})
+              </span>
+              <Link
+                href={liveDemoUrl}
+                target="_blank"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 transition"
+              >
+                <span>Buka Demo di Tab Baru</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
 
-          {/* Details & Live Action Panel */}
-          <div className="w-full lg:max-w-md space-y-6 text-slate-800">
-            {activeTab === "minimal-clean" ? (
-              <div className="space-y-4 animate-fade-in">
-                <div className="inline-block text-[10px] font-mono font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md border border-blue-200">
-                  TEMPLATE: MINIMAL CLEAN
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-                  Tampilan Elegan Reseller Apple & Flagship
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Fokus pada foto unit asli, kejelasan kondisi fisik, dan transparansi status IMEI (Resmi iBox / Kemenperin). Mengedepankan kesan toko profesional dan terpercaya.
-                </p>
+          {/* Template Grid Gallery (Right Scrollable) */}
+          <div className="lg:col-span-7 space-y-4">
+            <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-200">
+              <span className="font-bold text-slate-700">
+                Menampilkan {templatesToDisplay.length} Varian Desain
+              </span>
+              <span className="text-[11px] text-slate-400">Klik kartu untuk pratinjau</span>
+            </div>
 
-                <div className="space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Latar belakang netral dengan badge Battery Health kontras.</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Formulir taksir tukar tambah HP instan ke WhatsApp.</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Pencarian tipe HP & filter brand otomatis.</span>
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[640px] overflow-y-auto pr-1.5">
+              {templatesToDisplay.map((t) => {
+                const isSelected = selectedTemplateId === t.id;
+                const isDark = t.colors.isDark;
 
-                <div className="pt-2">
-                  <Link
-                    href="/berkahcell"
-                    target="_blank"
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs text-white bg-slate-900 hover:bg-slate-800 shadow-md transition"
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => setSelectedTemplateId(t.id)}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-3 ${
+                      isSelected
+                        ? isDark
+                          ? "border-emerald-500 bg-slate-900 text-white shadow-md ring-1 ring-emerald-500"
+                          : "border-blue-600 bg-blue-50/50 shadow-md ring-1 ring-blue-600 text-slate-900"
+                        : isDark
+                        ? "border-slate-800 hover:border-slate-700 bg-slate-950 text-slate-100"
+                        : "border-slate-200 hover:border-slate-300 bg-white text-slate-900"
+                    }`}
                   >
-                    <span>Coba Live Demo Berkah Cell di Tab Baru</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 animate-fade-in">
-                <div className="inline-block text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-800">
-                  TEMPLATE: DARK GAMING CYBER
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-                  Nuansa Gelap Agresif untuk HP High-FPS & Gaming
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Kombinasi latar hitam pekat dan aksen neon hijau emerald. Dirancang khusus untuk memikat komunitas gamer mobile di Bandung yang mencari ROG Phone, POCO F-series, dan iQOO.
-                </p>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-bold text-sm leading-tight">{t.name}</h4>
+                        </div>
+                        <span
+                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                            t.category === "Starter"
+                              ? "bg-blue-100 text-blue-800"
+                              : t.category === "Pro"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-amber-100 text-amber-800"
+                          }`}
+                        >
+                          {t.category}
+                        </span>
+                      </div>
 
-                <div className="space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Desain cyberpunk neon dengan label hardware tested.</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Tombol order direct chat bernuansa gaming rig.</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Ramah baterai smartphone OLED dengan dark mode penuh.</span>
-                  </div>
-                </div>
+                      <p className={`text-xs mt-1 line-clamp-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                        {t.description}
+                      </p>
+                    </div>
 
-                <div className="pt-2">
-                  <Link
-                    href="/gamersgadget"
-                    target="_blank"
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-md shadow-emerald-500/20 transition"
-                  >
-                    <span>Coba Live Demo Gamers Gadget di Tab Baru</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            )}
+                    {/* Color Palette Preview Bar */}
+                    <div className="flex items-center justify-between pt-1">
+                      <div
+                        className={`h-7 px-2.5 rounded-lg flex items-center justify-center text-[10px] font-bold shadow-xs ${t.colors.heroGradient} ${t.colors.heroBorder} border`}
+                      >
+                        {t.badge || "Preset Tema"}
+                      </div>
+
+                      <span
+                        className={`text-[11px] font-bold ${
+                          isSelected
+                            ? isDark
+                              ? "text-emerald-400"
+                              : "text-blue-600"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        {isSelected ? "Sedang Aktif" : "Pilih Preview →"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

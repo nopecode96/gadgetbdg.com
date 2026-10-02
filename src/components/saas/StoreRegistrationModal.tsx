@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { checkSlugAvailabilityAction, registerNewStoreAction } from "@/lib/actions";
+import { getAvailableTemplatesForTier } from "@/lib/constants/templates";
 
 export function StoreRegistrationModal({
   isOpen,
@@ -37,6 +38,8 @@ export function StoreRegistrationModal({
   const [templateId, setTemplateId] = useState("minimal-clean");
   const [whatsapp, setWhatsapp] = useState("");
   const [address, setAddress] = useState("");
+
+  const availableTemplatesForSelectedTier = getAvailableTemplatesForTier(tier);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -244,42 +247,58 @@ export function StoreRegistrationModal({
           {/* STEP 3: Template Selection */}
           {step === 3 && (
             <div className="space-y-3 animate-fade-in">
-              <label className="block font-bold text-slate-800 mb-1">Pilih Desain Template Awal *</label>
+              <div className="flex items-center justify-between">
+                <label className="block font-bold text-slate-800 text-xs">Pilih Desain Template Awal *</label>
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {availableTemplatesForSelectedTier.length} Template ({tier})
+                </span>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div
-                  onClick={() => setTemplateId("minimal-clean")}
-                  className={`p-3.5 rounded-2xl border-2 cursor-pointer transition ${
-                    templateId === "minimal-clean"
-                      ? "border-blue-600 bg-blue-50/50 shadow-md ring-1 ring-blue-600"
-                      : "border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  <div className="font-bold text-sm text-slate-900">Minimal Clean</div>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    Tema putih bersih & elegan. Populer untuk reseller iPhone second mulus.
-                  </p>
-                  <div className="mt-3 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-slate-500">
-                    Preview: White Elegance
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+                {availableTemplatesForSelectedTier.map((t) => {
+                  const isSelected = templateId === t.id;
+                  const isDark = t.colors.isDark;
 
-                <div
-                  onClick={() => setTemplateId("dark-gaming")}
-                  className={`p-3.5 rounded-2xl border-2 cursor-pointer transition ${
-                    templateId === "dark-gaming"
-                      ? "border-emerald-500 bg-slate-900 text-white shadow-md ring-1 ring-emerald-500"
-                      : "border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  <div className="font-bold text-sm">Dark Gaming Cyber</div>
-                  <p className={`text-[11px] mt-1 ${templateId === "dark-gaming" ? "text-slate-400" : "text-slate-500"}`}>
-                    Nuansa gelap cyberpunk & neon hijau. Cocok untuk ROG, iQOO, POCO flagship.
-                  </p>
-                  <div className="mt-3 h-12 rounded-lg bg-slate-950 flex items-center justify-center text-[10px] font-mono text-emerald-400">
-                    Preview: High FPS Gear
-                  </div>
-                </div>
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => setTemplateId(t.id)}
+                      className={`p-3 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-2 ${
+                        isSelected
+                          ? isDark
+                            ? "border-emerald-500 bg-slate-900 text-white shadow-md ring-1 ring-emerald-500"
+                            : "border-blue-600 bg-blue-50/50 shadow-md ring-1 ring-blue-600 text-slate-900"
+                          : isDark
+                          ? "border-slate-800 hover:border-slate-700 bg-slate-950 text-slate-100"
+                          : "border-slate-200 hover:border-slate-300 bg-white text-slate-900"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-xs truncate max-w-[150px]">{t.name}</h4>
+                          {isSelected && (
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${
+                                isDark ? "bg-emerald-500 text-slate-950" : "bg-blue-600 text-white"
+                              }`}
+                            >
+                              Dipilih
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-[11px] mt-0.5 line-clamp-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                          {t.description}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`h-8 rounded-lg flex items-center justify-center text-[10px] font-bold border ${t.colors.heroGradient} ${t.colors.heroBorder}`}
+                      >
+                        {t.badge || "Preset"}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

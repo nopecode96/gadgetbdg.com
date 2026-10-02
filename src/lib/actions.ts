@@ -216,6 +216,8 @@ export async function registerNewStoreAction(formData: FormData) {
         whatsapp: cleanWa,
         address: address || null,
         primaryColor: templateId === "dark-gaming" ? "#10b981" : "#2563eb",
+        hasWatermark: tier !== "STARTER",
+        lastTemplateChangeAt: new Date(),
         isActive: true,
       },
     });

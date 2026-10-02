@@ -8,6 +8,10 @@ generator client {
   binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
+// ============================================================
+// ENUMS
+// ============================================================
+
 enum StoreTier {
   STARTER
   PRO
@@ -19,6 +23,23 @@ enum ProductStatus {
   BOOKED
   SOLD
 }
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN_SAAS
+  STORE_OWNER
+  STORE_STAFF
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ============================================================
+// MODELS
+// ============================================================
 
 model Store {
   id           String        @id @default(cuid())
@@ -35,15 +56,34 @@ model Store {
   bannerUrl    String?
   hasWatermark Boolean       @default(false)
   lastTemplateChangeAt DateTime?
-  isActive     Boolean       @default(true)
+  isActive     Boolean       @default(false)
+  subscriptionExpiresAt DateTime?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  products     Product[]
+  products      Product[]
   tradeInOffers TradeInOffer[]
+  users         User[]
+  payments      SubscriptionPayment[]
 
   @@index([slug])
   @@index([customDomain])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role     @default(STORE_STAFF)
+  storeId      String?
+  store        Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([email])
+  @@index([storeId])
 }
 
 model Product {
@@ -86,4 +126,21 @@ model TradeInOffer {
   store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@index([storeId])
+}
+
+model SubscriptionPayment {
+  id         String        @id @default(cuid())
+  storeId    String
+  tier       StoreTier
+  amount     Int
+  receiptUrl String?
+  status     PaymentStatus @default(PENDING)
+  notes      String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  store      Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([status])
 }

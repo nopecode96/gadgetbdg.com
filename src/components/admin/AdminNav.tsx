@@ -35,6 +35,12 @@ export function AdminNav({ currentSlug }: { currentSlug?: string }) {
               <Share2 className="w-4 h-4" /> Generator Medsos
             </Link>
             <Link
+              href="/admin/team"
+              className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1.5 transition"
+            >
+              <span>👥 Tim &amp; Staf</span>
+            </Link>
+            <Link
               href="/admin/settings"
               className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1.5 transition"
             >

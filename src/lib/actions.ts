@@ -78,9 +78,38 @@ import {
 
 import { trackWhatsAppClickAction as baseTrackWhatsAppClickAction } from "./actions/analytics-actions";
 
+import {
+  registerStoreWithPaymentAction as baseRegisterStoreWithPayment,
+  approvePaymentAction as baseApprovePayment,
+  rejectPaymentAction as baseRejectPayment,
+  createStaffUserAction as baseCreateStaffUser,
+  deleteStaffUserAction as baseDeleteStaffUser,
+} from "./actions/auth-actions";
+
 export async function trackWhatsAppClickAction(productId: string, storeId: string) {
   return baseTrackWhatsAppClickAction(productId, storeId);
 }
+
+export async function registerStoreWithPaymentAction(formData: FormData) {
+  return baseRegisterStoreWithPayment(formData);
+}
+
+export async function approvePaymentAction(paymentId: string) {
+  return baseApprovePayment(paymentId);
+}
+
+export async function rejectPaymentAction(paymentId: string, notes: string) {
+  return baseRejectPayment(paymentId, notes);
+}
+
+export async function createStaffUserAction(formData: FormData) {
+  return baseCreateStaffUser(formData);
+}
+
+export async function deleteStaffUserAction(userId: string) {
+  return baseDeleteStaffUser(userId);
+}
+
 
 export async function createProduct(formData: FormData) {
   return guardedCreateProduct(formData);

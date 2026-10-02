@@ -1,14 +1,30 @@
-import { PrismaClient, StoreTier, ProductStatus } from "@prisma/client";
+import { PrismaClient, StoreTier, ProductStatus, Role, PaymentStatus } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Cleaning up existing seed data...");
+  await prisma.subscriptionPayment.deleteMany({});
   await prisma.tradeInOffer.deleteMany({});
   await prisma.product.deleteMany({});
+  await prisma.user.deleteMany({});
   await prisma.store.deleteMany({});
 
-  console.log("🌱 Seeding stores...");
+  console.log("🌱 Seeding Super Admin...");
+  const defaultPasswordHash = await bcrypt.hash("admin123", 10);
+
+  // Super Admin Default (Platform SaaS)
+  const superAdmin = await prisma.user.create({
+    data: {
+      name: "Super Admin GadgetBdg",
+      email: "superadmin@gadgetbdg.com",
+      passwordHash: defaultPasswordHash,
+      role: Role.SUPER_ADMIN,
+    },
+  });
+
+  console.log("🌱 Seeding stores & merchant users...");
 
   // 1. Berkah Cell (Minimal-Clean theme, Pro Tier)
   const berkahCell = await prisma.store.create({
@@ -189,9 +205,53 @@ async function main() {
     },
   });
 
+  // Buat User Store Owner & Staf untuk Berkah Cell (Pro Tier)
+  const berkahOwner = await prisma.user.create({
+    data: {
+      name: "Owner Berkah Cell",
+      email: "owner@berkahcell.com",
+      passwordHash: defaultPasswordHash,
+      role: Role.STORE_OWNER,
+      storeId: berkahCell.id,
+    },
+  });
+
+  const berkahStaff = await prisma.user.create({
+    data: {
+      name: "Kasir Berkah BEC",
+      email: "kasir@berkahcell.com",
+      passwordHash: defaultPasswordHash,
+      role: Role.STORE_STAFF,
+      storeId: berkahCell.id,
+    },
+  });
+
+  // Buat User Store Owner untuk Gamers Gadget (Starter Tier)
+  const gamersOwner = await prisma.user.create({
+    data: {
+      name: "Owner Gamers Gadget",
+      email: "owner@gamersgadget.com",
+      passwordHash: defaultPasswordHash,
+      role: Role.STORE_OWNER,
+      storeId: gamersGadget.id,
+    },
+  });
+
+  // Contoh data Payment Approved untuk Berkah Cell
+  await prisma.subscriptionPayment.create({
+    data: {
+      storeId: berkahCell.id,
+      tier: StoreTier.PRO,
+      amount: 600000,
+      status: PaymentStatus.APPROVED,
+      receiptUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80",
+    },
+  });
+
   console.log(`✅ Seeding berhasil!`);
-  console.log(`- Toko 1: ${berkahCell.name} (/${berkahCell.slug}) - Template: ${berkahCell.templateId}`);
-  console.log(`- Toko 2: ${gamersGadget.name} (/${gamersGadget.slug}) - Template: ${gamersGadget.templateId}`);
+  console.log(`- Super Admin: ${superAdmin.email} (Password: admin123)`);
+  console.log(`- Toko 1: ${berkahCell.name} (/${berkahCell.slug}) - Owner: ${berkahOwner.email}`);
+  console.log(`- Toko 2: ${gamersGadget.name} (/${gamersGadget.slug}) - Owner: ${gamersOwner.email}`);
 }
 
 main()

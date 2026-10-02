@@ -25,7 +25,17 @@ interface PaymentItem {
     name: string;
     slug: string;
     whatsapp: string;
+    salesUser?: {
+      id: string;
+      name: string;
+      referralCode: string | null;
+    } | null;
   };
+  commissions?: Array<{
+    id: string;
+    amount: number;
+    status: "PENDING" | "PAID";
+  }>;
 }
 
 function formatRupiah(n: number) {
@@ -157,7 +167,14 @@ export function BillingManagerClient({ initialPayments }: { initialPayments: Pay
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="font-black text-white text-base">{payment.store.name}</div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="font-black text-white text-base">{payment.store.name}</div>
+                      {payment.store.salesUser && (
+                        <span className="text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded-full">
+                          Sales: {payment.store.salesUser.name} ({payment.store.salesUser.referralCode})
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs font-mono text-slate-400">{payment.store.slug}.gadgetbdg.com</div>
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                       <span>{formatDate(payment.createdAt)}</span>

@@ -105,6 +105,7 @@ import {
   createSaasStaffAction as baseCreateSaasStaff,
   deleteSaasStaffAction as baseDeleteSaasStaff,
   manualActivateStoreAction as baseManualActivateStore,
+  paySalesCommissionAction as basePaySalesCommission,
 } from "./actions/saas-admin-actions";
 
 export async function resetStoreOwnerPasswordAction(storeId: string, newPassword: string) {
@@ -115,7 +116,16 @@ export async function extendStoreSubscriptionAction(storeId: string, additionalD
   return baseExtendStoreSubscription(storeId, additionalDays);
 }
 
-export async function createSaasStaffAction(data: { name: string; email: string; password: string; role: "SUPER_ADMIN" | "ADMIN_SAAS" }) {
+export async function createSaasStaffAction(data: {
+  name: string;
+  email: string;
+  password: string;
+  role: "SUPER_ADMIN" | "ADMIN_SAAS" | "SALES_AGENT";
+  referralCode?: string;
+  bankName?: string;
+  bankNumber?: string;
+  bankHolder?: string;
+}) {
   return baseCreateSaasStaff(data);
 }
 
@@ -125,6 +135,10 @@ export async function deleteSaasStaffAction(staffId: string) {
 
 export async function manualActivateStoreAction(storeId: string, days: number = 30) {
   return baseManualActivateStore(storeId, days);
+}
+
+export async function paySalesCommissionAction(commissionId: string) {
+  return basePaySalesCommission(commissionId);
 }
 
 export async function rejectPaymentAction(paymentId: string, notes: string) {

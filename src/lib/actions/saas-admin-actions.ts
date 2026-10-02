@@ -93,16 +93,20 @@ export async function extendStoreSubscriptionAction(storeId: string, additionalD
 }
 
 /**
- * 3. Buat akun staf internal platform SaaS (SUPER_ADMIN / ADMIN_SAAS)
+ * 3. Buat akun staf internal platform SaaS (SUPER_ADMIN / ADMIN_SAAS / SALES_AGENT)
  */
 export async function createSaasStaffAction(data: {
   name: string;
   email: string;
   password: string;
-  role: "SUPER_ADMIN" | "ADMIN_SAAS";
+  role: "SUPER_ADMIN" | "ADMIN_SAAS" | "SALES_AGENT";
+  referralCode?: string;
+  bankName?: string;
+  bankNumber?: string;
+  bankHolder?: string;
 }) {
   try {
-    const { name, email, password, role } = data;
+    const { name, email, password, role, referralCode, bankName, bankNumber, bankHolder } = data;
 
     if (!name || !email || !password || !role) {
       return { success: false, error: "Semua kolom wajib diisi." };
@@ -122,6 +126,17 @@ export async function createSaasStaffAction(data: {
       return { success: false, error: "Email sudah terdaftar. Gunakan email lain." };
     }
 
+    let cleanRefCode: string | null = null;
+    if (role === "SALES_AGENT") {
+      cleanRefCode = (referralCode || `SALES-${name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6)}`).trim();
+      const existingRef = await prisma.user.findUnique({
+        where: { referralCode: cleanRefCode },
+      });
+      if (existingRef) {
+        cleanRefCode = `${cleanRefCode}-${Math.floor(100 + Math.random() * 900)}`;
+      }
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
 
     const newUser = await prisma.user.create({
@@ -131,24 +146,66 @@ export async function createSaasStaffAction(data: {
         passwordHash,
         role,
         storeId: null, // Akun internal platform tidak terikat toko
+        referralCode: cleanRefCode,
+        bankName: bankName || null,
+        bankNumber: bankNumber || null,
+        bankHolder: bankHolder || null,
       },
     });
 
     revalidatePath("/super-admin/admins");
+    revalidatePath("/super-admin/sales-portal");
     return {
       success: true,
-      message: `Admin ${role} berhasil dibuat untuk ${newUser.name} (${newUser.email})!`,
+      message: `${role} berhasil dibuat untuk ${newUser.name} (${newUser.email})!`,
       user: {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        referralCode: newUser.referralCode,
         createdAt: newUser.createdAt.toISOString(),
       },
     };
   } catch (error: any) {
     console.error("createSaasStaffAction error:", error);
-    return { success: false, error: error.message || "Gagal membuat akun admin SaaS." };
+    return { success: false, error: error.message || "Gagal membuat akun staf SaaS." };
+  }
+}
+
+/**
+ * Tandai komisi sales sudah dibayar / ditransfer oleh Super Admin
+ */
+export async function paySalesCommissionAction(commissionId: string) {
+  try {
+    if (!commissionId) return { success: false, error: "Commission ID wajib diisi." };
+
+    const comm = await prisma.salesCommissionLog.findUnique({
+      where: { id: commissionId },
+      include: { salesUser: true, store: true },
+    });
+
+    if (!comm) return { success: false, error: "Data komisi tidak ditemukan." };
+    if (comm.status === "PAID") return { success: false, error: "Komisi ini sudah dicairkan sebelumnya." };
+
+    await prisma.salesCommissionLog.update({
+      where: { id: commissionId },
+      data: {
+        status: "PAID",
+        paidAt: new Date(),
+      },
+    });
+
+    revalidatePath("/super-admin/sales-portal");
+    revalidatePath("/super-admin");
+
+    return {
+      success: true,
+      message: `Komisi Rp ${comm.amount.toLocaleString("id-ID")} untuk ${comm.salesUser.name} (${comm.store.name}) berhasil ditandai LUNAS!`,
+    };
+  } catch (error: any) {
+    console.error("paySalesCommissionAction error:", error);
+    return { success: false, error: error.message || "Gagal mencairkan komisi." };
   }
 }
 

@@ -77,6 +77,13 @@ export default async function SuperAdminDashboardPage() {
 
           <div className="flex items-center gap-2">
             <Link
+              href="/super-admin/sales-portal"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-800/80 transition flex items-center gap-1.5"
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Portal Sales Partner</span>
+            </Link>
+            <Link
               href="/super-admin/stores"
               className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5"
             >

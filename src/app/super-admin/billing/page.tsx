@@ -8,7 +8,18 @@ export default async function SuperAdminBillingPage() {
   const paymentsRaw = await prisma.subscriptionPayment.findMany({
     include: {
       store: {
-        select: { id: true, name: true, slug: true, whatsapp: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          whatsapp: true,
+          salesUser: {
+            select: { id: true, name: true, referralCode: true },
+          },
+        },
+      },
+      commissions: {
+        select: { id: true, amount: true, status: true },
       },
     },
     orderBy: [

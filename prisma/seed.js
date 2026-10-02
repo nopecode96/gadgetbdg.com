@@ -16,6 +16,7 @@ async function main() {
   const adminPass = await bcrypt.hash("admin123", 10);
   const ownerPass = await bcrypt.hash("owner123", 10);
   const kasirPass = await bcrypt.hash("kasir123", 10);
+  const salesPass = await bcrypt.hash("sales123", 10);
 
   // =========================================================================
   // 1. Akun Platform SaaS (storeId: null)
@@ -39,6 +40,21 @@ async function main() {
       name: "Staff Operasional SaaS",
       phone: "6281122334466",
       role: "ADMIN_SAAS",
+      storeId: null,
+    },
+  });
+
+  const salesAgent = await prisma.user.create({
+    data: {
+      email: "sales@gadgetbdg.com",
+      passwordHash: salesPass,
+      name: "Andi Pratama (Sales Partner)",
+      phone: "6281122334477",
+      role: "SALES_AGENT",
+      referralCode: "SALES-ANDI",
+      bankName: "BCA",
+      bankNumber: "1234567890",
+      bankHolder: "Andi Pratama",
       storeId: null,
     },
   });
@@ -195,6 +211,7 @@ async function main() {
       lastTemplateChangeAt: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000), // >30 hari cooldown selesai
       isActive: true,
       subscriptionExpiresAt: thirtyDaysLater,
+      salesUserId: salesAgent.id,
       users: {
         create: [
           {
@@ -228,6 +245,16 @@ async function main() {
             status: "APPROVED",
             receiptUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80",
             notes: "Langganan Paket Pro 1 Bulan - Verified via QRIS",
+            commissions: {
+              create: [
+                {
+                  salesUserId: salesAgent.id,
+                  amount: 100000,
+                  tier: "PRO",
+                  status: "PENDING",
+                },
+              ],
+            },
           },
         ],
       },
@@ -721,9 +748,10 @@ async function main() {
   console.log("=================================================");
   console.log("🎉 DATABASE SEEDING COMPLETED SUCCESSFULLY!");
   console.log("=================================================");
-  console.log("👑 SaaS Internal Admins:");
+  console.log("👑 SaaS Internal Admins & Partners:");
   console.log(`   - Super Admin : ${superAdmin.email} | pass: admin123`);
   console.log(`   - Staff Admin : ${staffAdmin.email} | pass: admin123`);
+  console.log(`   - Sales Agent : ${salesAgent.email} | pass: sales123 (Ref: ${salesAgent.referralCode})`);
   console.log("🏬 Toko 1 (STARTER):");
   console.log(`   - Store : ${storeStarter.name} (/${storeStarter.slug})`);
   console.log(`   - Owner : owner@bandungcell.com | pass: owner123 (Total 1 user)`);

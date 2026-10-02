@@ -19,7 +19,11 @@ interface SaasAdminUser {
   id: string;
   name: string;
   email: string;
-  role: "SUPER_ADMIN" | "ADMIN_SAAS";
+  role: "SUPER_ADMIN" | "ADMIN_SAAS" | "SALES_AGENT";
+  referralCode?: string | null;
+  bankName?: string | null;
+  bankNumber?: string | null;
+  bankHolder?: string | null;
   createdAt: string;
 }
 
@@ -32,7 +36,11 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"SUPER_ADMIN" | "ADMIN_SAAS">("ADMIN_SAAS");
+  const [role, setRole] = useState<"SUPER_ADMIN" | "ADMIN_SAAS" | "SALES_AGENT">("ADMIN_SAAS");
+  const [referralCode, setReferralCode] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankNumber, setBankNumber] = useState("");
+  const [bankHolder, setBankHolder] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -52,7 +60,16 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
     }
 
     setIsSubmitting(true);
-    const res = await createSaasStaffAction({ name, email, password, role });
+    const res = await createSaasStaffAction({
+      name,
+      email,
+      password,
+      role,
+      referralCode: role === "SALES_AGENT" ? referralCode : undefined,
+      bankName: role === "SALES_AGENT" ? bankName : undefined,
+      bankNumber: role === "SALES_AGENT" ? bankNumber : undefined,
+      bankHolder: role === "SALES_AGENT" ? bankHolder : undefined,
+    });
     setIsSubmitting(false);
 
     if (res.success && res.user) {
@@ -62,6 +79,10 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
       setEmail("");
       setPassword("");
       setRole("ADMIN_SAAS");
+      setReferralCode("");
+      setBankName("");
+      setBankNumber("");
+      setBankHolder("");
     } else {
       setErrorMsg(res.error || "Gagal membuat akun admin.");
     }
@@ -180,8 +201,59 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
               >
                 <option value="ADMIN_SAAS">ADMIN_SAAS (Verifikasi Bayar &amp; Monitoring)</option>
                 <option value="SUPER_ADMIN">SUPER_ADMIN (Hak Akses Penuh Termasuk User)</option>
+                <option value="SALES_AGENT">SALES_AGENT (Partner Sales Komisi &amp; Referral)</option>
               </select>
             </div>
+
+            {role === "SALES_AGENT" && (
+              <div className="p-3.5 bg-slate-950/70 border border-indigo-900/60 rounded-xl space-y-3">
+                <span className="text-[11px] font-bold text-indigo-400 block">
+                  ⚙️ Informasi Mitra Sales (Opsional / Otomatis)
+                </span>
+                <div>
+                  <label className="block text-slate-400 text-[11px] mb-1">Kode Referral Unik:</label>
+                  <input
+                    type="text"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    placeholder="Contoh: SALES-ANDI"
+                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono uppercase text-xs focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-slate-400 text-[11px] mb-1">Bank Pencairan:</label>
+                    <input
+                      type="text"
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      placeholder="BCA / Mandiri"
+                      className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 text-[11px] mb-1">Nomor Rekening:</label>
+                    <input
+                      type="text"
+                      value={bankNumber}
+                      onChange={(e) => setBankNumber(e.target.value)}
+                      placeholder="1234567890"
+                      className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs font-mono"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-slate-400 text-[11px] mb-1">Nama Pemilik Rekening:</label>
+                  <input
+                    type="text"
+                    value={bankHolder}
+                    onChange={(e) => setBankHolder(e.target.value)}
+                    placeholder="Sesuai buku tabungan"
+                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs"
+                  />
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -203,7 +275,7 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
           <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-purple-400" />
-              <span>Daftar Pengguna Berwenang</span>
+              <span>Daftar Pengguna Berwenang &amp; Mitra</span>
             </h2>
             <span className="text-[11px] text-slate-400 font-mono">storeId: null (Internal)</span>
           </div>
@@ -214,6 +286,7 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
                 <tr>
                   <th className="px-5 py-3">Nama &amp; Email</th>
                   <th className="px-5 py-3">Role Wewenang</th>
+                  <th className="px-5 py-3">Ref / Rekening</th>
                   <th className="px-5 py-3">Dibuat Pada</th>
                   <th className="px-5 py-3 text-right">Aksi</th>
                 </tr>
@@ -221,7 +294,7 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
               <tbody className="divide-y divide-slate-700/60">
                 {admins.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-5 py-8 text-center text-slate-500">
+                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500">
                       Belum ada staf SaaS terdaftar.
                     </td>
                   </tr>
@@ -229,6 +302,7 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
                   admins.map((adm) => {
                     const isLoading = loadingId === adm.id;
                     const isSuper = adm.role === "SUPER_ADMIN";
+                    const isSales = adm.role === "SALES_AGENT";
 
                     return (
                       <tr key={adm.id} className="hover:bg-slate-750/50 transition">
@@ -238,6 +312,8 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
                               className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
                                 isSuper
                                   ? "bg-purple-950 text-purple-300 border border-purple-800"
+                                  : isSales
+                                  ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
                                   : "bg-blue-950 text-blue-300 border border-blue-800"
                               }`}
                             >
@@ -257,12 +333,31 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border inline-flex items-center gap-1 ${
                               isSuper
                                 ? "bg-purple-950 text-purple-300 border-purple-800"
+                                : isSales
+                                ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
                                 : "bg-sky-950 text-sky-300 border-sky-800"
                             }`}
                           >
                             <Shield className="w-3 h-3" />
                             {adm.role}
                           </span>
+                        </td>
+
+                        <td className="px-5 py-3.5 text-slate-300">
+                          {isSales ? (
+                            <div className="space-y-0.5">
+                              <span className="font-mono text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800 text-[10px]">
+                                {adm.referralCode || "-"}
+                              </span>
+                              {adm.bankNumber && (
+                                <div className="text-[10px] text-slate-400">
+                                  {adm.bankName} {adm.bankNumber} ({adm.bankHolder})
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-500 font-mono">–</span>
+                          )}
                         </td>
 
                         <td className="px-5 py-3.5 text-slate-400 font-mono text-[11px]">

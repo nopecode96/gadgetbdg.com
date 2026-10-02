@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldAlert, Store, Globe, ArrowLeft, BarChart3, Receipt, Users, ShieldCheck } from "lucide-react";
+import { ShieldAlert, Store, Globe, ArrowLeft, BarChart3, Receipt, Users, ShieldCheck, TrendingUp } from "lucide-react";
 
 export function SuperAdminNav() {
   return (
@@ -49,6 +49,12 @@ export function SuperAdminNav() {
               className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"
             >
               <ShieldCheck className="w-4 h-4 text-purple-400" /> Tim SaaS
+            </Link>
+            <Link
+              href="/super-admin/sales-portal"
+              className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"
+            >
+              <TrendingUp className="w-4 h-4 text-emerald-400" /> Sales Partner
             </Link>
           </nav>
         </div>

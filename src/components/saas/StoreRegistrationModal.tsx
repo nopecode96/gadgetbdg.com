@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
   Store,
@@ -17,6 +17,7 @@ import {
   QrCode,
   Upload,
   Clock,
+  Tag,
 } from "lucide-react";
 import { checkSlugAvailabilityAction, registerStoreWithPaymentAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier } from "@/lib/constants/templates";
@@ -50,6 +51,17 @@ export function StoreRegistrationModal({
   const [slugError, setSlugError] = useState<string | null>(null);
   const [whatsapp, setWhatsapp] = useState("");
   const [address, setAddress] = useState("");
+  const [refCode, setRefCode] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("ref");
+      if (ref) {
+        setRefCode(ref.toUpperCase());
+      }
+    }
+  }, []);
 
   // Step 2: Tier
   const [tier, setTier] = useState<"STARTER" | "PRO" | "ADVANCE">("PRO");
@@ -127,6 +139,7 @@ export function StoreRegistrationModal({
     formData.append("ownerName", ownerName);
     formData.append("email", email);
     formData.append("password", password);
+    if (refCode) formData.append("refCode", refCode);
     if (receiptUrl) formData.append("receiptUrl", receiptUrl);
 
     const res = await registerStoreWithPaymentAction(formData);
@@ -297,6 +310,30 @@ export function StoreRegistrationModal({
                   placeholder="Contoh: Bandung Electronic Center Lt.1 Blok C-05"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm"
                 />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-indigo-600" />
+                    Kode Referensi Sales (Opsional)
+                  </span>
+                  {refCode && (
+                    <span className="text-[11px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      Tersambung Partner
+                    </span>
+                  )}
+                </label>
+                <input
+                  type="text"
+                  value={refCode}
+                  onChange={(e) => setRefCode(e.target.value.toUpperCase().trim())}
+                  placeholder="Contoh: SALES-ANDI"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm uppercase placeholder:normal-case placeholder:font-sans"
+                />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Masukkan kode dari agen sales Anda (jika ada) untuk prioritas pendampingan onboarding.
+                </p>
               </div>
             </div>
           )}

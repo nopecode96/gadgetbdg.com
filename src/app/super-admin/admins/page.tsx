@@ -8,7 +8,7 @@ export default async function SuperAdminStaffPage() {
   const adminsRaw = await prisma.user.findMany({
     where: {
       role: {
-        in: ["SUPER_ADMIN", "ADMIN_SAAS"],
+        in: ["SUPER_ADMIN", "ADMIN_SAAS", "SALES_AGENT"],
       },
     },
     orderBy: { createdAt: "desc" },
@@ -18,7 +18,11 @@ export default async function SuperAdminStaffPage() {
     id: a.id,
     name: a.name,
     email: a.email,
-    role: a.role as "SUPER_ADMIN" | "ADMIN_SAAS",
+    role: a.role as "SUPER_ADMIN" | "ADMIN_SAAS" | "SALES_AGENT",
+    referralCode: a.referralCode,
+    bankName: a.bankName,
+    bankNumber: a.bankNumber,
+    bankHolder: a.bankHolder,
     createdAt: a.createdAt.toISOString(),
   }));
 

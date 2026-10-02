@@ -27,6 +27,7 @@ enum ProductStatus {
 enum Role {
   SUPER_ADMIN
   ADMIN_SAAS
+  SALES_AGENT
   STORE_OWNER
   STORE_STAFF
 }
@@ -35,6 +36,11 @@ enum PaymentStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum CommissionStatus {
+  PENDING
+  PAID
 }
 
 // ============================================================
@@ -58,16 +64,20 @@ model Store {
   lastTemplateChangeAt DateTime?
   isActive     Boolean       @default(false)
   subscriptionExpiresAt DateTime?
+  salesUserId  String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
+  salesUser     User?                 @relation("SalesStoreRelation", fields: [salesUserId], references: [id])
   products      Product[]
   tradeInOffers TradeInOffer[]
   users         User[]
   payments      SubscriptionPayment[]
+  commissions   SalesCommissionLog[]
 
   @@index([slug])
   @@index([customDomain])
+  @@index([salesUserId])
 }
 
 model User {
@@ -78,12 +88,20 @@ model User {
   phone        String?
   role         Role     @default(STORE_STAFF)
   storeId      String?
+  referralCode String?  @unique
+  bankName     String?
+  bankNumber   String?
+  bankHolder   String?
   store        Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  clientStores Store[]              @relation("SalesStoreRelation")
+  commissions  SalesCommissionLog[]
+
   @@index([email])
   @@index([storeId])
+  @@index([referralCode])
 }
 
 model Product {
@@ -129,18 +147,41 @@ model TradeInOffer {
 }
 
 model SubscriptionPayment {
-  id         String        @id @default(cuid())
-  storeId    String
-  tier       StoreTier
-  amount     Int
-  receiptUrl String?
-  status     PaymentStatus @default(PENDING)
-  notes      String?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id          String               @id @default(cuid())
+  storeId     String
+  tier        StoreTier
+  amount      Int
+  receiptUrl  String?
+  status      PaymentStatus        @default(PENDING)
+  notes       String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
-  store      Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store       Store                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  commissions SalesCommissionLog[]
 
   @@index([storeId])
   @@index([status])
 }
+
+model SalesCommissionLog {
+  id          String           @id @default(cuid())
+  salesUserId String
+  storeId     String
+  paymentId   String
+  tier        StoreTier
+  amount      Int
+  status      CommissionStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  salesUser   User                @relation(fields: [salesUserId], references: [id], onDelete: Cascade)
+  store       Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  payment     SubscriptionPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([salesUserId])
+  @@index([storeId])
+  @@index([paymentId])
+  @@index([status])
+}
+

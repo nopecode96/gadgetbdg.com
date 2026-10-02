@@ -21,6 +21,15 @@ const TIER_PRICE: Record<"STARTER" | "PRO" | "ADVANCE", number> = {
 };
 
 // ---------------------------------------------------------------
+// Komisi Sales per Tier
+// ---------------------------------------------------------------
+const SALES_COMMISSION: Record<"STARTER" | "PRO" | "ADVANCE", number> = {
+  STARTER: 50_000,
+  PRO: 100_000,
+  ADVANCE: 150_000,
+};
+
+// ---------------------------------------------------------------
 // 1. REGISTER STORE + OWNER + PAYMENT (dari Wizard Onboarding)
 // ---------------------------------------------------------------
 export async function registerStoreWithPaymentAction(formData: FormData) {
@@ -35,6 +44,7 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
     const password = formData.get("password") as string;
     const ownerName = formData.get("ownerName") as string;
     const receiptUrl = formData.get("receiptUrl") as string | null;
+    const refCode = (formData.get("refCode") as string | null)?.trim() || null;
 
     // Validasi wajib
     if (!name || !rawSlug || !whatsapp || !email || !password || !ownerName) {
@@ -66,6 +76,21 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
       return { success: false, error: "Email ini sudah terdaftar. Gunakan email lain." };
     }
 
+    // Cek referral code sales jika diisi
+    let salesUserId: string | null = null;
+    if (refCode) {
+      const salesUser = await prisma.user.findFirst({
+        where: {
+          role: "SALES_AGENT",
+          referralCode: { equals: refCode, mode: "insensitive" },
+        },
+        select: { id: true },
+      });
+      if (salesUser) {
+        salesUserId = salesUser.id;
+      }
+    }
+
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
@@ -87,6 +112,7 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
           hasWatermark: tier !== "STARTER",
           lastTemplateChangeAt: new Date(),
           isActive: false, // aktif setelah pembayaran diverifikasi
+          salesUserId,
         },
       });
 
@@ -115,6 +141,7 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
 
     revalidatePath("/super-admin");
     revalidatePath("/super-admin/billing");
+    revalidatePath("/super-admin/leads");
 
     return { success: true, storeId: result.store.id, paymentId: result.payment.id };
   } catch (error: any) {
@@ -130,7 +157,18 @@ export async function approvePaymentAction(paymentId: string) {
   try {
     const payment = await prisma.subscriptionPayment.findUnique({
       where: { id: paymentId },
-      include: { store: true },
+      include: {
+        store: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            whatsapp: true,
+            tier: true,
+            salesUserId: true,
+          },
+        },
+      },
     });
 
     if (!payment) return { success: false, error: "Data pembayaran tidak ditemukan." };
@@ -139,23 +177,42 @@ export async function approvePaymentAction(paymentId: string) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    await prisma.$transaction([
-      prisma.subscriptionPayment.update({
+    await prisma.$transaction(async (tx) => {
+      // 1. Update status pembayaran menjadi APPROVED
+      await tx.subscriptionPayment.update({
         where: { id: paymentId },
         data: { status: "APPROVED" },
-      }),
-      prisma.store.update({
+      });
+
+      // 2. Aktifkan toko dan set masa aktif
+      await tx.store.update({
         where: { id: payment.storeId },
         data: {
           isActive: true,
           subscriptionExpiresAt: expiresAt,
         },
-      }),
-    ]);
+      });
+
+      // 3. Otomasi pencatatan komisi jika toko memiliki sales agent pembawanya
+      if (payment.store.salesUserId) {
+        const commissionAmount = SALES_COMMISSION[payment.tier] || 50_000;
+        await tx.salesCommissionLog.create({
+          data: {
+            salesUserId: payment.store.salesUserId,
+            storeId: payment.storeId,
+            paymentId: payment.id,
+            tier: payment.tier,
+            amount: commissionAmount,
+            status: "PENDING",
+          },
+        });
+      }
+    });
 
     revalidatePath("/super-admin/billing");
     revalidatePath("/super-admin/stores");
     revalidatePath("/super-admin");
+    revalidatePath("/super-admin/sales-portal");
 
     return {
       success: true,

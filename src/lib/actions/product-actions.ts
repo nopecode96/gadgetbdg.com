@@ -78,7 +78,25 @@ export async function createProductAction(formData: FormData) {
 
     const price = parseInt(priceRaw.replace(/\D/g, ""), 10);
     const batteryHealth = batteryHealthRaw ? parseInt(batteryHealthRaw, 10) : null;
-    const images = imageUrl ? [imageUrl] : [];
+
+    // Ambil array images dari FormData (mendukung multi-upload WebP atau single imageUrl)
+    let images: string[] = [];
+    const imagesJson = formData.get("images") as string | null;
+    if (imagesJson) {
+      try {
+        const parsed = JSON.parse(imagesJson);
+        if (Array.isArray(parsed)) {
+          images = parsed.filter((url) => typeof url === "string" && url.trim().length > 0);
+        }
+      } catch {
+        // Not JSON, treat as raw url
+        if (imagesJson.trim()) images = [imagesJson.trim()];
+      }
+    }
+
+    if (images.length === 0 && imageUrl) {
+      images = [imageUrl.trim()];
+    }
 
     const product = await prisma.product.create({
       data: {

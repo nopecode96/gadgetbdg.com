@@ -18,6 +18,7 @@ import {
 import { formatRupiah } from "@/lib/utils";
 import { toggleProductStatus, createProductAction, deleteProductAction } from "@/lib/actions";
 import { BarcodeScannerModal } from "@/components/admin/BarcodeScannerModal";
+import { ProductImageUploader } from "@/components/admin/ProductImageUploader";
 
 interface Product {
   id: string;
@@ -76,6 +77,7 @@ export function ProductManagerClient({
   const [formError, setFormError] = useState<string | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [scannedImei, setScannedImei] = useState("");
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   // Live active count based on current local state
   const liveActiveCount = products.filter(
@@ -125,6 +127,11 @@ export function ProductManagerClient({
     const formData = new FormData(e.currentTarget);
     // storeId NOT appended — server reads it from session cookie
 
+    // Lampirkan array images hasil upload WebP
+    if (uploadedImages.length > 0) {
+      formData.set("images", JSON.stringify(uploadedImages));
+    }
+
     const res = await createProductAction(formData);
     setLoading(false);
 
@@ -132,6 +139,7 @@ export function ProductManagerClient({
       setProducts((prev) => [res.product as any, ...prev]);
       setIsFormOpen(false);
       setScannedImei("");
+      setUploadedImages([]);
       (e.target as HTMLFormElement).reset();
     } else {
       setFormError(res.error || "Gagal menambahkan unit.");
@@ -393,34 +401,37 @@ export function ProductManagerClient({
               </div>
             </div>
 
-            {/* Row 4: Minus Notes / Image URL */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Catatan Minus / Riwayat Part
-                </label>
-                <input
-                  type="text"
-                  name="minusNotes"
-                  placeholder="Contoh: No minus mulus total / Layar pernah ganti ori"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">URL Foto Unit</label>
-                <input
-                  type="url"
-                  name="imageUrl"
-                  placeholder="https://..."
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
+            {/* Row 4: Minus Notes */}
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Catatan Minus / Riwayat Part
+              </label>
+              <input
+                type="text"
+                name="minusNotes"
+                placeholder="Contoh: No minus mulus total / Layar pernah ganti ori"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+              />
+            </div>
+
+            {/* Row 5: Multi-Upload Galeri Foto Unit with Sharp WebP & Watermark */}
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200">
+              <ProductImageUploader
+                images={uploadedImages}
+                onChange={setUploadedImages}
+                maxFiles={5}
+                isWatermarked={store?.tier !== "STARTER" || store?.hasWatermark === true}
+              />
             </div>
 
             <div className="pt-2 flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => { setIsFormOpen(false); setFormError(null); }}
+                onClick={() => {
+                  setIsFormOpen(false);
+                  setFormError(null);
+                  setUploadedImages([]);
+                }}
                 className="px-4 py-2 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition text-xs"
               >
                 Batal
@@ -494,9 +505,16 @@ export function ProductManagerClient({
               >
                 {/* Product Info */}
                 <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                  <div className="w-16 h-16 rounded-xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200">
+                  <div className="relative w-16 h-16 rounded-xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200">
                     {p.images && p.images.length > 0 ? (
-                      <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                      <>
+                        <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                        {p.images.length > 1 && (
+                          <span className="absolute bottom-1 right-1 bg-black/75 text-white text-[9px] font-bold px-1 rounded">
+                            {p.images.length} 📷
+                          </span>
+                        )}
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-300 text-[10px]">
                         No Pic

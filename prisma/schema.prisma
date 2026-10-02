@@ -59,6 +59,7 @@ model Product {
   condition     String        // e.g. "98% Mulus Like New", "95% Pemakaian Wajar"
   minusNotes    String?       // e.g. "TrueTone Off", "Layar pernah ganti ori", "No minus mulus"
   status        ProductStatus @default(AVAILABLE)
+  clickCount    Int           @default(0)
   images        String[]      @default([])
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

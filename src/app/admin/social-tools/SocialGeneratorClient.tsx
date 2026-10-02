@@ -17,6 +17,7 @@ interface Product {
   condition: string;
   minusNotes: string | null;
   status: string;
+  images?: string[];
 }
 
 export function SocialGeneratorClient({

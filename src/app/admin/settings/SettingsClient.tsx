@@ -37,6 +37,20 @@ export function SettingsClient({ store }: SettingsClientProps) {
 
   const isProOrAdvance = store.tier === "PRO" || store.tier === "ADVANCE";
 
+  // Hitung status cooldown 30 hari untuk paket PRO
+  let isCooldownActive = false;
+  let cooldownDaysRemaining = 0;
+
+  if (store.tier === "PRO" && store.lastTemplateChangeAt) {
+    const lastChange = new Date(store.lastTemplateChangeAt).getTime();
+    const now = Date.now();
+    const diffDays = (now - lastChange) / (1000 * 3600 * 24);
+    if (diffDays < 30) {
+      isCooldownActive = true;
+      cooldownDaysRemaining = Math.max(1, Math.ceil(30 - diffDays));
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -146,19 +160,45 @@ export function SettingsClient({ store }: SettingsClientProps) {
               <Palette className="w-4 h-4 text-purple-600" />
               <span>Pilihan Desain Template Storefront</span>
             </h2>
-            <span className="text-[11px] font-semibold text-slate-500">1-Klik Ganti Tema</span>
+            <span className="text-[11px] font-semibold text-slate-500">
+              {availableTemplates.length} Template ({store.tier})
+            </span>
           </div>
+
+          {/* Cooldown Guard Alert untuk Paket PRO */}
+          {isCooldownActive && (
+            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Cooldown Pergantian Tema Sedang Berjalan</p>
+                <p className="text-[11px] text-amber-800 mt-0.5">
+                  Tema dapat diganti lagi dalam <b>{cooldownDaysRemaining} hari</b> (Cooldown 30 hari paket Pro). Upgrade ke <b>Advance</b> untuk bebas ganti tema kapan saja.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-1">
             {availableTemplates.map((t) => {
               const isSelected = selectedTemplate === t.id;
               const isDark = t.colors.isDark;
+              const isDisabled = isCooldownActive && t.id !== store.templateId;
 
               return (
                 <div
                   key={t.id}
-                  onClick={() => setSelectedTemplate(t.id)}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between space-y-3 ${
+                  onClick={() => {
+                    if (isDisabled) {
+                      alert(`Tema dapat diganti lagi dalam ${cooldownDaysRemaining} hari (Cooldown 30 hari paket Pro). Upgrade ke Advance untuk bebas ganti tema kapan saja.`);
+                      return;
+                    }
+                    setSelectedTemplate(t.id);
+                  }}
+                  className={`p-4 rounded-2xl border-2 transition flex flex-col justify-between space-y-3 ${
+                    isDisabled
+                      ? "opacity-40 cursor-not-allowed bg-slate-100 border-slate-200"
+                      : "cursor-pointer"
+                  } ${
                     isSelected
                       ? isDark
                         ? "border-emerald-500 bg-slate-900 text-white shadow-md ring-1 ring-emerald-500"

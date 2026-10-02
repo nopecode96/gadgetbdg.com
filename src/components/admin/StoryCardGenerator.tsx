@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, Sparkles, Smartphone, Image as ImageIcon, Check } from "lucide-react";
+import { Download, Sparkles, Check, Tag } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 
 interface Product {
@@ -16,7 +16,7 @@ interface Product {
   condition: string;
   minusNotes: string | null;
   status: string;
-  images: string[];
+  images?: string[];
 }
 
 interface StoryCardGeneratorProps {
@@ -26,23 +26,31 @@ interface StoryCardGeneratorProps {
     address: string | null;
     whatsapp: string;
     templateId?: string;
+    tier?: string;
+    hasWatermark?: boolean;
   };
   product: Product;
 }
+
+type PromoPreset = "none" | "flash-sale" | "payday" | "cod-ready";
 
 export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [rendered, setRendered] = useState(false);
+  const [promoPreset, setPromoPreset] = useState<PromoPreset>("none");
 
   const storeName = store?.name || "Berkah Cell Gadget";
   const storeSlug = store?.slug || "berkahcell";
   const storeAddress = store?.address || "BEC Lantai 1 Blok C-05 Bandung";
   const storeWa = store?.whatsapp || "081234567890";
 
+  // Cek hak watermark: aktif untuk paket PRO & ADVANCE atau jika hasWatermark === true
+  const showWatermark = Boolean(store?.hasWatermark || (store?.tier && store.tier !== "STARTER"));
+
   useEffect(() => {
     drawStoryCanvas();
-  }, [product, store]);
+  }, [product, store, promoPreset]);
 
   function drawStoryCanvas() {
     const canvas = canvasRef.current;
@@ -121,6 +129,55 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     ctx.fill();
     ctx.restore();
 
+    const drawOverlaysAndWatermark = () => {
+      // 1. Watermark Protection pada Kanvas Poster
+      if (showWatermark) {
+        ctx.save();
+        ctx.translate(W / 2, imgY + imgH / 2);
+        ctx.rotate((-15 * Math.PI) / 180);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        roundRect(ctx, -260, -45, 520, 90, 20);
+        ctx.fill();
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+        ctx.font = "900 46px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText(storeName.toUpperCase(), 0, 5);
+        ctx.restore();
+      }
+
+      // 2. Preset Badge Promo di Bagian Atas Gambar
+      if (promoPreset !== "none") {
+        ctx.save();
+        let badgeText = "";
+        let badgeBg = "#ef4444";
+        let badgeTextColor = "#ffffff";
+
+        if (promoPreset === "flash-sale") {
+          badgeText = "🔥 FLASH SALE HANYA HARI INI!";
+          badgeBg = "#dc2626";
+        } else if (promoPreset === "payday") {
+          badgeText = "💸 PROMO SPESIAL GAJIAN • CASHBACK TOKO";
+          badgeBg = "#059669";
+        } else if (promoPreset === "cod-ready") {
+          badgeText = "⚡ SIAP COD / LANGSUNG CEK DI TOKO BEC";
+          badgeBg = "#2563eb";
+        }
+
+        ctx.fillStyle = badgeBg;
+        roundRect(ctx, imgX + 30, imgY + 30, imgW - 60, 64, 18);
+        ctx.fill();
+
+        ctx.fillStyle = badgeTextColor;
+        ctx.font = "900 28px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(badgeText, W / 2, imgY + 72);
+        ctx.restore();
+      }
+    };
+
     const fallbackDraw = () => {
       ctx.fillStyle = "#334155";
       roundRect(ctx, imgX, imgY, imgW, imgH, 36);
@@ -129,6 +186,8 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       ctx.font = "bold 44px -apple-system, BlinkMacSystemFont, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("FOTO UNIT HP SECOND", W / 2, imgY + imgH / 2);
+
+      drawOverlaysAndWatermark();
       renderDetails();
     };
 
@@ -142,6 +201,8 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
         ctx.clip();
         ctx.drawImage(img, imgX, imgY, imgW, imgH);
         ctx.restore();
+
+        drawOverlaysAndWatermark();
         renderDetails();
       };
       img.onerror = () => {
@@ -284,7 +345,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     textColor: string
   ) {
     ctx.fillStyle = bgColor;
-    roundRect(ctx, x, y, w, h, 20);
+    roundRect(ctx, x, y, w, h, 18);
     ctx.fill();
 
     ctx.textAlign = "left";
@@ -334,13 +395,20 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
 
   return (
     <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-600 flex items-center justify-center">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-slate-900">Poster Story Medsos (9:16 HD)</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm text-slate-900">Poster Story Medsos (9:16 HD)</h3>
+              {showWatermark && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  Watermark Aktif
+                </span>
+              )}
+            </div>
             <p className="text-[11px] text-slate-500">
               Format portrait 1080x1920 siap share ke WhatsApp Story & Instagram Story
             </p>
@@ -350,7 +418,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
         <button
           onClick={downloadStory}
           disabled={!rendered || downloading}
-          className="px-4 py-2 bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md transition disabled:opacity-50"
+          className="px-4 py-2 bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition disabled:opacity-50"
         >
           {downloading ? (
             <>
@@ -364,6 +432,25 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
             </>
           )}
         </button>
+      </div>
+
+      {/* Preset Badge Promo Selector */}
+      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 font-bold text-slate-700">
+          <Tag className="w-4 h-4 text-blue-600" />
+          <span>Preset Banner Promo Poster:</span>
+        </div>
+
+        <select
+          value={promoPreset}
+          onChange={(e) => setPromoPreset(e.target.value as PromoPreset)}
+          className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="none">Normal (Spesifikasi Unit)</option>
+          <option value="flash-sale">🔥 Flash Sale Terbatas</option>
+          <option value="payday">💸 Promo Gajian (Payday)</option>
+          <option value="cod-ready">⚡ Siap COD / Toko BEC</option>
+        </select>
       </div>
 
       {/* Canvas Preview Container (Scaled Down for UI) */}

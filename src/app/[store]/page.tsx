@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
+import { getTemplateConfig } from "@/lib/constants/templates";
+import { resolveHexColor } from "@/lib/pwa-utils";
 
 interface StorePageProps {
   params: Promise<{ store: string }> | { store: string };
@@ -22,6 +24,9 @@ export async function generateMetadata({ params }: StorePageProps): Promise<Meta
     },
     select: {
       name: true,
+      slug: true,
+      templateId: true,
+      primaryColor: true,
       address: true,
       bannerUrl: true,
       logoUrl: true,
@@ -45,9 +50,25 @@ export async function generateMetadata({ params }: StorePageProps): Promise<Meta
   }. WhatsApp langsung tanpa perantara.`;
   const image = store.bannerUrl || store.logoUrl || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80";
 
+  const themeConfig = getTemplateConfig(store.templateId || "clean-ledger");
+  const themeColor = store.primaryColor?.startsWith("#")
+    ? store.primaryColor
+    : resolveHexColor(themeConfig.colors.accent || themeConfig.colors.bgContainer, themeConfig.colors.isDark ? "#000000" : "#0f172a");
+
   return {
     title,
     description,
+    manifest: `/${store.slug}/manifest.webmanifest`,
+    themeColor: themeColor,
+    icons: {
+      icon: store.logoUrl || "/icons/icon-192.png",
+      apple: store.logoUrl || "/icons/icon-192.png",
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: store.name,
+    },
     openGraph: {
       title,
       description,

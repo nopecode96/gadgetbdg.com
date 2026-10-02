@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
 import { BatteryCharging, ShieldCheck, MessageCircle } from "lucide-react";
 import { StoreData, ProductData } from "./types";
@@ -24,7 +25,7 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
   if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
 
   const currentOrigin = typeof window !== "undefined" ? window.location.origin : "https://gadgetbdg.com";
-  const productUrl = `${currentOrigin}/${store.slug}#${product.id}`;
+  const productUrl = `${currentOrigin}/${store.slug}/product/${product.id}`;
   const waMessage = encodeURIComponent(
     `Halo ${store.name}, saya berminat dengan unit ini:\n\n` +
       `*${product.name}*\n` +
@@ -46,60 +47,66 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
     }
   }
 
+  const detailUrl = `/${store.slug}/product/${product.id}`;
+
   return (
     <div
       id={product.id}
       className={`rounded-2xl p-3 border transition flex flex-col justify-between space-y-2.5 ${colors.cardBg} ${colors.cardBorder} ${colors.cardHoverBorder} shadow-sm`}
     >
       <div>
-        {/* Thumbnail Image with Automatic Watermark Protection */}
-        <div className="aspect-square rounded-xl bg-neutral-100 dark:bg-slate-900 overflow-hidden relative border border-neutral-200/50 dark:border-slate-800 mb-2 select-none flex items-center justify-center p-1">
-          {product.images && product.images.length > 0 ? (
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              className="w-full h-full object-contain p-0.5 transition-transform duration-200 hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400">
-              No Pic
-            </div>
-          )}
-
-          {/* Condition badge */}
-          <span
-            className={`absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded shadow ${
-              isDark ? `${colors.accent} text-slate-950` : "bg-neutral-900 text-white"
-            }`}
-          >
-            {product.condition.slice(0, 10)}
-          </span>
-
-          {/* WATERMARK: Diagonal Overlay Protection for PRO & ADVANCE tiers */}
-          {showWatermark && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-              <div className="transform -rotate-[15deg] opacity-35 bg-black/40 px-3 py-1.5 rounded-lg border border-white/20 backdrop-blur-[1px] shadow-lg">
-                <span className="text-white font-black text-xs sm:text-sm tracking-widest uppercase drop-shadow-md whitespace-nowrap">
-                  {store.name}
-                </span>
+        {/* Thumbnail Image with Automatic Watermark Protection (Clickable to Detail) */}
+        <Link href={detailUrl} className="block group">
+          <div className="aspect-square rounded-xl bg-neutral-100 dark:bg-slate-900 overflow-hidden relative border border-neutral-200/50 dark:border-slate-800 mb-2 select-none flex items-center justify-center p-1">
+            {product.images && product.images.length > 0 ? (
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className="w-full h-full object-contain p-0.5 transition-transform duration-200 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400">
+                No Pic
               </div>
+            )}
+
+            {/* Condition badge */}
+            <span
+              className={`absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded shadow ${
+                isDark ? `${colors.accent} text-slate-950` : "bg-neutral-900 text-white"
+              }`}
+            >
+              {product.condition.slice(0, 10)}
+            </span>
+
+            {/* WATERMARK: Diagonal Overlay Protection for PRO & ADVANCE tiers */}
+            {showWatermark && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+                <div className="transform -rotate-[15deg] opacity-35 bg-black/40 px-3 py-1.5 rounded-lg border border-white/20 backdrop-blur-[1px] shadow-lg">
+                  <span className="text-white font-black text-xs sm:text-sm tracking-widest uppercase drop-shadow-md whitespace-nowrap">
+                    {store.name}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Corner badge identifier */}
+            <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[8px] font-mono px-1 py-0.5 rounded opacity-80 pointer-events-none select-none">
+              @{store.slug}
             </div>
-          )}
-
-          {/* Corner badge identifier */}
-          <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[8px] font-mono px-1 py-0.5 rounded opacity-80 pointer-events-none select-none">
-            @{store.slug}
           </div>
-        </div>
+        </Link>
 
-        {/* Brand & Name */}
+        {/* Brand & Name (Clickable to Detail) */}
         <span className={`text-[9px] font-bold uppercase tracking-wider ${colors.accentText}`}>
           {product.brand}
         </span>
-        <h3 className={`font-bold text-xs line-clamp-1 leading-snug ${isDark ? "text-white" : "text-slate-950"}`}>
-          {product.name}
-        </h3>
+        <Link href={detailUrl} className="block group">
+          <h3 className={`font-bold text-xs line-clamp-1 leading-snug group-hover:underline ${isDark ? "text-white" : "text-slate-950"}`}>
+            {product.name}
+          </h3>
+        </Link>
 
         {/* Price */}
         <div className={`font-black text-sm mt-0.5 ${isDark ? colors.priceText : "text-blue-700 font-extrabold"}`}>

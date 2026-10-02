@@ -35,6 +35,10 @@ import {
   getAvailableTemplatesForTier,
   getTemplateConfig,
 } from "@/lib/constants/templates";
+import { StoreShell } from "@/components/templates/shared/StoreShell";
+import { StoreHomeView } from "@/components/templates/shared/StoreHomeView";
+import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
+import { StoreData, ProductData, StoreTabType } from "@/components/templates/shared/types";
 
 // ---------------------------------------------------------------------------
 // Mock Phone Products with Real Physical Device Imagery
@@ -806,24 +810,119 @@ function MidnightGoldScreen() {
 }
 
 // ---------------------------------------------------------------------------
-// Dynamic Switcher for Smartphone Mockup Screen
+// Real Product Data for Live Storefront Mockup
+// ---------------------------------------------------------------------------
+const LIVE_MOCK_PRODUCTS: ProductData[] = [
+  {
+    id: "prod-1",
+    name: "iPhone 15 Pro Max 256GB Natural Titanium",
+    brand: "Apple",
+    price: 18500000,
+    ramRom: "8GB / 256GB",
+    batteryHealth: 94,
+    imeiStatus: "Resmi iBox Kemenperin",
+    completeness: "Fullset Original Box & Cable",
+    condition: "LIKE_NEW",
+    minusNotes: null,
+    status: "AVAILABLE",
+    images: ["/images/items/iphone-15-pro.png"],
+  },
+  {
+    id: "prod-2",
+    name: "Samsung Galaxy S24 Ultra 12/512GB Titanium Gray",
+    brand: "Samsung",
+    price: 15900000,
+    ramRom: "12GB / 512GB",
+    batteryHealth: null,
+    imeiStatus: "Resmi SEIN Indonesia",
+    completeness: "Fullset Original",
+    condition: "98% Mulus",
+    minusNotes: null,
+    status: "AVAILABLE",
+    images: ["/images/items/samsung-s24-ultra.png"],
+  },
+  {
+    id: "prod-3",
+    name: "Xiaomi 14T Pro 12/512GB Leica Camera",
+    brand: "Xiaomi",
+    price: 8750000,
+    ramRom: "12GB / 512GB",
+    batteryHealth: null,
+    imeiStatus: "Resmi Kemenperin",
+    completeness: "Fullset Box & Fast Charger 120W",
+    condition: "99% Mulus",
+    minusNotes: null,
+    status: "AVAILABLE",
+    images: ["/images/items/xiaomi-14t-pro.png"],
+  },
+  {
+    id: "prod-4",
+    name: "ASUS ROG Phone 8 Pro 16/256GB Phantom Black",
+    brand: "ASUS ROG",
+    price: 10800000,
+    ramRom: "16GB / 256GB",
+    batteryHealth: null,
+    imeiStatus: "Resmi Indonesia",
+    completeness: "Fullset Box & AeroActive Cooler",
+    condition: "LIKE_NEW",
+    minusNotes: null,
+    status: "AVAILABLE",
+    images: ["/images/items/rog-phone-8.png"],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Dynamic Switcher for Smartphone Mockup Screen (Synchronized with Live Storefront)
 // ---------------------------------------------------------------------------
 function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
-  switch (activeTheme.id) {
-    case "dark-gaming":
-      return <DarkGamingScreen />;
-    case "keynote-obsidian":
-      return <KeynoteObsidianScreen />;
-    case "tokyo-editorial":
-      return <TokyoEditorialScreen />;
-    case "cyber-hud":
-      return <CyberHudScreen />;
-    case "midnight-gold":
-      return <MidnightGoldScreen />;
-    case "minimal-clean":
-    default:
-      return <MinimalCleanScreen />;
+  const [activeTab, setActiveTab] = useState<StoreTabType>("home");
+
+  const mockStore: StoreData = {
+    id: "mock-store-id",
+    name: activeTheme.id === "dark-gaming" ? "Gamers Gadget Bandung" : "Berkah Cell Gadget",
+    slug: activeTheme.id === "dark-gaming" ? "gamersgadget" : "berkahcell",
+    address:
+      activeTheme.id === "dark-gaming"
+        ? "ITC Kebon Kelapa Lantai 3 Blok F No. 8, Bandung"
+        : "Bandung Electronic Center (BEC) Lantai 1 Blok C-05",
+    mapsUrl: null,
+    whatsapp: "628123456789",
+    templateId: activeTheme.id,
+    primaryColor: activeTheme.id === "dark-gaming" ? "#00e5b3" : "#2563eb",
+    bannerUrl: null,
+    logoUrl: null,
+    tier: "ADVANCE",
+    hasWatermark: true,
+  };
+
+  // If minimal-clean or dark-gaming, render StoreShell with StoreHomeView
+  if (activeTheme.id === "minimal-clean" || activeTheme.id === "dark-gaming") {
+    return (
+      <div className="w-full h-full overflow-y-auto no-scrollbar pointer-events-auto text-left select-none">
+        <StoreShell
+          store={mockStore}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          theme={activeTheme.id}
+          totalProducts={LIVE_MOCK_PRODUCTS.length}
+        >
+          <StoreHomeView
+            store={mockStore}
+            products={LIVE_MOCK_PRODUCTS}
+            onNavigateTab={setActiveTab}
+            theme={activeTheme.id}
+          />
+        </StoreShell>
+      </div>
+    );
   }
+
+  // Other archetypes (Keynote, Tokyo, Cyber, Midnight) rendered directly
+  return (
+    <div className="w-full h-full overflow-y-auto no-scrollbar pointer-events-auto text-left select-none">
+      <TemplateRenderer store={mockStore} products={LIVE_MOCK_PRODUCTS} />
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------

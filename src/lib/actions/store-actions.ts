@@ -66,6 +66,7 @@ export async function updateStoreSettings(formData: FormData) {
     const whatsapp = formData.get("whatsapp") as string;
     const address = formData.get("address") as string;
     const mapsUrl = formData.get("mapsUrl") as string;
+    const googleReviewUrl = formData.get("googleReviewUrl") as string;
     const primaryColor = formData.get("primaryColor") as string;
     const templateId = formData.get("templateId") as string;
     const rawCustomDomain = formData.get("customDomain") as string;
@@ -134,6 +135,7 @@ export async function updateStoreSettings(formData: FormData) {
         whatsapp: cleanWa,
         address: address || null,
         mapsUrl: mapsUrl || null,
+        googleReviewUrl: googleReviewUrl || null,
         primaryColor: primaryColor || currentStore.primaryColor,
         templateId: templateId || currentStore.templateId,
         ...(shouldUpdateLastChange ? { lastTemplateChangeAt: new Date() } : {}),
@@ -142,6 +144,7 @@ export async function updateStoreSettings(formData: FormData) {
     });
 
     revalidatePath("/admin/settings");
+    revalidatePath("/admin/qr-kit");
     revalidatePath("/admin");
     revalidatePath(`/${updated.slug}`);
     if (updated.customDomain) {

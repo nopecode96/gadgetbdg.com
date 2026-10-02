@@ -10,6 +10,12 @@ export const TIER_LIMITS = {
     hasWatermark: false,
     customDomain: false,
     description: "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
+    qrKit: {
+      allowGoogleReview: false,
+      allowHdDownload: false,
+      showWatermarkPlatform: true, // label footer: "Powered by gadgetbdg.com"
+      allowedFormats: ["compact-mono"] as const,
+    },
   },
   PRO: {
     name: "Pro",
@@ -22,6 +28,12 @@ export const TIER_LIMITS = {
     hasWatermark: true,
     customDomain: true,
     description: "Untuk konter HP aktif BEC / Bandung yang ingin scale-up penjualan & branding profesional.",
+    qrKit: {
+      allowGoogleReview: true,
+      allowHdDownload: true,
+      showWatermarkPlatform: false,
+      allowedFormats: ["compact-mono", "acrylic-stand", "tent-card"] as const,
+    },
   },
   ADVANCE: {
     name: "Advance",
@@ -34,6 +46,12 @@ export const TIER_LIMITS = {
     hasWatermark: true,
     customDomain: true,
     description: "Kapasitas tanpa batas untuk juragan HP second dengan perputaran stok masif & multi-cabang.",
+    qrKit: {
+      allowGoogleReview: true,
+      allowHdDownload: true,
+      showWatermarkPlatform: false,
+      allowedFormats: ["compact-mono", "acrylic-stand", "tent-card", "gold-luxury", "badge-custom"] as const,
+    },
   },
 } as const;
 

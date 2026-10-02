@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Store, Package, RefreshCw, Share2, ExternalLink, LogOut, Users, Settings } from "lucide-react";
+import { Store, Package, RefreshCw, Share2, ExternalLink, LogOut, Users, Settings, QrCode } from "lucide-react";
 import { logoutAction } from "@/lib/actions/login-actions";
 import type { Role } from "@prisma/client";
 
@@ -42,6 +42,12 @@ export function AdminNav({ currentSlug, storeName, userName, role }: AdminNavPro
               className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1.5 transition"
             >
               <Share2 className="w-4 h-4" /> Generator Medsos
+            </Link>
+            <Link
+              href="/admin/qr-kit"
+              className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1.5 transition text-indigo-700 bg-indigo-50/60 font-bold"
+            >
+              <QrCode className="w-4 h-4 text-indigo-600" /> QR Cetak Meja
             </Link>
             {isOwner && (
               <>

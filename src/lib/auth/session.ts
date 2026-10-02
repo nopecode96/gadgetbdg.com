@@ -59,6 +59,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
           whatsapp: true,
           address: true,
           mapsUrl: true,
+          googleReviewUrl: true,
           tier: true,
           templateId: true,
           primaryColor: true,

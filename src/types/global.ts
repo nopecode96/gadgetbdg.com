@@ -19,6 +19,7 @@ export interface SerializedStore {
   whatsapp: string;
   address: string | null;
   mapsUrl: string | null;
+  googleReviewUrl: string | null;
   tier: StoreTier;
   templateId: string;
   primaryColor: string;

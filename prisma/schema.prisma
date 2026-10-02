@@ -55,6 +55,7 @@ model Store {
   whatsapp     String
   address      String?
   mapsUrl      String?
+  googleReviewUrl String?
   tier         StoreTier     @default(STARTER)
   templateId   String        @default("default")
   primaryColor String        @default("#2563eb")

@@ -150,6 +150,30 @@ export function SettingsClient({ store }: SettingsClientProps) {
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-medium text-slate-700">
+                  Link Ulasan Google Maps (Google Review Link)
+                </label>
+                <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                  Digunakan untuk QR Code Kit Meja Kasir ⭐
+                </span>
+              </div>
+              <input
+                type="url"
+                name="googleReviewUrl"
+                defaultValue={store.googleReviewUrl || ""}
+                placeholder="https://g.page/r/.../review atau https://maps.app.goo.gl/..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-[11px] text-slate-500 mt-1.5 flex items-start gap-1">
+                <HelpCircle className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+                <span>
+                  <b>Cara salin link ulasan Google Bisnis:</b> Buka profil Google Bisnis Toko Anda di Google Maps ➔ Klik tombol <b>&quot;Minta Ulasan&quot; (Ask for reviews)</b> ➔ Salin tautan pendek (contoh: <code>https://g.page/r/.../review</code>) lalu tempel di sini.
+                </span>
+              </p>
+            </div>
           </div>
         </div>
 

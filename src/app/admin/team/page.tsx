@@ -14,14 +14,26 @@ export default async function AdminTeamPage() {
     redirect("/admin");
   }
 
-  const storeWithUsers = await prisma.store.findUnique({
-    where: { id: store.id },
-    include: {
-      users: {
-        orderBy: { createdAt: "asc" },
+  const [storeWithUsers, branches] = await Promise.all([
+    prisma.store.findUnique({
+      where: { id: store.id },
+      include: {
+        users: {
+          include: {
+            branch: {
+              select: { id: true, name: true, isMain: true },
+            },
+          },
+          orderBy: { createdAt: "asc" },
+        },
       },
-    },
-  });
+    }),
+    prisma.branch.findMany({
+      where: { storeId: store.id },
+      orderBy: [{ isMain: "desc" }, { name: "asc" }],
+      select: { id: true, name: true, isMain: true },
+    }),
+  ]);
 
   if (!storeWithUsers) redirect("/admin");
 
@@ -30,6 +42,8 @@ export default async function AdminTeamPage() {
     name: u.name,
     email: u.email,
     role: u.role as "STORE_OWNER" | "STORE_STAFF",
+    branchId: u.branchId,
+    branch: u.branch ? { id: u.branch.id, name: u.branch.name, isMain: u.branch.isMain } : null,
     createdAt: u.createdAt.toISOString(),
   }));
 
@@ -40,6 +54,7 @@ export default async function AdminTeamPage() {
         storeName={store.name}
         tier={store.tier as "STARTER" | "PRO" | "ADVANCE"}
         initialUsers={users}
+        branches={branches}
       />
     </div>
   );

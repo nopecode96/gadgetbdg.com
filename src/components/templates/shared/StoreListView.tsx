@@ -6,6 +6,7 @@ import {
   Filter,
   SlidersHorizontal,
   Smartphone,
+  MapPin,
 } from "lucide-react";
 import { StoreData, ProductData } from "./types";
 import { getTemplateConfig } from "@/lib/constants/templates";
@@ -35,6 +36,7 @@ export function StoreListView({
 
   const [search, setSearch] = useState("");
   const [brand, setBrand] = useState(initialBrand);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>("ALL");
   const [priceRange, setPriceRange] = useState<string>("ALL");
   const [selectedRam, setSelectedRam] = useState<string>("ALL");
   const [selectedStorage, setSelectedStorage] = useState<string>("ALL");
@@ -43,6 +45,9 @@ export function StoreListView({
 
   // Extract unique brands
   const allBrands = ["ALL", ...Array.from(new Set(displayProducts.map((p) => p.brand).filter(Boolean)))];
+
+  // Store branches
+  const storeBranches = store.branches && store.branches.length > 1 ? store.branches : [];
 
   // Filter application
   const filteredProducts = useMemo(() => {
@@ -55,10 +60,17 @@ export function StoreListView({
         !search ||
         (p.name || "").toLowerCase().includes(q) ||
         (p.ramRom || "").toLowerCase().includes(q) ||
-        (p.imeiStatus || "").toLowerCase().includes(q);
+        (p.imeiStatus || "").toLowerCase().includes(q) ||
+        (p.branch?.name || "").toLowerCase().includes(q);
 
       // 2. Brand
       const matchBrand = brand === "ALL" || p.brand === brand;
+
+      // 2.5. Branch
+      const matchBranch =
+        selectedBranchId === "ALL" ||
+        p.branchId === selectedBranchId ||
+        p.branch?.id === selectedBranchId;
 
       // 3. Price range
       let matchPrice = true;
@@ -77,13 +89,14 @@ export function StoreListView({
       const matchCondition =
         selectedCondition === "ALL" || (p.condition || "").toLowerCase().includes(selectedCondition.toLowerCase());
 
-      return matchSearch && matchBrand && matchPrice && matchRam && matchStorage && matchCondition;
+      return matchSearch && matchBrand && matchBranch && matchPrice && matchRam && matchStorage && matchCondition;
     });
-  }, [displayProducts, search, brand, priceRange, selectedRam, selectedStorage, selectedCondition]);
+  }, [displayProducts, search, brand, selectedBranchId, priceRange, selectedRam, selectedStorage, selectedCondition]);
 
   function resetFilters() {
     setSearch("");
     setBrand("ALL");
+    setSelectedBranchId("ALL");
     setPriceRange("ALL");
     setSelectedRam("ALL");
     setSelectedStorage("ALL");
@@ -93,6 +106,7 @@ export function StoreListView({
 
   const hasActiveFilters =
     brand !== "ALL" ||
+    selectedBranchId !== "ALL" ||
     priceRange !== "ALL" ||
     selectedRam !== "ALL" ||
     selectedStorage !== "ALL" ||
@@ -148,6 +162,55 @@ export function StoreListView({
           )}
         </button>
       </div>
+
+      {/* 1.5. Branch Filter Pills (Shown if Store has multiple branches) */}
+      {storeBranches.length > 0 && (
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+            <button
+              onClick={() => setSelectedBranchId("ALL")}
+              className={`px-3 py-1 rounded-full font-bold tracking-wide shrink-0 transition flex items-center gap-1 border ${
+                selectedBranchId === "ALL"
+                  ? isDark
+                    ? "bg-blue-600 text-white border-blue-500 shadow-sm"
+                    : "bg-blue-600 text-white border-blue-600 shadow-sm"
+                  : isDark
+                  ? "bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200"
+                  : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300"
+              }`}
+            >
+              <MapPin className="w-3 h-3" />
+              <span>Semua Lokasi ({displayProducts.length})</span>
+            </button>
+
+            {storeBranches.map((branch) => {
+              const branchCount = displayProducts.filter(
+                (p) => p.branchId === branch.id || p.branch?.id === branch.id
+              ).length;
+              return (
+                <button
+                  key={branch.id}
+                  onClick={() => setSelectedBranchId(branch.id)}
+                  className={`px-3 py-1 rounded-full font-bold tracking-wide shrink-0 transition flex items-center gap-1 border ${
+                    selectedBranchId === branch.id
+                      ? isDark
+                        ? "bg-blue-600 text-white border-blue-500 shadow-sm"
+                        : "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : isDark
+                      ? "bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200"
+                      : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300"
+                  }`}
+                >
+                  <MapPin className="w-3 h-3 text-blue-400" />
+                  <span>
+                    {branch.name} {branch.isMain ? "(Pusat)" : ""} ({branchCount})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 2. Brand Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">

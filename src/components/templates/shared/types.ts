@@ -1,3 +1,12 @@
+export interface BranchData {
+  id: string;
+  name: string;
+  address: string;
+  phone?: string | null;
+  mapsUrl?: string | null;
+  isMain?: boolean;
+}
+
 export interface StoreData {
   id: string;
   name: string;
@@ -11,6 +20,7 @@ export interface StoreData {
   tier: string;
   templateId: string;
   hasWatermark?: boolean;
+  branches?: BranchData[];
 }
 
 export interface ProductData {
@@ -26,6 +36,8 @@ export interface ProductData {
   minusNotes: string | null;
   status: string;
   images: string[];
+  branchId?: string | null;
+  branch?: BranchData | null;
 }
 
 export type StoreTabType = "home" | "list" | "trade-in" | "about";

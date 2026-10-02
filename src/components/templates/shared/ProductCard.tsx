@@ -116,8 +116,13 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
           {product.ramRom}
         </div>
 
-        {/* Badges: BH & IMEI */}
+        {/* Badges: BH & IMEI & Branch */}
         <div className="flex flex-wrap gap-1 mt-1.5">
+          {product.branch && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+              <span>📍 {product.branch.name}</span>
+            </span>
+          )}
           {product.batteryHealth !== null && (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
               <BatteryCharging className="w-2.5 h-2.5 text-amber-600" />

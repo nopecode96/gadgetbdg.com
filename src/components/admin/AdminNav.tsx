@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Store, Package, RefreshCw, Share2, ExternalLink, LogOut, Users, Settings, QrCode } from "lucide-react";
+import { Store, Package, RefreshCw, Share2, ExternalLink, LogOut, Users, Settings, QrCode, Building2 } from "lucide-react";
 import { logoutAction } from "@/lib/actions/login-actions";
 import type { Role } from "@prisma/client";
 
@@ -56,6 +56,12 @@ export function AdminNav({ currentSlug, storeName, userName, role }: AdminNavPro
                   className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1.5 transition"
                 >
                   <Users className="w-4 h-4" /> Tim &amp; Staf
+                </Link>
+                <Link
+                  href="/admin/branches"
+                  className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1.5 transition"
+                >
+                  <Building2 className="w-4 h-4" /> Kelola Cabang
                 </Link>
                 <Link
                   href="/admin/settings"

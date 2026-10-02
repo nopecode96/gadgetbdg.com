@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Sparkles,
   Info,
+  MapPin,
 } from "lucide-react";
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
@@ -28,18 +29,26 @@ export function CleanLedgerLayout({ store, products }: ArchetypeLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [search, setSearch] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("ALL");
+  const [selectedBranchId, setSelectedBranchId] = useState("ALL");
   const [filterCondition, setFilterCondition] = useState("ALL");
+
+  const storeBranches = store.branches && store.branches.length > 1 ? store.branches : [];
 
   const filtered = products.filter((p) => {
     const matchBrand = selectedBrand === "ALL" || p.brand === selectedBrand;
+    const matchBranch =
+      selectedBranchId === "ALL" ||
+      p.branchId === selectedBranchId ||
+      p.branch?.id === selectedBranchId;
     const matchCondition = filterCondition === "ALL" || p.condition.includes(filterCondition);
     const matchSearch =
       !search ||
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.brand.toLowerCase().includes(search.toLowerCase()) ||
       p.ramRom.toLowerCase().includes(search.toLowerCase()) ||
-      p.imeiStatus.toLowerCase().includes(search.toLowerCase());
-    return matchBrand && matchCondition && matchSearch;
+      p.imeiStatus.toLowerCase().includes(search.toLowerCase()) ||
+      (p.branch?.name || "").toLowerCase().includes(search.toLowerCase());
+    return matchBrand && matchBranch && matchCondition && matchSearch;
   });
 
   const brands = ["ALL", ...Array.from(new Set(products.map((p) => p.brand).filter(Boolean)))];
@@ -127,6 +136,44 @@ export function CleanLedgerLayout({ store, products }: ArchetypeLayoutProps) {
                 </div>
               </div>
 
+              {/* Branch Location Pills */}
+              {storeBranches.length > 0 && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-t border-slate-100 pt-2.5">
+                  <button
+                    onClick={() => setSelectedBranchId("ALL")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap ${
+                      selectedBranchId === "ALL"
+                        ? "bg-blue-600 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <MapPin className="w-3 h-3" />
+                    <span>Semua Lokasi ({products.length})</span>
+                  </button>
+                  {storeBranches.map((br) => {
+                    const cnt = products.filter(
+                      (p) => p.branchId === br.id || p.branch?.id === br.id
+                    ).length;
+                    return (
+                      <button
+                        key={br.id}
+                        onClick={() => setSelectedBranchId(br.id)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap ${
+                          selectedBranchId === br.id
+                            ? "bg-blue-600 text-white"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        <MapPin className="w-3 h-3 text-blue-500" />
+                        <span>
+                          {br.name} {br.isMain ? "(Pusat)" : ""} ({cnt})
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100 font-mono">
                 <span>Ditemukan: {filtered.length} unit siap transaksi</span>
                 <span className="text-emerald-700 font-bold">100% GARANSI TOKO TERDAFTAR</span>
@@ -171,6 +218,11 @@ export function CleanLedgerLayout({ store, products }: ArchetypeLayoutProps) {
 
                         {/* Specs Pill Line */}
                         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                          {p.branch && (
+                            <span className="inline-flex items-center gap-1 font-mono font-bold text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">
+                              <MapPin className="w-2.5 h-2.5" /> {p.branch.name}
+                            </span>
+                          )}
                           <span className="font-semibold text-slate-800">{p.ramRom}</span>
                           <span>•</span>
                           <span className="text-slate-600">{p.condition}</span>

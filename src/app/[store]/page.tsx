@@ -109,9 +109,24 @@ export default async function StorePage({ params }: StorePageProps) {
       },
     },
     include: {
+      branches: {
+        orderBy: [{ isMain: "desc" }, { createdAt: "asc" }],
+      },
       products: {
         where: {
           status: { in: ["AVAILABLE", "BOOKED"] },
+        },
+        include: {
+          branch: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+              phone: true,
+              mapsUrl: true,
+              isMain: true,
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -138,6 +153,14 @@ export default async function StorePage({ params }: StorePageProps) {
     tier: String(rawStore.tier || "STARTER"),
     templateId: String(rawStore.templateId || "minimal-clean"),
     hasWatermark: Boolean(rawStore.hasWatermark || rawStore.tier !== "STARTER"),
+    branches: (rawStore.branches || []).map((b) => ({
+      id: String(b.id),
+      name: String(b.name),
+      address: String(b.address),
+      phone: b.phone ? String(b.phone) : null,
+      mapsUrl: b.mapsUrl ? String(b.mapsUrl) : null,
+      isMain: Boolean(b.isMain),
+    })),
   };
 
   const productsData = (rawStore.products || []).map((p) => ({
@@ -153,6 +176,17 @@ export default async function StorePage({ params }: StorePageProps) {
     minusNotes: p.minusNotes ? String(p.minusNotes) : null,
     status: String(p.status || "AVAILABLE"),
     images: Array.isArray(p.images) ? p.images.map(String) : [],
+    branchId: p.branchId ? String(p.branchId) : null,
+    branch: p.branch
+      ? {
+          id: String(p.branch.id),
+          name: String(p.branch.name),
+          address: String(p.branch.address),
+          phone: p.branch.phone ? String(p.branch.phone) : null,
+          mapsUrl: p.branch.mapsUrl ? String(p.branch.mapsUrl) : null,
+          isMain: Boolean(p.branch.isMain),
+        }
+      : null,
   }));
 
   return <TemplateRenderer store={storeData} products={productsData} />;

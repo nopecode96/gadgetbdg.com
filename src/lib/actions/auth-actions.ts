@@ -299,6 +299,7 @@ export async function createStaffUserAction(formData: FormData) {
     const email = (formData.get("email") as string).toLowerCase().trim();
     const password = formData.get("password") as string;
     const staffName = formData.get("staffName") as string;
+    const branchId = (formData.get("branchId") as string) || null;
 
     if (!storeId || !email || !password || !staffName) {
       return { success: false, error: "Semua kolom wajib dilengkapi." };
@@ -330,6 +331,17 @@ export async function createStaffUserAction(formData: FormData) {
       };
     }
 
+    // Validasi cabang jika diberikan
+    let validBranchId: string | null = null;
+    if (branchId && branchId.trim()) {
+      const branchExists = await prisma.branch.findFirst({
+        where: { id: branchId.trim(), storeId },
+      });
+      if (branchExists) {
+        validBranchId = branchExists.id;
+      }
+    }
+
     // Cek email unik
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -345,6 +357,7 @@ export async function createStaffUserAction(formData: FormData) {
         name: staffName,
         role: "STORE_STAFF",
         storeId,
+        branchId: validBranchId,
       },
     });
 

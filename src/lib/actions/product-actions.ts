@@ -12,6 +12,16 @@ function serializeProduct(p: any) {
     price: Number(p.price),
     createdAt: p.createdAt instanceof Date ? p.createdAt.toISOString() : p.createdAt,
     updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : p.updatedAt,
+    branch: p.branch
+      ? {
+          id: p.branch.id,
+          name: p.branch.name,
+          address: p.branch.address,
+          phone: p.branch.phone ?? null,
+          mapsUrl: p.branch.mapsUrl ?? null,
+          isMain: Boolean(p.branch.isMain),
+        }
+      : null,
   };
 }
 
@@ -22,6 +32,18 @@ export async function getStoreProductsAction() {
 
   const products = await prisma.product.findMany({
     where: { storeId: store.id },
+    include: {
+      branch: {
+        select: {
+          id: true,
+          name: true,
+          address: true,
+          phone: true,
+          mapsUrl: true,
+          isMain: true,
+        },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -48,6 +70,7 @@ export async function createProductAction(formData: FormData) {
     const condition = formData.get("condition") as string;
     const minusNotes = (formData.get("minusNotes") as string) || null;
     const imageUrl = (formData.get("imageUrl") as string) || null;
+    const branchId = (formData.get("branchId") as string) || null;
 
     const imeiStatus = imeiNumber
       ? `${imeiStatusRaw} [IMEI: ${imeiNumber}]`
@@ -55,6 +78,17 @@ export async function createProductAction(formData: FormData) {
 
     if (!name || !brand || !priceRaw || !ramRom || !imeiStatusRaw || !completeness || !condition) {
       return { success: false, error: "Mohon lengkapi seluruh field wajib." };
+    }
+
+    // Validasi branchId jika ada
+    let validBranchId: string | null = null;
+    if (branchId && branchId.trim()) {
+      const branchExists = await prisma.branch.findFirst({
+        where: { id: branchId.trim(), storeId: store.id },
+      });
+      if (branchExists) {
+        validBranchId = branchExists.id;
+      }
     }
 
     // Hitung stok aktif (AVAILABLE + BOOKED) milik toko ini
@@ -101,6 +135,7 @@ export async function createProductAction(formData: FormData) {
     const product = await prisma.product.create({
       data: {
         storeId: store.id, // ← selalu dari session, bukan dari formData
+        branchId: validBranchId,
         name,
         brand,
         price,
@@ -112,6 +147,18 @@ export async function createProductAction(formData: FormData) {
         minusNotes,
         status: "AVAILABLE",
         images,
+      },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            phone: true,
+            mapsUrl: true,
+            isMain: true,
+          },
+        },
       },
     });
 

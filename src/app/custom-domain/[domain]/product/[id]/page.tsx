@@ -104,6 +104,18 @@ export default async function CustomDomainProductDetailPage({
       id: productId,
       storeId: rawStore.id,
     },
+    include: {
+      branch: {
+        select: {
+          id: true,
+          name: true,
+          address: true,
+          phone: true,
+          mapsUrl: true,
+          isMain: true,
+        },
+      },
+    },
   });
 
   if (!rawProduct) {
@@ -141,6 +153,17 @@ export default async function CustomDomainProductDetailPage({
     minusNotes: rawProduct.minusNotes ? String(rawProduct.minusNotes) : null,
     status: String(rawProduct.status || "AVAILABLE"),
     images: Array.isArray(rawProduct.images) ? rawProduct.images.map(String) : [],
+    branchId: rawProduct.branchId ? String(rawProduct.branchId) : null,
+    branch: rawProduct.branch
+      ? {
+          id: String(rawProduct.branch.id),
+          name: String(rawProduct.branch.name),
+          address: String(rawProduct.branch.address),
+          phone: rawProduct.branch.phone ? String(rawProduct.branch.phone) : null,
+          mapsUrl: rawProduct.branch.mapsUrl ? String(rawProduct.branch.mapsUrl) : null,
+          isMain: Boolean(rawProduct.branch.isMain),
+        }
+      : null,
   };
 
   return (

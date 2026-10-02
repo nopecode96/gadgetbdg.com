@@ -23,6 +23,7 @@ import { ProductImageUploader } from "@/components/admin/ProductImageUploader";
 interface Product {
   id: string;
   storeId: string;
+  branchId?: string | null;
   name: string;
   brand: string;
   price: number;
@@ -35,6 +36,19 @@ interface Product {
   status: string;
   images: string[];
   clickCount?: number;
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    isMain: boolean;
+  } | null;
+}
+
+interface BranchItem {
+  id: string;
+  name: string;
+  address?: string;
+  isMain?: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -58,12 +72,14 @@ const STATUS_LABELS: Record<string, string> = {
 export function ProductManagerClient({
   store,
   initialProducts,
+  branches = [],
   canAddProduct = true,
   maxActiveProducts = Infinity,
   activeProductCount = 0,
 }: {
   store?: any;
   initialProducts: Product[];
+  branches?: BranchItem[];
   canAddProduct?: boolean;
   maxActiveProducts?: number;
   activeProductCount?: number;
@@ -401,17 +417,36 @@ export function ProductManagerClient({
               </div>
             </div>
 
-            {/* Row 4: Minus Notes */}
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Catatan Minus / Riwayat Part
-              </label>
-              <input
-                type="text"
-                name="minusNotes"
-                placeholder="Contoh: No minus mulus total / Layar pernah ganti ori"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-              />
+            {/* Row 4: Minus Notes & Branch Allocation */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Catatan Minus / Riwayat Part
+                </label>
+                <input
+                  type="text"
+                  name="minusNotes"
+                  placeholder="Contoh: No minus mulus total / Layar pernah ganti ori"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Lokasi Cabang / Toko Fisik {branches.length > 0 ? "" : "(Opsional)"}
+                </label>
+                <select
+                  name="branchId"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-xs"
+                >
+                  <option value="">Pusat / Semua Cabang</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} {b.isMain ? "(Pusat)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Row 5: Multi-Upload Galeri Foto Unit with Sharp WebP & Watermark */}
@@ -539,6 +574,11 @@ export function ProductManagerClient({
                       {p.batteryHealth !== null && (
                         <span className="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
                           <BatteryCharging className="w-3 h-3" /> BH {p.batteryHealth}%
+                        </span>
+                      )}
+                      {p.branch && (
+                        <span className="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">
+                          🏢 {p.branch.name}
                         </span>
                       )}
                       {p.clickCount && p.clickCount > 0 ? (

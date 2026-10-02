@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { isReservedSlug } from "@/lib/constants/reserved-slugs";
 
 export interface TradeInInput {
   storeId: string;
@@ -244,9 +245,8 @@ export async function checkSlugAvailabilityAction(slug: string) {
       return { available: false, error: "Slug minimal 3 karakter huruf/angka." };
     }
 
-    const reserved = ["admin", "super-admin", "api", "app", "dashboard", "settings", "login", "register", "custom-domain"];
-    if (reserved.includes(cleanSlug)) {
-      return { available: false, error: "Subdomain ini dilindungi oleh sistem." };
+    if (isReservedSlug(cleanSlug)) {
+      return { available: false, error: "Subdomain ini dilindungi sistem dan tidak dapat digunakan." };
     }
 
     const existing = await prisma.store.findUnique({
@@ -274,6 +274,11 @@ export async function registerNewStoreAction(formData: FormData) {
     }
 
     const cleanSlug = rawSlug.toLowerCase().replace(/[^a-z0-9-]/g, "");
+
+    if (isReservedSlug(cleanSlug)) {
+      return { success: false, error: "Subdomain ini dilindungi sistem dan tidak dapat digunakan." };
+    }
+
     const existing = await prisma.store.findUnique({
       where: { slug: cleanSlug },
     });

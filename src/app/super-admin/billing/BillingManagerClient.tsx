@@ -85,7 +85,7 @@ export function BillingManagerClient({ initialPayments }: { initialPayments: Pay
 
   function buildWaMessage(payment: PaymentItem) {
     const msg = encodeURIComponent(
-      `Halo ${payment.store.name},\n\nPembayaran paket *${payment.tier}* sebesar *${formatRupiah(payment.amount)}* telah kami terima dan akun Anda sudah AKTIF ✅\n\nSilakan login di:\n${payment.store.slug}.gadgetbdg.com/admin\n\nTerima kasih telah berlangganan GadgetBDG.com! 🎉`
+      `Halo ${payment.store.name},\n\nPembayaran paket *${payment.tier}* sebesar *${formatRupiah(payment.amount)}* telah kami terima dan akun Anda sudah AKTIF ✅\n\nWebsite Toko Online:\nhttps://${payment.store.slug}.gadgetbdg.com\n\nLogin Dashboard Admin Toko:\nhttps://toko.gadgetbdg.com\n\nTerima kasih telah berlangganan GadgetBDG.com! 🎉`
     );
     return `https://wa.me/${payment.store.whatsapp}?text=${msg}`;
   }

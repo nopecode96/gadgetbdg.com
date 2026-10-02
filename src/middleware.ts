@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isReservedSlug } from "@/lib/constants/reserved-slugs";
 
 export const config = {
   matcher: [
@@ -34,22 +35,35 @@ export default async function middleware(req: NextRequest) {
     currentHost === "127.0.0.1";
 
   if (isMainDomain) {
-    // If request path starts with /admin, keep it accessible as /admin or rewrite if needed
-    // SaaS landing page, admin, super-admin handled directly under app/(saas) or app/admin
+    // SaaS landing page, admin, super-admin handled directly under app/(saas), app/admin, app/super-admin
     return NextResponse.next();
   }
 
-  // 2. Subdomain check (e.g. [slug].gadgetbdg.com)
+  // 2. Subdomain check (*.gadgetbdg.com)
   if (currentHost.endsWith(`.${mainDomain}`)) {
-    const subdomain = currentHost.replace(`.${mainDomain}`, "");
+    const subdomain = currentHost.replace(`.${mainDomain}`, "").toLowerCase();
 
-    // Exclude special subdomains like 'www', 'admin', 'app', 'superadmin' if applicable
+    // 2a. admin.gadgetbdg.com -> Super Admin SaaS Panel (/super-admin)
+    if (subdomain === "admin" || subdomain === "super-admin" || subdomain === "superadmin") {
+      return NextResponse.rewrite(new URL(`/super-admin${path}`, req.url));
+    }
+
+    // 2b. toko.gadgetbdg.com -> Admin Toko Merchant Panel (/admin)
+    if (subdomain === "toko") {
+      return NextResponse.rewrite(new URL(`/admin${path}`, req.url));
+    }
+
+    // 2c. www -> pass through ke root domain
     if (subdomain === "www") {
       return NextResponse.next();
     }
 
-    // Rewrite to /app/[store]/... route
-    // Note: In Next.js App Router, dynamic folder is [store]
+    // 2d. Cegah akses reserved slugs lain menimpa store view
+    if (isReservedSlug(subdomain)) {
+      return NextResponse.next();
+    }
+
+    // 2e. Storefront Toko Merchant: [slug].gadgetbdg.com -> /[store]/...
     return NextResponse.rewrite(new URL(`/${subdomain}${path}`, req.url));
   }
 
@@ -57,3 +71,4 @@ export default async function middleware(req: NextRequest) {
   // Rewrite to custom-domain dynamic route: /custom-domain/[domain]/...
   return NextResponse.rewrite(new URL(`/custom-domain/${currentHost}${path}`, req.url));
 }
+

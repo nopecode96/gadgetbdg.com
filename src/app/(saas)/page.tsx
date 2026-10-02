@@ -105,18 +105,21 @@ export default function SaaSlandingPage() {
             <a href="#harga" className="hover:text-blue-600 transition-colors">
               Harga Paket
             </a>
-            <Link href="/admin" className="hover:text-blue-600 transition-colors">
+            <a
+              href="https://toko.gadgetbdg.com"
+              className="hover:text-blue-600 transition-colors font-semibold"
+            >
               Login Toko
-            </Link>
+            </a>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/admin"
+            <a
+              href="https://toko.gadgetbdg.com"
               className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-slate-700 hover:text-blue-600"
             >
               Masuk
-            </Link>
+            </a>
             <button
               onClick={() => setIsRegisterOpen(true)}
               className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition"
@@ -320,12 +323,12 @@ export default function SaaSlandingPage() {
           </div>
 
           <div className="flex items-center gap-6 text-sm">
-            <Link href="/admin" className="hover:text-white transition">
+            <a href="https://toko.gadgetbdg.com" className="hover:text-white transition">
               Portal Toko
-            </Link>
-            <Link href="/super-admin" className="hover:text-white transition">
+            </a>
+            <a href="https://admin.gadgetbdg.com" className="hover:text-white transition">
               SaaS Admin
-            </Link>
+            </a>
             <a href="https://wa.me/6281234567890" target="_blank" rel="noreferrer" className="hover:text-white transition">
               Bantuan WA
             </a>

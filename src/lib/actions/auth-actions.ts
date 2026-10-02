@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { isReservedSlug } from "@/lib/constants/reserved-slugs";
 
 // ---------------------------------------------------------------
 // Tier quota: maks jumlah user (termasuk STORE_OWNER)
@@ -44,6 +45,14 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
     }
 
     const cleanSlug = rawSlug.toLowerCase().replace(/[^a-z0-9-]/g, "");
+
+    // Cek apakah slug termasuk subdomain yang dilindungi sistem
+    if (isReservedSlug(cleanSlug)) {
+      return {
+        success: false,
+        error: "Subdomain ini dilindungi sistem dan tidak dapat digunakan.",
+      };
+    }
 
     // Cek slug unik
     const existingStore = await prisma.store.findUnique({ where: { slug: cleanSlug } });

@@ -158,6 +158,48 @@ export async function cycleStoreTierAction(storeId: string, currentTier: "STARTE
   }
 }
 
+export async function updateStoreTierAction(storeId: string, newTier: "STARTER" | "PRO" | "ADVANCE") {
+  try {
+    const updated = await prisma.store.update({
+      where: { id: storeId },
+      data: {
+        tier: newTier,
+        hasWatermark: newTier !== "STARTER",
+      },
+    });
+
+    revalidatePath("/super-admin");
+    revalidatePath("/super-admin/stores");
+    revalidatePath("/super-admin/domains");
+    revalidatePath("/admin/settings");
+    revalidatePath(`/${updated.slug}`);
+
+    return { success: true, store: updated };
+  } catch (error: any) {
+    console.error("Error setting store tier:", error);
+    return { success: false, error: error?.message || "Gagal mengubah tier toko." };
+  }
+}
+
+export async function resetTemplateCooldownAction(storeId: string) {
+  try {
+    const updated = await prisma.store.update({
+      where: { id: storeId },
+      data: { lastTemplateChangeAt: null },
+    });
+
+    revalidatePath("/super-admin");
+    revalidatePath("/super-admin/stores");
+    revalidatePath("/admin/settings");
+    revalidatePath(`/${updated.slug}`);
+
+    return { success: true, store: updated };
+  } catch (error: any) {
+    console.error("Error resetting template cooldown:", error);
+    return { success: false, error: error?.message || "Gagal mereset cooldown template." };
+  }
+}
+
 export async function checkSlugAvailabilityAction(slug: string) {
   try {
     const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "");

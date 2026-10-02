@@ -5,7 +5,7 @@ import { StoreManagementClient } from "./StoreManagementClient";
 export const revalidate = 0;
 
 export default async function SuperAdminStoresPage() {
-  const stores = await prisma.store.findMany({
+  const storesRaw = await prisma.store.findMany({
     include: {
       _count: {
         select: { products: true, tradeInOffers: true },
@@ -13,6 +13,14 @@ export default async function SuperAdminStoresPage() {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  // Serialize dates for client component boundary
+  const stores = storesRaw.map((s) => ({
+    ...s,
+    createdAt: s.createdAt.toISOString(),
+    updatedAt: s.updatedAt.toISOString(),
+    lastTemplateChangeAt: s.lastTemplateChangeAt ? s.lastTemplateChangeAt.toISOString() : null,
+  }));
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">

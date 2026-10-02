@@ -5,7 +5,7 @@ import { DomainManagerClient } from "./DomainManagerClient";
 export const revalidate = 0;
 
 export default async function SuperAdminDomainsPage() {
-  const stores = await prisma.store.findMany({
+  const storesRaw = await prisma.store.findMany({
     where: {
       tier: {
         in: ["PRO", "ADVANCE"],
@@ -13,6 +13,17 @@ export default async function SuperAdminDomainsPage() {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  // Serialize dates for client component boundary
+  const stores = storesRaw.map((s) => ({
+    id: s.id,
+    name: s.name,
+    slug: s.slug,
+    customDomain: s.customDomain,
+    tier: s.tier,
+    whatsapp: s.whatsapp,
+    createdAt: s.createdAt.toISOString(),
+  }));
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">

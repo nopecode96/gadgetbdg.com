@@ -1,34 +1,29 @@
-import { prisma } from "@/lib/prisma";
-import { AdminNav } from "@/components/admin/AdminNav";
+import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
 import { SettingsClient } from "./SettingsClient";
+import { redirect } from "next/navigation";
 
 export const revalidate = 0;
 
 export default async function AdminSettingsPage() {
-  const stores = await prisma.store.findMany({
-    orderBy: { createdAt: "asc" },
-  });
+  const ctx = await requireStoreOwnerOrStaff();
+  const { store, user } = ctx;
 
-  const activeStore = stores[0];
+  // Settings page is owner-only
+  if (user.role !== "STORE_OWNER") {
+    redirect("/admin");
+  }
 
-  const serializedStore = activeStore
-    ? {
-        ...activeStore,
-        createdAt: activeStore.createdAt?.toISOString(),
-        updatedAt: activeStore.updatedAt?.toISOString(),
-        lastTemplateChangeAt: activeStore.lastTemplateChangeAt
-          ? activeStore.lastTemplateChangeAt.toISOString()
-          : null,
-      }
-    : null;
+  const serializedStore = {
+    ...store,
+    subscriptionExpiresAt: store.subscriptionExpiresAt?.toISOString() ?? null,
+    updatedAt: new Date().toISOString(), // not exposed in SerializedStore, use current
+    createdAt: new Date().toISOString(),
+    lastTemplateChangeAt: store.lastTemplateChangeAt?.toISOString() ?? null,
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <AdminNav currentSlug={activeStore?.slug} />
-
-      <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-8">
-        <SettingsClient store={serializedStore} />
-      </main>
+    <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-8">
+      <SettingsClient store={serializedStore} />
     </div>
   );
 }

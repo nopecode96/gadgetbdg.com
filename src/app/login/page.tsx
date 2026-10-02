@@ -1,0 +1,103 @@
+"use client";
+
+import { useState } from "react";
+import { loginAction } from "@/lib/actions/login-actions";
+import { Store, Lock, Mail, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPass, setShowPass] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const result = await loginAction(formData);
+
+    setLoading(false);
+    if (!result.success) {
+      setError(result.error || "Login gagal.");
+      return;
+    }
+    if (result.redirect) {
+      router.push(result.redirect);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-xl mb-3">
+            <Store className="w-7 h-7" />
+          </div>
+          <h1 className="text-2xl font-black text-white">GadgetBdg</h1>
+          <p className="text-sm text-blue-300 mt-1">Admin Panel &amp; Dashboard</p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 space-y-4">
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+              <p className="text-sm text-red-300">{error}</p>
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-semibold text-blue-200 block mb-1.5">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="email"
+                name="email"
+                placeholder="your@email.com"
+                required
+                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-blue-200 block mb-1.5">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type={showPass ? "text" : "password"}
+                name="password"
+                placeholder="••••••••"
+                required
+                className="w-full pl-10 pr-10 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition text-sm"
+          >
+            {loading ? "Memproses..." : "Masuk →"}
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-slate-500 mt-6">
+          Platform manajemen toko HP bekas Bandung
+        </p>
+      </div>
+    </div>
+  );
+}

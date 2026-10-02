@@ -1,18 +1,21 @@
+import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { AdminNav } from "@/components/admin/AdminNav";
 import { TeamManagerClient } from "./TeamManagerClient";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export const revalidate = 0;
 
-// Demo: storeId statis untuk /berkahcell. Dalam implementasi full,
-// storeId diambil dari session/cookie JWT. Untuk sekarang gunakan
-// store pertama sebagai representasi demo admin login.
-const DEMO_STORE_SLUG = "berkahcell";
-
 export default async function AdminTeamPage() {
-  const store = await prisma.store.findUnique({
-    where: { slug: DEMO_STORE_SLUG },
+  const ctx = await requireStoreOwnerOrStaff();
+  const { store, user, limits } = ctx;
+
+  // Team management is owner-only
+  if (user.role !== "STORE_OWNER") {
+    redirect("/admin");
+  }
+
+  const storeWithUsers = await prisma.store.findUnique({
+    where: { id: store.id },
     include: {
       users: {
         orderBy: { createdAt: "asc" },
@@ -20,9 +23,9 @@ export default async function AdminTeamPage() {
     },
   });
 
-  if (!store) return notFound();
+  if (!storeWithUsers) redirect("/admin");
 
-  const users = store.users.map((u) => ({
+  const users = storeWithUsers.users.map((u) => ({
     id: u.id,
     name: u.name,
     email: u.email,
@@ -31,16 +34,13 @@ export default async function AdminTeamPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <AdminNav currentSlug={store.slug} />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <TeamManagerClient
-          storeId={store.id}
-          storeName={store.name}
-          tier={store.tier as "STARTER" | "PRO" | "ADVANCE"}
-          initialUsers={users}
-        />
-      </main>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <TeamManagerClient
+        storeId={store.id}
+        storeName={store.name}
+        tier={store.tier as "STARTER" | "PRO" | "ADVANCE"}
+        initialUsers={users}
+      />
     </div>
   );
 }

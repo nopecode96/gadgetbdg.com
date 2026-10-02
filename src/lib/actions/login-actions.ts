@@ -1,0 +1,62 @@
+"use server";
+
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { SESSION_COOKIE } from "@/lib/auth/session";
+import type { SessionPayload } from "@/lib/auth/session";
+
+// ─── Login ────────────────────────────────────────────────────────
+export async function loginAction(formData: FormData) {
+  const email = (formData.get("email") as string)?.toLowerCase().trim();
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    return { success: false, error: "Email dan password wajib diisi." };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return { success: false, error: "Email atau password salah." };
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      return { success: false, error: "Email atau password salah." };
+    }
+
+    const payload: SessionPayload = {
+      userId: user.id,
+      storeId: user.storeId,
+      role: user.role,
+    };
+
+    const cookieStore = cookies();
+    cookieStore.set(SESSION_COOKIE, JSON.stringify(payload), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 hari
+      path: "/",
+    });
+
+    // Redirect based on role
+    const saasRoles = ["SUPER_ADMIN", "ADMIN_SAAS", "SALES_AGENT"];
+    if (saasRoles.includes(user.role)) {
+      return { success: true, redirect: "/super-admin" };
+    }
+    return { success: true, redirect: "/admin" };
+  } catch (error: any) {
+    console.error("loginAction error:", error);
+    return { success: false, error: "Terjadi kesalahan. Coba lagi." };
+  }
+}
+
+// ─── Logout ───────────────────────────────────────────────────────
+export async function logoutAction() {
+  const cookieStore = cookies();
+  cookieStore.delete(SESSION_COOKIE);
+  redirect("/login");
+}

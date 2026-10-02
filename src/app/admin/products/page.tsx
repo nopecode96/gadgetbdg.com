@@ -1,35 +1,34 @@
+import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { AdminNav } from "@/components/admin/AdminNav";
 import { ProductManagerClient } from "./ProductManagerClient";
 
 export const revalidate = 0;
 
 export default async function AdminProductsPage() {
-  // Get active stores (default to berkahcell or first store)
-  const stores = await prisma.store.findMany({
-    orderBy: { createdAt: "asc" },
+  const ctx = await requireStoreOwnerOrStaff();
+  const { store, limits, usage, permissions } = ctx;
+
+  const products = await prisma.product.findMany({
+    where: { storeId: store.id },
+    orderBy: { createdAt: "desc" },
   });
 
-  const activeStore = stores[0];
-
-  const products = activeStore
-    ? await prisma.product.findMany({
-        where: { storeId: activeStore.id },
-        orderBy: { createdAt: "desc" },
-      })
-    : [];
+  // Serialize store for client component
+  const serializedStore = {
+    ...store,
+    subscriptionExpiresAt: store.subscriptionExpiresAt?.toISOString() ?? null,
+    lastTemplateChangeAt: store.lastTemplateChangeAt?.toISOString() ?? null,
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <AdminNav currentSlug={activeStore?.slug} />
-
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
-        <ProductManagerClient
-          store={activeStore}
-          allStores={stores}
-          initialProducts={products}
-        />
-      </main>
+    <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
+      <ProductManagerClient
+        store={serializedStore}
+        initialProducts={products}
+        canAddProduct={permissions.canAddProduct}
+        maxActiveProducts={limits.maxActiveProducts}
+        activeProductCount={usage.activeProductCount}
+      />
     </div>
   );
 }

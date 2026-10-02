@@ -35,15 +35,19 @@ interface Product {
 
 export function ProductManagerClient({
   store,
-  allStores,
   initialProducts,
+  canAddProduct = true,
+  maxActiveProducts = Infinity,
+  activeProductCount = 0,
 }: {
   store?: any;
-  allStores: any[];
   initialProducts: Product[];
+  canAddProduct?: boolean;
+  maxActiveProducts?: number;
+  activeProductCount?: number;
 }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [selectedStoreId, setSelectedStoreId] = useState(store?.id || "");
+  const [selectedStoreId] = useState(store?.id || "");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);

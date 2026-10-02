@@ -7,7 +7,6 @@ import {
   Sparkles,
   ArrowRight,
   ShoppingBag,
-  Star,
   CheckCircle2,
   ShieldCheck,
   MessageCircle,
@@ -16,13 +15,14 @@ import {
   TEMPLATE_LIST,
   TemplateThemeConfig,
   getAvailableTemplatesForTier,
+  getTemplateConfig,
 } from "@/lib/constants/templates";
 
 // ---------------------------------------------------------------------------
 // Dynamic Smartphone Mockup Screen
 // ---------------------------------------------------------------------------
-function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
-  const c = t.colors;
+function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
+  const c = activeTheme.colors;
   const isDark = c.isDark;
 
   const demoProducts = [
@@ -57,23 +57,37 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
   ];
 
   return (
-    <div className={`w-full h-full ${c.bgMain} flex flex-col overflow-hidden text-left transition-colors duration-300 font-sans`}>
-      {/* 1. Header Toko */}
-      <div className={`sticky top-0 z-20 px-3.5 py-2.5 flex items-center justify-between border-b backdrop-blur-md transition-colors duration-300 ${c.headerBg}`}>
+    <div
+      className={`w-full h-full ${c.bgMain} flex flex-col overflow-hidden text-left transition-colors duration-300 font-sans`}
+    >
+      {/* 1. Header HP (Status Bar & Nama Toko) */}
+      <div
+        className={`sticky top-0 z-20 px-3.5 py-2.5 flex items-center justify-between transition-colors duration-300 ${
+          isDark
+            ? "bg-slate-900 border-b border-slate-800 text-white"
+            : "bg-white border-b border-slate-200 text-slate-950 shadow-xs"
+        }`}
+      >
         <div className="flex items-center gap-1.5 min-w-0">
-          <div className={`w-6 h-6 rounded-lg ${c.accent} text-white flex items-center justify-center font-black text-[10px] shrink-0 shadow-sm`}>
+          <div
+            className={`w-6 h-6 rounded-lg ${c.accent} text-white flex items-center justify-center font-black text-[10px] shrink-0 shadow-sm`}
+          >
             G
           </div>
           <div className="truncate">
-            <div className="font-extrabold text-[11px] leading-tight truncate">GadgetBDG Bandung</div>
-            <div className="text-[8px] opacity-70 flex items-center gap-1">
+            <div className="font-extrabold text-[11px] leading-tight truncate">
+              GadgetBDG Bandung
+            </div>
+            <div className="text-[8px] opacity-75 flex items-center gap-1 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Online Siap COD
             </div>
           </div>
         </div>
 
-        <div className={`px-2 py-0.5 rounded-full text-[8px] font-bold shrink-0 border ${c.badgeVerifiedBg} ${c.badgeVerifiedText} ${c.badgeVerifiedBorder} flex items-center gap-0.5`}>
+        <div
+          className={`px-2 py-0.5 rounded-full text-[8px] font-bold shrink-0 border ${c.badgeVerifiedBg} ${c.badgeVerifiedText} ${c.badgeVerifiedBorder} flex items-center gap-0.5`}
+        >
           <ShieldCheck className="w-2.5 h-2.5" />
           <span>Verified</span>
         </div>
@@ -81,23 +95,33 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
 
       {/* 2. Scrollable Body Content */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-3">
-        {/* Banner Hero Dinamis */}
-        <div className={`rounded-2xl p-3.5 relative overflow-hidden shadow-md border transition-all duration-300 ${c.heroGradient} ${c.heroBorder}`}>
+        {/* Card Banner Hero di Layar HP (KUNCI KONTRAS) */}
+        <div
+          className={`rounded-2xl p-3.5 relative overflow-hidden shadow-md border transition-all duration-300 ${c.heroGradient} ${c.heroBorder}`}
+        >
           <div className="relative z-10 space-y-1.5">
-            {/* Tag Badge */}
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-extrabold tracking-wider uppercase bg-black/30 text-white backdrop-blur-md border border-white/20">
-              <Sparkles className="w-2.5 h-2.5 text-amber-300" />
-              <span>{t.badge || "Katalog Spesial"}</span>
+            {/* Badge kecil: Background kontras tajam */}
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-extrabold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+              <Sparkles className="w-2.5 h-2.5 text-emerald-300" />
+              <span>SPESIALIS HP SECOND</span>
             </div>
 
-            {/* Judul Hero */}
-            <h2 className="text-xs sm:text-[13px] font-black leading-tight tracking-tight drop-shadow-sm">
-              {isDark ? "Gear Flagship & HP High-Spec Murah" : "Katalog iPhone & Android Istimewa"}
+            {/* Judul Hero: Wajib kontras mutlak */}
+            <h2
+              className={`text-xs sm:text-[13px] font-black leading-tight tracking-tight drop-shadow-sm ${
+                activeTheme.id === "clearance-yellow" ? "text-slate-950" : "text-white"
+              }`}
+            >
+              Katalog iPhone &amp; Android Istimewa
             </h2>
 
             {/* Deskripsi */}
-            <p className="text-[8.5px] leading-relaxed opacity-90 max-w-[200px]">
-              Semua unit lolos 30 titik uji fungsi, IMEI permanen & garansi toko resmi.
+            <p
+              className={`text-[8.5px] leading-relaxed max-w-[210px] font-medium ${
+                activeTheme.id === "clearance-yellow" ? "text-slate-800" : "text-slate-100/90"
+              }`}
+            >
+              Semua unit lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
             </p>
 
             {/* Tombol CTA */}
@@ -105,10 +129,12 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
               <button
                 type="button"
                 className={`px-2.5 py-1 rounded-lg font-bold text-[8.5px] shadow-sm flex items-center gap-1 transition ${
-                  isDark ? `${c.accent} text-slate-950 font-black` : "bg-slate-900 text-white"
+                  isDark
+                    ? `${c.accent} text-slate-950 font-black`
+                    : "bg-slate-900 text-white hover:bg-slate-800"
                 }`}
               >
-                <span>Lihat Stok</span>
+                <span>Jelajahi Stok</span>
                 <ArrowRight className="w-2.5 h-2.5" />
               </button>
 
@@ -117,10 +143,10 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
                 className={`px-2 py-1 rounded-lg font-semibold text-[8px] border transition ${
                   isDark
                     ? "border-white/30 bg-black/40 text-white"
-                    : "border-slate-300 bg-white/90 text-slate-800"
+                    : "border-slate-300 bg-white/95 text-slate-800 shadow-xs"
                 }`}
               >
-                Tukar Tambah
+                Tukar Tambah HP
               </button>
             </div>
           </div>
@@ -132,42 +158,58 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
         {/* Section Title */}
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-1.5">
-            <span className={`font-black text-[10px] tracking-tight ${c.textPrimary}`}>Unit Pilihan Hari Ini</span>
-            <span className={`text-[8px] px-1.5 py-0.2 rounded-full font-bold ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}>
+            <span className={`font-black text-[10px] tracking-tight ${c.textPrimary}`}>
+              Unit Pilihan Hari Ini
+            </span>
+            <span
+              className={`text-[8px] px-1.5 py-0.2 rounded-full font-bold ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
+            >
               4 Ready
             </span>
           </div>
-          <span className={`text-[8.5px] font-bold ${c.accentText}`}>Semua →</span>
+          <span className={`text-[8.5px] font-bold ${c.accentText}`}>Lihat Semua →</span>
         </div>
 
-        {/* Grid Produk */}
+        {/* Kartu Produk di Mockup HP */}
         <div className="grid grid-cols-2 gap-2">
           {demoProducts.map((p) => (
             <div
               key={p.name}
-              className={`rounded-xl p-2.5 border transition-all duration-300 flex flex-col justify-between space-y-2 shadow-xs ${c.cardBg} ${c.cardBorder}`}
+              className={`rounded-xl p-2.5 border transition-all duration-300 flex flex-col justify-between space-y-2 shadow-xs ${c.bgContainer} ${c.cardBorder}`}
             >
               <div className="space-y-1.5">
                 {/* Visual Phone Box Art / Placeholder */}
-                <div className={`w-full aspect-[4/3] rounded-lg flex flex-col items-center justify-center relative overflow-hidden ${
-                  isDark ? "bg-white/5 border border-white/5" : "bg-slate-100 border border-slate-200/60"
-                }`}>
-                  <ShoppingBag className={`w-6 h-6 ${isDark ? "text-white/20" : "text-slate-300"}`} />
-                  <span className={`text-[7px] font-mono uppercase tracking-wider mt-1 opacity-60 ${c.textSecondary}`}>
+                <div
+                  className={`w-full aspect-[4/3] rounded-lg flex flex-col items-center justify-center relative overflow-hidden ${
+                    isDark
+                      ? "bg-white/5 border border-white/5"
+                      : "bg-slate-100 border border-slate-200/60"
+                  }`}
+                >
+                  <ShoppingBag
+                    className={`w-6 h-6 ${isDark ? "text-white/20" : "text-slate-300"}`}
+                  />
+                  <span
+                    className={`text-[7px] font-mono uppercase tracking-wider mt-1 opacity-70 ${c.textSecondary}`}
+                  >
                     {p.brand}
                   </span>
-                  <span className={`absolute top-1 right-1 text-[6.5px] font-bold px-1.5 py-0.2 rounded ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}>
+                  <span
+                    className={`absolute top-1 right-1 text-[6.5px] font-bold px-1.5 py-0.2 rounded ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
+                  >
                     {p.badge}
                   </span>
                 </div>
 
                 <div>
-                  <h4 className={`text-[8.5px] font-bold leading-tight line-clamp-1 ${c.textPrimary}`}>
+                  <h4
+                    className={`text-[8.5px] font-bold leading-tight line-clamp-1 ${
+                      isDark ? "text-white" : "text-slate-950"
+                    }`}
+                  >
                     {p.name}
                   </h4>
-                  <p className={`text-[7px] ${c.textSecondary}`}>
-                    {p.spec}
-                  </p>
+                  <p className={`text-[7px] font-medium ${c.textSecondary}`}>{p.spec}</p>
                 </div>
               </div>
 
@@ -176,7 +218,7 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
                   {p.price}
                 </div>
 
-                {/* Tombol Beli WA */}
+                {/* Tombol Aksi di Mockup */}
                 <button
                   type="button"
                   className={`w-full py-1 rounded-md text-[8px] font-bold flex items-center justify-center gap-1 transition shadow-xs text-white ${c.accent} ${c.accentHover}`}
@@ -194,7 +236,9 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
       </div>
 
       {/* 3. Bottom Nav Bar */}
-      <div className={`sticky bottom-0 z-20 border-t px-2 py-1.5 flex items-center justify-around text-[7.5px] font-bold backdrop-blur-md transition-colors duration-300 ${c.bottomNavBg} ${c.bottomNavBorder}`}>
+      <div
+        className={`sticky bottom-0 z-20 border-t px-2 py-1.5 flex items-center justify-around text-[7.5px] font-bold backdrop-blur-md transition-colors duration-300 ${c.bottomNavBg} ${c.bottomNavBorder}`}
+      >
         {[
           { label: "Beranda", active: true },
           { label: "Katalog", active: false },
@@ -207,7 +251,11 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
               item.active ? c.bottomNavActive : c.bottomNavInactive
             }`}
           >
-            <div className={`w-3.5 h-1 rounded-full ${item.active ? (isDark ? "bg-white" : "bg-slate-900") : "bg-transparent"}`} />
+            <div
+              className={`w-3.5 h-1 rounded-full ${
+                item.active ? (isDark ? "bg-white" : "bg-slate-900") : "bg-transparent"
+              }`}
+            />
             <span>{item.label}</span>
           </div>
         ))}
@@ -221,7 +269,7 @@ function PhoneMockupScreen({ t }: { t: TemplateThemeConfig }) {
 // ---------------------------------------------------------------------------
 export function TemplateShowcase() {
   const [filterTier, setFilterTier] = useState<"ALL" | "STARTER" | "PRO" | "ADVANCE">("ALL");
-  const [activeTemplate, setActiveTemplate] = useState<TemplateThemeConfig>(TEMPLATE_LIST[0]);
+  const [selectedId, setSelectedId] = useState<string>("minimal-clean");
 
   const templatesToDisplay =
     filterTier === "ALL"
@@ -232,12 +280,17 @@ export function TemplateShowcase() {
       ? getAvailableTemplatesForTier("PRO")
       : TEMPLATE_LIST;
 
+  const activeTheme = getTemplateConfig(selectedId);
+
   // URL Demo tab baru
   const liveDemoUrl =
-    activeTemplate.id === "dark-gaming" ? "/gamersgadget" : "/berkahcell";
+    activeTheme.id === "dark-gaming" ? "/gamersgadget" : "/berkahcell";
 
   return (
-    <section id="showcase" className="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-100 border-b border-slate-200">
+    <section
+      id="showcase"
+      className="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-100 border-b border-slate-200"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="text-center max-w-3xl mx-auto mb-12">
@@ -248,7 +301,9 @@ export function TemplateShowcase() {
             Pilih Desain &amp; Lihat Langsung di HP
           </h2>
           <p className="mt-3 text-slate-600 text-sm leading-relaxed">
-            Klik kartu desain di sebelah kanan. Layar smartphone di sebelah kiri akan <b className="text-slate-900">seketika bertransformasi</b> menyesuaikan palet warna, tipografi, banner hero, hingga tombol aksi tema pilihan Anda.
+            Klik kartu desain di sebelah kanan. Layar smartphone di sebelah kiri akan{" "}
+            <b className="text-slate-900">seketika bertransformasi</b> menyesuaikan palet warna,
+            tipografi, banner hero, hingga tombol aksi tema pilihan Anda.
           </p>
 
           {/* Tier Filter Tabs */}
@@ -298,7 +353,6 @@ export function TemplateShowcase() {
 
         {/* 2-Column: Live Interactive Smartphone (Left) & Template Gallery (Right) */}
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-start max-w-6xl mx-auto">
-
           {/* ----------------------------------------------------------------
               LEFT COLUMN — Smartphone Hardware Mockup Frame
           ----------------------------------------------------------------- */}
@@ -314,7 +368,7 @@ export function TemplateShowcase() {
 
                 {/* Inner Screen Canvas */}
                 <div className="rounded-[2.2rem] overflow-hidden w-full h-full relative">
-                  <PhoneMockupScreen key={activeTemplate.id} t={activeTemplate} />
+                  <PhoneMockupScreen key={activeTheme.id} activeTheme={activeTheme} />
                 </div>
               </div>
 
@@ -322,17 +376,21 @@ export function TemplateShowcase() {
               <div className="mt-4 text-center space-y-2 w-full max-w-[310px]">
                 <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-between text-xs">
                   <div className="text-left min-w-0">
-                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Aktif di HP:</div>
-                    <div className="font-black text-slate-900 truncate">{activeTemplate.name}</div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      Aktif di HP:
+                    </div>
+                    <div className="font-black text-slate-900 truncate">{activeTheme.name}</div>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
-                    activeTemplate.category === "Starter"
-                      ? "bg-blue-100 text-blue-800"
-                      : activeTemplate.category === "Pro"
-                      ? "bg-purple-100 text-purple-800"
-                      : "bg-amber-100 text-amber-800"
-                  }`}>
-                    {activeTemplate.category}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
+                      activeTheme.category === "Starter"
+                        ? "bg-blue-100 text-blue-800"
+                        : activeTheme.category === "Pro"
+                        ? "bg-purple-100 text-purple-800"
+                        : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    {activeTheme.category}
                   </span>
                 </div>
 
@@ -363,16 +421,16 @@ export function TemplateShowcase() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[640px] overflow-y-auto pr-2 pb-4">
               {templatesToDisplay.map((t) => {
-                const isSelected = activeTemplate.id === t.id;
+                const isSelected = selectedId === t.id;
                 const isDark = t.colors.isDark;
 
                 return (
                   <div
                     key={t.id}
-                    onClick={() => setActiveTemplate(t)}
+                    onClick={() => setSelectedId(t.id)}
                     className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-3 ${
                       isSelected
-                        ? "ring-2 ring-indigo-600 border-transparent shadow-xl scale-[1.01] bg-white"
+                        ? "ring-2 ring-indigo-600 border-indigo-600 shadow-md scale-[1.01] bg-white text-slate-900"
                         : isDark
                         ? "border-2 border-slate-800 hover:border-indigo-400/60 bg-slate-950 text-slate-100 hover:shadow-md"
                         : "border-2 border-slate-200 hover:border-indigo-300 bg-white text-slate-900 hover:shadow-md"
@@ -381,9 +439,11 @@ export function TemplateShowcase() {
                     <div>
                       {/* Card Header: Name & Tier Badge */}
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className={`font-black text-sm leading-snug ${
-                          isSelected ? "text-indigo-600" : isDark ? "text-white" : "text-slate-900"
-                        }`}>
+                        <h4
+                          className={`font-black text-sm leading-snug ${
+                            isSelected ? "text-indigo-600" : isDark ? "text-white" : "text-slate-900"
+                          }`}
+                        >
                           {t.name}
                         </h4>
                         <span
@@ -400,9 +460,11 @@ export function TemplateShowcase() {
                       </div>
 
                       {/* Description */}
-                      <p className={`text-xs mt-1.5 line-clamp-2 leading-relaxed font-medium ${
-                        isSelected ? "text-slate-600" : isDark ? "text-slate-400" : "text-slate-600"
-                      }`}>
+                      <p
+                        className={`text-xs mt-1.5 line-clamp-2 leading-relaxed font-medium ${
+                          isSelected ? "text-slate-600" : isDark ? "text-slate-400" : "text-slate-600"
+                        }`}
+                      >
                         {t.description}
                       </p>
                     </div>
@@ -420,7 +482,7 @@ export function TemplateShowcase() {
                       <span
                         className={`text-xs font-black flex items-center gap-1 transition ${
                           isSelected
-                            ? "text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-200"
+                            ? "text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200"
                             : isDark
                             ? "text-slate-400 hover:text-white"
                             : "text-slate-500 hover:text-slate-900"

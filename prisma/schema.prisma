@@ -68,7 +68,7 @@ model Store {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  salesUser     User?                 @relation("SalesStoreRelation", fields: [salesUserId], references: [id])
+  salesUser     User?                 @relation("SalesStoreRelation", fields: [salesUserId], references: [id], onDelete: SetNull)
   products      Product[]
   tradeInOffers TradeInOffer[]
   users         User[]

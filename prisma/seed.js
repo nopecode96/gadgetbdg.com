@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Cleaning up old database records...");
   // Hapus data child terlebih dahulu untuk menjaga relasi
+  await prisma.salesCommissionLog.deleteMany({});
   await prisma.tradeInOffer.deleteMany({});
   await prisma.subscriptionPayment.deleteMany({});
   await prisma.product.deleteMany({});
@@ -245,16 +246,6 @@ async function main() {
             status: "APPROVED",
             receiptUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80",
             notes: "Langganan Paket Pro 1 Bulan - Verified via QRIS",
-            commissions: {
-              create: [
-                {
-                  salesUserId: salesAgent.id,
-                  amount: 100000,
-                  tier: "PRO",
-                  status: "PENDING",
-                },
-              ],
-            },
           },
         ],
       },
@@ -417,6 +408,23 @@ async function main() {
       },
     },
   });
+
+  // Buat SalesCommissionLog terpisah setelah storePro & payment sudah ada ID-nya
+  const storeProfirstPayment = await prisma.subscriptionPayment.findFirst({
+    where: { storeId: storePro.id },
+  });
+  if (storeProfirstPayment) {
+    await prisma.salesCommissionLog.create({
+      data: {
+        salesUserId: salesAgent.id,
+        storeId: storePro.id,
+        paymentId: storeProfirstPayment.id,
+        tier: "PRO",
+        amount: 100000,
+        status: "PENDING",
+      },
+    });
+  }
 
   // =========================================================================
   // 4. Toko 3: PAKET ADVANCE (Rp 1.000.000/bln)

@@ -48,74 +48,59 @@ export function StoreHomeView({
   const heroHighlight = displayProducts[0];
   const bestDeals = displayProducts.slice(1, 7);
 
-  // Visual Quick Category Icons (Pilar C)
-  const visualCategories = [
-    {
-      id: "PHONE",
-      label: "Phone",
-      icon: Smartphone,
-      bgColor: "bg-blue-50 dark:bg-blue-950/60",
-      borderColor: "border-blue-200/80 dark:border-blue-900/60",
-      iconColor: "text-blue-600 dark:text-blue-400",
-      filter: { category: "phone" },
-    },
-    {
-      id: "TABLET",
-      label: "Tablet",
-      icon: Tablet,
-      bgColor: "bg-cyan-50 dark:bg-cyan-950/60",
-      borderColor: "border-cyan-200/80 dark:border-cyan-900/60",
-      iconColor: "text-cyan-600 dark:text-cyan-400",
-      filter: { category: "tablet" },
-    },
-    {
-      id: "WATCH",
-      label: "Watch",
-      icon: Watch,
-      bgColor: "bg-purple-50 dark:bg-purple-950/60",
-      borderColor: "border-purple-200/80 dark:border-purple-900/60",
-      iconColor: "text-purple-600 dark:text-purple-400",
-      filter: { category: "watch" },
-    },
-    {
-      id: "AUDIO",
-      label: "Audio",
-      icon: Headphones,
-      bgColor: "bg-rose-50 dark:bg-rose-950/60",
-      borderColor: "border-rose-200/80 dark:border-rose-900/60",
-      iconColor: "text-rose-600 dark:text-rose-400",
-      filter: { category: "audio" },
-    },
-    {
-      id: "CHARGER",
-      label: "Charger",
-      icon: Zap,
-      bgColor: "bg-amber-50 dark:bg-amber-950/60",
-      borderColor: "border-amber-200/80 dark:border-amber-900/60",
-      iconColor: "text-amber-600 dark:text-amber-400",
-      filter: { category: "charger" },
-    },
-    {
-      id: "TRADEIN",
-      label: "Trade-In",
-      icon: RefreshCw,
-      bgColor: "bg-emerald-50 dark:bg-emerald-950/60",
-      borderColor: "border-emerald-200/80 dark:border-emerald-900/60",
-      iconColor: "text-emerald-600 dark:text-emerald-400",
-      action: "trade-in" as const,
-    },
-  ];
+  // Smart Preset Filters (Opsi 1): ALL | IPHONE | ANDROID | GAMING | BUDGET | LIKENEW
+  const [activeFilter, setActiveFilter] = React.useState<
+    "ALL" | "IPHONE" | "ANDROID" | "GAMING" | "BUDGET" | "LIKENEW"
+  >("ALL");
 
-  function handleCategoryClick(cat: (typeof visualCategories)[number]) {
-    if (cat.action === "trade-in") {
-      onNavigateTab("trade-in");
-      return;
-    }
-    if (onSelectCategoryFilter && cat.filter) {
-      onSelectCategoryFilter(cat.filter);
-    }
-    onNavigateTab("list");
-  }
+  const smartFilteredProducts = React.useMemo(() => {
+    return displayProducts.filter((p) => {
+      if (activeFilter === "ALL") return true;
+      const brandLower = (p.brand || "").toLowerCase();
+      const nameLower = (p.name || "").toLowerCase();
+
+      if (activeFilter === "IPHONE") {
+        return brandLower === "apple" || nameLower.includes("iphone");
+      }
+      if (activeFilter === "ANDROID") {
+        return brandLower !== "apple" && !nameLower.includes("iphone");
+      }
+      if (activeFilter === "GAMING") {
+        return (
+          brandLower.includes("rog") ||
+          brandLower.includes("iqoo") ||
+          brandLower.includes("poco") ||
+          nameLower.includes("rog") ||
+          nameLower.includes("iqoo") ||
+          nameLower.includes("poco") ||
+          nameLower.includes("gaming")
+        );
+      }
+      if (activeFilter === "BUDGET") {
+        return Number(p.price || 0) <= 3000000;
+      }
+      if (activeFilter === "LIKENEW") {
+        const cond = (p.condition || "").toUpperCase();
+        return (
+          cond === "LIKE_NEW" ||
+          cond.includes("MULUS") ||
+          cond.includes("99%") ||
+          cond.includes("98%") ||
+          cond.includes("LIKE NEW")
+        );
+      }
+      return true;
+    });
+  }, [displayProducts, activeFilter]);
+
+  const smartPills = [
+    { id: "ALL" as const, label: "Semua Unit", icon: "📱", desc: "Semua Stok" },
+    { id: "IPHONE" as const, label: "iPhone", icon: "🍎", desc: "Apple iBox" },
+    { id: "ANDROID" as const, label: "Android", icon: "🤖", desc: "Samsung & More" },
+    { id: "GAMING" as const, label: "Gaming / FPS", icon: "🎮", desc: "ROG • iQOO • POCO" },
+    { id: "BUDGET" as const, label: "Budget < 3 Jt", icon: "🏷️", desc: "Hemat Berkualitas" },
+    { id: "LIKENEW" as const, label: "Mulus 99%", icon: "✨", desc: "Grade A+ Like New" },
+  ];
 
   return (
     <div className="space-y-6 p-4 animate-fade-in text-xs font-sans pb-10">
@@ -182,38 +167,45 @@ export function StoreHomeView({
         </div>
       </div>
 
-      {/* ── 2. VISUAL QUICK CATEGORY ICONS (Pilar C: Phone, Tablet, Watch, Audio, Charger) ── */}
+      {/* ── 2. SMART PRESET FILTERS (Filter Cepat Katalog Real-Time) ── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs px-0.5">
-          <span className={`font-extrabold tracking-tight ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-            Kategori Pilihan
+          <div className="flex items-center gap-1.5 font-black">
+            <span className="text-sm">🎯</span>
+            <span className={isDark ? "text-slate-100" : "text-slate-900"}>
+              Smart Filter Koleksi
+            </span>
+          </div>
+          <span className="text-[10px] text-slate-400 font-bold">
+            {smartFilteredProducts.length} Unit Sesuai
           </span>
-          <button
-            onClick={() => onNavigateTab("list")}
-            className={`text-[11px] font-bold hover:underline ${colors.accentText}`}
-          >
-            Lihat Semua →
-          </button>
         </div>
 
-        <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1">
-          {visualCategories.map((cat) => {
-            const Icon = cat.icon;
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          {smartPills.map((pill) => {
+            const isSelected = activeFilter === pill.id;
             return (
-              <div
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat)}
-                className="flex flex-col items-center gap-1.5 cursor-pointer shrink-0 group select-none min-w-[56px]"
+              <button
+                key={pill.id}
+                type="button"
+                onClick={() => setActiveFilter(pill.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl shrink-0 transition-all duration-200 select-none ${
+                  isSelected
+                    ? isDark
+                      ? "bg-[#00e5b3] text-slate-950 font-black border-2 border-[#00e5b3] shadow-md shadow-emerald-500/20 scale-105"
+                      : "bg-slate-950 text-white font-black border-2 border-slate-950 shadow-md scale-105"
+                    : isDark
+                    ? "bg-slate-900/90 text-slate-300 border-2 border-slate-800 hover:border-slate-700"
+                    : "bg-white text-slate-700 border-2 border-slate-200/90 hover:border-slate-300 shadow-2xs"
+                }`}
               >
-                <div
-                  className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-200 group-hover:scale-105 group-active:scale-95 shadow-2xs border ${cat.bgColor} ${cat.borderColor} ${cat.iconColor}`}
-                >
-                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-sm">{pill.icon}</span>
+                <div className="text-left">
+                  <div className="text-xs font-black leading-tight whitespace-nowrap">
+                    {pill.label}
+                  </div>
                 </div>
-                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-slate-950 dark:group-hover:text-white transition">
-                  {cat.label}
-                </span>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -357,7 +349,9 @@ export function StoreHomeView({
           <div className="flex items-center gap-1.5 font-black">
             <Flame className="w-4 h-4 text-rose-500 fill-rose-500 animate-pulse" />
             <span className={isDark ? "text-white" : "text-slate-950"}>
-              Rekomendasi Siap COD Hari Ini
+              {activeFilter === "ALL"
+                ? "Rekomendasi Siap COD Hari Ini"
+                : `Hasil Filter: ${smartPills.find((p) => p.id === activeFilter)?.label}`}
             </span>
           </div>
           <button
@@ -368,16 +362,30 @@ export function StoreHomeView({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {(bestDeals.length > 0 ? bestDeals : displayProducts.slice(0, 4)).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              store={store}
-              themeConfig={themeConfig}
-            />
-          ))}
-        </div>
+        {smartFilteredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3">
+            {smartFilteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                store={store}
+                themeConfig={themeConfig}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className={`p-8 text-center rounded-3xl border ${
+            isDark ? "bg-slate-900 border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"
+          }`}>
+            <p className="font-bold text-xs">Belum ada unit yang cocok dengan filter ini.</p>
+            <button
+              onClick={() => setActiveFilter("ALL")}
+              className="mt-2 text-xs font-black text-indigo-600 hover:underline"
+            >
+              Reset ke Semua Unit
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── 5. MINI BANNER CTA: TRADE IN ── */}

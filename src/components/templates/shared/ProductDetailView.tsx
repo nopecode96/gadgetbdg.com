@@ -323,115 +323,79 @@ export function ProductDetailView({
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
             {/* Battery Health (khusus iPhone / jika ada) */}
-            <div className={`rounded-2xl p-3.5 shadow-xs ${
-              isDark
-                ? "bg-slate-950 border border-slate-800"
-                : "bg-slate-50 border border-slate-200"
-            }`}>
-              <span className={`text-xs font-extrabold tracking-wider block mb-1 uppercase ${
-                isDark ? "text-amber-400" : "text-slate-600"
-              }`}>
+            <div className="bg-white border-2 border-slate-200 dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider uppercase block mb-1">
                 <span className="flex items-center gap-1.5">
                   <BatteryCharging className="w-3.5 h-3.5 text-amber-500" />
                   BATTERY HEALTH
                 </span>
               </span>
-              <div className={`font-black text-sm sm:text-base ${isDark ? "text-white" : "text-slate-950"}`}>
+              <div className="text-slate-950 dark:text-white font-black text-base">
                 {product.batteryHealth ? `${product.batteryHealth}% Normal` : "Original Bawaan"}
               </div>
             </div>
 
             {/* Legalitas IMEI */}
-            <div className={`rounded-2xl p-3.5 shadow-xs ${
-              isDark
-                ? "bg-slate-950 border border-slate-800"
-                : "bg-slate-50 border border-slate-200"
-            }`}>
-              <span className={`text-xs font-extrabold tracking-wider block mb-1 uppercase ${
-                isDark ? "text-emerald-400" : "text-slate-600"
-              }`}>
+            <div className="bg-white border-2 border-slate-200 dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider uppercase block mb-1">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                   LEGALITAS IMEI
                 </span>
               </span>
-              <div className={`font-black text-sm sm:text-base ${isDark ? "text-white" : "text-slate-950"}`}>
+              <div className="text-slate-950 dark:text-white font-black text-base">
                 {product.imeiStatus || "Resmi Terdaftar"}
               </div>
             </div>
 
             {/* RAM & Storage */}
-            <div className={`rounded-2xl p-3.5 shadow-xs ${
-              isDark
-                ? "bg-slate-950 border border-slate-800"
-                : "bg-slate-50 border border-slate-200"
-            }`}>
-              <span className={`text-xs font-extrabold tracking-wider block mb-1 uppercase ${
-                isDark ? "text-blue-400" : "text-slate-600"
-              }`}>
+            <div className="bg-white border-2 border-slate-200 dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider uppercase block mb-1">
                 <span className="flex items-center gap-1.5">
                   <HardDrive className="w-3.5 h-3.5 text-blue-500" />
                   RAM &amp; STORAGE
                 </span>
               </span>
-              <div className={`font-black text-sm sm:text-base ${isDark ? "text-white" : "text-slate-950"}`}>
+              <div className="text-slate-950 dark:text-white font-black text-base">
                 {product.ramRom || "-"}
               </div>
             </div>
 
             {/* Kelengkapan Unit */}
-            <div className={`rounded-2xl p-3.5 shadow-xs ${
-              isDark
-                ? "bg-slate-950 border border-slate-800"
-                : "bg-slate-50 border border-slate-200"
-            }`}>
-              <span className={`text-xs font-extrabold tracking-wider block mb-1 uppercase ${
-                isDark ? "text-purple-400" : "text-slate-600"
-              }`}>
+            <div className="bg-white border-2 border-slate-200 dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider uppercase block mb-1">
                 <span className="flex items-center gap-1.5">
                   <Package className="w-3.5 h-3.5 text-purple-500" />
                   KELENGKAPAN
                 </span>
               </span>
-              <div className={`font-black text-sm sm:text-base ${isDark ? "text-white" : "text-slate-950"}`}>
+              <div className="text-slate-950 dark:text-white font-black text-base">
                 {product.completeness || "Fullset"}
               </div>
             </div>
 
             {/* Kondisi Fisik */}
-            <div className={`rounded-2xl p-3.5 shadow-xs ${
-              isDark
-                ? "bg-slate-950 border border-slate-800"
-                : "bg-slate-50 border border-slate-200"
-            }`}>
-              <span className={`text-xs font-extrabold tracking-wider block mb-1 uppercase ${
-                isDark ? "text-pink-400" : "text-slate-600"
-              }`}>
+            <div className="bg-white border-2 border-slate-200 dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider uppercase block mb-1">
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-pink-500" />
                   KONDISI FISIK
                 </span>
               </span>
-              <div className={`font-black text-sm sm:text-base ${isDark ? "text-white" : "text-slate-950"}`}>
+              <div className="text-slate-950 dark:text-white font-black text-base">
                 {product.condition || "98% Mulus"}
               </div>
             </div>
 
             {/* Brand */}
-            <div className={`rounded-2xl p-3.5 shadow-xs ${
-              isDark
-                ? "bg-slate-950 border border-slate-800"
-                : "bg-slate-50 border border-slate-200"
-            }`}>
-              <span className={`text-xs font-extrabold tracking-wider block mb-1 uppercase ${
-                isDark ? "text-slate-400" : "text-slate-600"
-              }`}>
+            <div className="bg-white border-2 border-slate-200 dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider uppercase block mb-1">
                 <span className="flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5 text-slate-500" />
                   MERK / BRAND
                 </span>
               </span>
-              <div className={`font-black text-sm sm:text-base ${isDark ? "text-white" : "text-slate-950"}`}>
+              <div className="text-slate-950 dark:text-white font-black text-base">
                 {product.brand}
               </div>
             </div>
@@ -439,21 +403,13 @@ export function ProductDetailView({
         </div>
 
         {/* 4. CATATAN MINUS (KONTRAK MUTLAK) */}
-        <div className={`rounded-2xl p-4 border-2 shadow-xs ${
-          isDark
-            ? "bg-amber-950/40 border-amber-600/70"
-            : "bg-amber-50 border-amber-300"
-        }`}>
-          <div className={`text-xs uppercase font-black flex items-center gap-1.5 mb-1.5 ${
-            isDark ? "text-amber-300" : "text-amber-900"
-          }`}>
+        <div className="bg-amber-50 border-2 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50 rounded-2xl p-4 shadow-xs">
+          <div className="text-amber-950 dark:text-amber-300 font-black text-xs uppercase flex items-center gap-1.5 mb-1.5">
             <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>CATATAN MINUS &amp; HASIL UJI FUNGSI TOKO:</span>
           </div>
 
-          <p className={`text-sm font-bold leading-relaxed ${
-            isDark ? "text-amber-100" : "text-slate-900"
-          }`}>
+          <p className="text-slate-900 dark:text-slate-100 font-bold text-sm leading-relaxed">
             {product.minusNotes && product.minusNotes.trim().length > 0
               ? product.minusNotes
               : "Unit mulus normal tanpa minus fungsional. Lolos 30 titik uji kelayakan toko."}
@@ -462,24 +418,24 @@ export function ProductDetailView({
 
         {/* 4.5. LOKASI FISIK CABANG & READY STOCK */}
         {product.branch ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 font-semibold space-y-3 shadow-xs">
+          <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-slate-900 dark:text-slate-100 font-semibold space-y-3 shadow-xs">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Lokasi Unit Fisik / Titik COD
                   </div>
-                  <div className="font-black text-sm sm:text-base text-slate-950">
+                  <div className="font-black text-sm sm:text-base text-slate-950 dark:text-white">
                     📍 Ready Stock di: {product.branch.name} {product.branch.isMain && "(Pusat)"}
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="text-xs leading-relaxed text-slate-700 font-medium">
+            <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
               {product.branch.address}
             </p>
 
@@ -489,7 +445,7 @@ export function ProductDetailView({
                   href={product.branch.mapsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-black transition border border-blue-200"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-xs font-black transition border border-blue-200 dark:border-blue-800"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>Buka Petunjuk Arah (Google Maps)</span>
@@ -498,10 +454,10 @@ export function ProductDetailView({
             )}
           </div>
         ) : store.address ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 font-semibold space-y-2 shadow-xs">
+          <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-slate-900 dark:text-slate-100 font-semibold space-y-2 shadow-xs">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
-              <div className="font-black text-xs sm:text-sm text-slate-950">
+              <div className="font-black text-xs sm:text-sm text-slate-950 dark:text-white">
                 Lokasi Toko: {store.address}
               </div>
             </div>
@@ -511,7 +467,7 @@ export function ProductDetailView({
                   href={store.mapsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   <ExternalLink className="w-3 h-3" />
                   <span>Buka Peta Google Maps</span>
@@ -522,12 +478,12 @@ export function ProductDetailView({
         ) : null}
 
         {/* Jaminan & Keamanan Transaksi Toko */}
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-950 font-medium text-xs leading-relaxed space-y-1.5 shadow-xs">
-          <div className="font-black flex items-center gap-1.5 text-emerald-900">
+        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-slate-900 dark:text-slate-100 space-y-1.5 shadow-xs">
+          <div className="font-black flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span className="text-xs font-black uppercase tracking-wider">Jaminan Belanja Aman GadgetBDG</span>
           </div>
-          <p className="text-xs text-emerald-950 leading-relaxed font-semibold">
+          <p className="text-xs leading-relaxed font-medium text-slate-700 dark:text-slate-300">
             Bisa COD dan cek fisik langsung sepuasnya di konter kami ({product.branch?.name || store.address || "BEC Bandung"}). Garansi personal toko penggantian unit atau servis jika ada kendala non-human error.
           </p>
         </div>

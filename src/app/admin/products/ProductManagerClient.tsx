@@ -71,7 +71,7 @@ export function ProductManagerClient({
         prev.map((item) => (item.id === productId ? (res.product as any) : item))
       );
     } else {
-      alert("Gagal memperbarui status unit.");
+      alert(res.error || "Gagal memperbarui status unit.");
     }
   }
 

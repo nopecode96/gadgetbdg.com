@@ -193,10 +193,10 @@ export function StoreRegistrationModal({
               >
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-slate-900">STARTER</div>
-                  <div className="font-extrabold text-slate-900">Rp 200.000 /bln</div>
+                  <div className="font-extrabold text-slate-900">Rp 250.000 /bln</div>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Katalog s/d 50 Unit HP • Subdomain resmi • Tombol order WA langsung.
+                  Katalog s/d 15 Unit HP Aktif • 1 Akun Admin • 2 Template Storefront.
                 </p>
               </div>
 
@@ -214,10 +214,10 @@ export function StoreRegistrationModal({
                 </span>
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-slate-900">PRO</div>
-                  <div className="font-extrabold text-blue-600">Rp 500.000 /bln</div>
+                  <div className="font-extrabold text-blue-600">Rp 600.000 /bln</div>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Dukungan Custom Domain (.com) • Katalog s/d 250 HP • Prioritas listing direktori.
+                  Katalog s/d 30 HP Aktif • 3 Akun Admin • 10 Template • Watermark Otomatis • Custom Domain.
                 </p>
               </div>
 
@@ -235,7 +235,7 @@ export function StoreRegistrationModal({
                   <div className="font-extrabold text-purple-600">Rp 1.000.000 /bln</div>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Unlimited Unit HP • Multi-Cabang & Multi-Admin Staff • Dedicated support.
+                  Kapasitas Stok UNLIMITED • 5 Akun per Cabang • 30 Template Bebas Ganti • Watermark Otomatis.
                 </p>
               </div>
             </div>

@@ -18,6 +18,7 @@ async function ensureDemoData() {
       primaryColor: "#2563eb",
       logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
       bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: true,
       isActive: true,
     },
     create: {
@@ -32,6 +33,8 @@ async function ensureDemoData() {
       primaryColor: "#2563eb",
       logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
       bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: true,
+      lastTemplateChangeAt: new Date(Date.now() - 40 * 24 * 3600 * 1000),
       isActive: true,
     },
   });
@@ -121,6 +124,7 @@ async function ensureDemoData() {
       primaryColor: "#10b981",
       logoUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&auto=format&fit=crop&q=80",
       bannerUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: false,
       isActive: true,
     },
     create: {
@@ -135,6 +139,8 @@ async function ensureDemoData() {
       primaryColor: "#10b981",
       logoUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&auto=format&fit=crop&q=80",
       bannerUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: false,
+      lastTemplateChangeAt: null,
       isActive: true,
     },
   });

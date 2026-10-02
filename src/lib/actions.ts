@@ -65,97 +65,47 @@ export async function createTradeInOffer(formData: FormData) {
   }
 }
 
+import {
+  createProduct as guardedCreateProduct,
+  updateProductStatus as guardedUpdateProductStatus,
+  deleteProduct as guardedDeleteProduct,
+} from "./actions/product-actions";
+
+import {
+  changeStoreTemplate as guardedChangeStoreTemplate,
+  updateStoreSettings as guardedUpdateStoreSettings,
+} from "./actions/store-actions";
+
+export async function createProduct(formData: FormData) {
+  return guardedCreateProduct(formData);
+}
+
+export async function updateProductStatus(productId: string, newStatus: "AVAILABLE" | "BOOKED" | "SOLD") {
+  return guardedUpdateProductStatus(productId, newStatus);
+}
+
+export async function deleteProduct(productId: string) {
+  return guardedDeleteProduct(productId);
+}
+
+export async function changeStoreTemplate(storeId: string, newTemplateId: string) {
+  return guardedChangeStoreTemplate(storeId, newTemplateId);
+}
+
+export async function updateStoreSettings(formData: FormData) {
+  return guardedUpdateStoreSettings(formData);
+}
+
 export async function toggleProductStatus(productId: string, newStatus: "AVAILABLE" | "BOOKED" | "SOLD") {
-  try {
-    const updated = await prisma.product.update({
-      where: { id: productId },
-      data: { status: newStatus },
-      include: { store: true },
-    });
-
-    revalidatePath("/admin/products");
-    if (updated.store?.slug) {
-      revalidatePath(`/${updated.store.slug}`);
-    }
-
-    return { success: true, product: updated };
-  } catch (error: any) {
-    console.error("Error updating product status:", error);
-    return { success: false, error: error?.message || "Gagal mengubah status unit." };
-  }
+  return guardedUpdateProductStatus(productId, newStatus);
 }
 
 export async function createProductAction(formData: FormData) {
-  try {
-    const storeId = formData.get("storeId") as string;
-    const name = formData.get("name") as string;
-    const brand = formData.get("brand") as string;
-    const priceRaw = formData.get("price") as string;
-    const ramRom = formData.get("ramRom") as string;
-    const batteryHealthRaw = formData.get("batteryHealth") as string;
-    const imeiStatus = formData.get("imeiStatus") as string;
-    const completeness = formData.get("completeness") as string;
-    const condition = formData.get("condition") as string;
-    const minusNotes = formData.get("minusNotes") as string;
-    const imageUrl = formData.get("imageUrl") as string;
-
-    if (!storeId || !name || !brand || !priceRaw || !ramRom || !imeiStatus || !completeness || !condition) {
-      return { success: false, error: "Mohon lengkapi field wajib." };
-    }
-
-    const price = parseInt(priceRaw.replace(/\D/g, ""), 10);
-    const batteryHealth = batteryHealthRaw ? parseInt(batteryHealthRaw, 10) : null;
-    const images = imageUrl ? [imageUrl] : [];
-
-    const product = await prisma.product.create({
-      data: {
-        storeId,
-        name,
-        brand,
-        price,
-        ramRom,
-        batteryHealth: batteryHealth && !isNaN(batteryHealth) ? batteryHealth : null,
-        imeiStatus,
-        completeness,
-        condition,
-        minusNotes: minusNotes || null,
-        status: "AVAILABLE",
-        images,
-      },
-      include: {
-        store: true,
-      },
-    });
-
-    revalidatePath("/admin/products");
-    if (product.store?.slug) {
-      revalidatePath(`/${product.store.slug}`);
-    }
-
-    return { success: true, product };
-  } catch (error: any) {
-    console.error("Error creating product:", error);
-    return { success: false, error: error?.message || "Gagal menambahkan produk." };
-  }
+  return guardedCreateProduct(formData);
 }
 
 export async function deleteProductAction(productId: string) {
-  try {
-    const deleted = await prisma.product.delete({
-      where: { id: productId },
-      include: { store: true },
-    });
-
-    revalidatePath("/admin/products");
-    if (deleted.store?.slug) {
-      revalidatePath(`/${deleted.store.slug}`);
-    }
-
-    return { success: true };
-  } catch (error: any) {
-    console.error("Error deleting product:", error);
-    return { success: false, error: error?.message || "Gagal menghapus produk." };
-  }
+  return guardedDeleteProduct(productId);
 }
 
 // -------------------------------------------------------------
@@ -276,72 +226,6 @@ export async function registerNewStoreAction(formData: FormData) {
 }
 
 export async function updateStoreSettingsAction(formData: FormData) {
-  try {
-    const storeId = formData.get("storeId") as string;
-    const name = formData.get("name") as string;
-    const whatsapp = formData.get("whatsapp") as string;
-    const address = formData.get("address") as string;
-    const mapsUrl = formData.get("mapsUrl") as string;
-    const primaryColor = formData.get("primaryColor") as string;
-    const templateId = formData.get("templateId") as string;
-    const rawCustomDomain = formData.get("customDomain") as string;
-
-    if (!storeId || !name || !whatsapp) {
-      return { success: false, error: "Nama toko dan WhatsApp wajib diisi." };
-    }
-
-    let customDomain = rawCustomDomain ? rawCustomDomain.toLowerCase().trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "") : null;
-
-    // Check if store tier allows custom domain
-    const currentStore = await prisma.store.findUnique({
-      where: { id: storeId },
-    });
-
-    if (!currentStore) {
-      return { success: false, error: "Toko tidak ditemukan." };
-    }
-
-    if (customDomain && currentStore.tier === "STARTER") {
-      return { success: false, error: "Custom domain hanya tersedia untuk paket PRO dan ADVANCE." };
-    }
-
-    // Check custom domain collision
-    if (customDomain && customDomain !== currentStore.customDomain) {
-      const existingDomain = await prisma.store.findUnique({
-        where: { customDomain },
-      });
-      if (existingDomain) {
-        return { success: false, error: "Custom domain ini sudah dipakai oleh toko lain." };
-      }
-    }
-
-    let cleanWa = whatsapp.replace(/\D/g, "");
-    if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
-
-    const updated = await prisma.store.update({
-      where: { id: storeId },
-      data: {
-        name,
-        whatsapp: cleanWa,
-        address: address || null,
-        mapsUrl: mapsUrl || null,
-        primaryColor: primaryColor || currentStore.primaryColor,
-        templateId: templateId || currentStore.templateId,
-        customDomain: customDomain || null,
-      },
-    });
-
-    revalidatePath("/admin/settings");
-    revalidatePath("/admin");
-    revalidatePath(`/${updated.slug}`);
-    if (updated.customDomain) {
-      revalidatePath(`/custom-domain/${updated.customDomain}`);
-    }
-
-    return { success: true, store: updated };
-  } catch (error: any) {
-    console.error("Error updating store settings:", error);
-    return { success: false, error: error?.message || "Gagal menyimpan pengaturan toko." };
-  }
+  return updateStoreSettings(formData);
 }
 

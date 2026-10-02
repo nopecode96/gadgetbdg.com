@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldAlert, Store, Globe, ArrowLeft, BarChart3, Receipt } from "lucide-react";
+import { ShieldAlert, Store, Globe, ArrowLeft, BarChart3, Receipt, Users, ShieldCheck } from "lucide-react";
 
 export function SuperAdminNav() {
   return (
@@ -21,6 +21,18 @@ export function SuperAdminNav() {
               <BarChart3 className="w-4 h-4 text-indigo-400" /> Ringkasan Platform
             </Link>
             <Link
+              href="/super-admin/leads"
+              className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"
+            >
+              <Users className="w-4 h-4 text-sky-400" /> Calon Klien (Leads)
+            </Link>
+            <Link
+              href="/super-admin/billing"
+              className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"
+            >
+              <Receipt className="w-4 h-4 text-amber-400" /> Verifikasi Bayar
+            </Link>
+            <Link
               href="/super-admin/stores"
               className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"
             >
@@ -33,10 +45,10 @@ export function SuperAdminNav() {
               <Globe className="w-4 h-4 text-blue-400" /> Custom Domains
             </Link>
             <Link
-              href="/super-admin/billing"
+              href="/super-admin/admins"
               className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"
             >
-              <Receipt className="w-4 h-4 text-amber-400" /> Verifikasi Bayar
+              <ShieldCheck className="w-4 h-4 text-purple-400" /> Tim SaaS
             </Link>
           </nav>
         </div>

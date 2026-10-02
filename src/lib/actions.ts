@@ -98,6 +98,14 @@ export async function approvePaymentAction(paymentId: string) {
   return baseApprovePayment(paymentId);
 }
 
+export {
+  resetStoreOwnerPasswordAction,
+  extendStoreSubscriptionAction,
+  createSaasStaffAction,
+  deleteSaasStaffAction,
+  manualActivateStoreAction,
+} from "./actions/saas-admin-actions";
+
 export async function rejectPaymentAction(paymentId: string, notes: string) {
   return baseRejectPayment(paymentId, notes);
 }

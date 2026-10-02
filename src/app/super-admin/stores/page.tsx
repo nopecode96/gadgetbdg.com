@@ -7,6 +7,10 @@ export const revalidate = 0;
 export default async function SuperAdminStoresPage() {
   const storesRaw = await prisma.store.findMany({
     include: {
+      users: {
+        where: { role: "STORE_OWNER" },
+        select: { id: true, name: true, email: true },
+      },
       _count: {
         select: { products: true, tradeInOffers: true },
       },
@@ -20,6 +24,8 @@ export default async function SuperAdminStoresPage() {
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt.toISOString(),
     lastTemplateChangeAt: s.lastTemplateChangeAt ? s.lastTemplateChangeAt.toISOString() : null,
+    subscriptionExpiresAt: s.subscriptionExpiresAt ? s.subscriptionExpiresAt.toISOString() : null,
+    owner: s.users.length > 0 ? s.users[0] : null,
   }));
 
   return (

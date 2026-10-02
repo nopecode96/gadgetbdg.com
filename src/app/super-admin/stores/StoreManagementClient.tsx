@@ -14,11 +14,17 @@ import {
   Droplets,
   Clock,
   ChevronDown,
+  KeyRound,
+  CalendarPlus,
+  Shield,
+  X,
 } from "lucide-react";
 import {
   toggleStoreActiveAction,
   updateStoreTierAction,
   resetTemplateCooldownAction,
+  resetStoreOwnerPasswordAction,
+  extendStoreSubscriptionAction,
 } from "@/lib/actions";
 
 interface StoreItem {
@@ -30,10 +36,16 @@ interface StoreItem {
   tier: "STARTER" | "PRO" | "ADVANCE";
   templateId: string;
   hasWatermark: boolean;
-  lastTemplateChangeAt: string | null; // ISO string (serialized from server)
+  lastTemplateChangeAt: string | null; // ISO string
+  subscriptionExpiresAt: string | null; // ISO string
   isActive: boolean;
   address: string | null;
   createdAt: string;
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
   _count: {
     products: number;
     tradeInOffers: number;
@@ -56,11 +68,22 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
+  // Modal State: Reset Password
+  const [pwdModalStore, setPwdModalStore] = useState<StoreItem | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [isResettingPwd, setIsResettingPwd] = useState(false);
+
+  // Modal State: Extend Subscription
+  const [extendModalStore, setExtendModalStore] = useState<StoreItem | null>(null);
+  const [additionalDays, setAdditionalDays] = useState(30);
+  const [isExtendingSub, setIsExtendingSub] = useState(false);
+
   const filteredStores = stores.filter((s) => {
     const matchSearch =
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.slug.toLowerCase().includes(search.toLowerCase()) ||
-      (s.customDomain && s.customDomain.toLowerCase().includes(search.toLowerCase()));
+      (s.customDomain && s.customDomain.toLowerCase().includes(search.toLowerCase())) ||
+      (s.owner && s.owner.email.toLowerCase().includes(search.toLowerCase()));
     const matchTier = tierFilter === "ALL" || s.tier === tierFilter;
     return matchSearch && matchTier;
   });
@@ -121,6 +144,54 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
     }
   }
 
+  async function handleConfirmResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pwdModalStore) return;
+    if (newPassword.length < 6) {
+      alert("Password minimal 6 karakter.");
+      return;
+    }
+
+    setIsResettingPwd(true);
+    const res = await resetStoreOwnerPasswordAction(pwdModalStore.id, newPassword);
+    setIsResettingPwd(false);
+
+    if (res.success) {
+      alert(res.message);
+      setPwdModalStore(null);
+      setNewPassword("");
+    } else {
+      alert(res.error || "Gagal mereset password.");
+    }
+  }
+
+  async function handleConfirmExtendSubscription(e: React.FormEvent) {
+    e.preventDefault();
+    if (!extendModalStore) return;
+
+    setIsExtendingSub(true);
+    const res = await extendStoreSubscriptionAction(extendModalStore.id, additionalDays);
+    setIsExtendingSub(false);
+
+    if (res.success) {
+      alert(res.message);
+      setStores((prev) =>
+        prev.map((item) =>
+          item.id === extendModalStore.id
+            ? {
+                ...item,
+                subscriptionExpiresAt: res.subscriptionExpiresAt || item.subscriptionExpiresAt,
+                isActive: res.isActive !== undefined ? res.isActive : item.isActive,
+              }
+            : item
+        )
+      );
+      setExtendModalStore(null);
+    } else {
+      alert(res.error || "Gagal memperpanjang langganan.");
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Title & Filters */}
@@ -133,7 +204,7 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Atur tier paket, status operasional, cooldown template, dan pantau katalog masing-masing tenant.
+            Atur tier paket, status operasional, perpanjangan langganan, reset password admin toko, dan cooldown template.
           </p>
         </div>
 
@@ -144,7 +215,7 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari toko, subdomain, domain..."
+              placeholder="Cari toko, domain, email..."
               className="pl-9 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -168,15 +239,15 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
           <table className="w-full text-xs text-left">
             <thead className="bg-slate-900/90 text-slate-400 uppercase font-mono text-[10px] border-b border-slate-700">
               <tr>
-                <th className="px-5 py-4">Toko &amp; Info</th>
+                <th className="px-5 py-4">Toko &amp; Pemilik</th>
                 <th className="px-5 py-4">Subdomain / Domain</th>
                 <th className="px-5 py-4">Paket Tier</th>
                 <th className="px-5 py-4">Template</th>
-                <th className="px-5 py-4">Watermark</th>
+                <th className="px-5 py-4">Masa Aktif</th>
                 <th className="px-5 py-4">Cooldown Tema</th>
                 <th className="px-5 py-4">Unit HP</th>
                 <th className="px-5 py-4">Status</th>
-                <th className="px-5 py-4 text-right">Aksi</th>
+                <th className="px-5 py-4 text-right">Intervensi &amp; Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/60">
@@ -190,6 +261,9 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
                 filteredStores.map((store) => {
                   const isLoading = loadingId === store.id;
                   const cd = cooldownLabel(store.lastTemplateChangeAt);
+                  const isExpired =
+                    store.subscriptionExpiresAt &&
+                    new Date(store.subscriptionExpiresAt).getTime() < Date.now();
 
                   return (
                     <tr key={store.id} className="hover:bg-slate-750/50 transition">
@@ -201,8 +275,15 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
                           </div>
                           <span>{store.name}</span>
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5 pl-9">
-                          WA: {store.whatsapp}
+                        <div className="text-[11px] text-slate-400 mt-0.5 pl-9 space-y-0.5">
+                          {store.owner ? (
+                            <div className="text-slate-300 font-medium truncate max-w-[200px]" title={store.owner.email}>
+                              👤 {store.owner.name} ({store.owner.email})
+                            </div>
+                          ) : (
+                            <div className="text-amber-400/80">⚠️ Belum ada STORE_OWNER</div>
+                          )}
+                          <div>WA: +{store.whatsapp}</div>
                         </div>
                       </td>
 
@@ -259,14 +340,27 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
                         </span>
                       </td>
 
-                      {/* Watermark Badge */}
+                      {/* Masa Aktif Langganan */}
                       <td className="px-5 py-4">
-                        {store.hasWatermark ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">
-                            <Droplets className="w-3 h-3" /> Aktif
-                          </span>
+                        {store.subscriptionExpiresAt ? (
+                          <div>
+                            <span
+                              className={`font-mono text-[11px] font-bold ${
+                                isExpired ? "text-rose-400" : "text-emerald-400"
+                              }`}
+                            >
+                              {new Date(store.subscriptionExpiresAt).toLocaleDateString("id-ID", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </span>
+                            {isExpired && (
+                              <div className="text-[10px] text-rose-500 font-semibold">Kadaluarsa</div>
+                            )}
+                          </div>
                         ) : (
-                          <span className="text-slate-600 text-[10px]">–</span>
+                          <span className="text-slate-500 font-mono text-[11px]">Selamanya</span>
                         )}
                       </td>
 
@@ -329,31 +423,57 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
                             </>
                           ) : (
                             <>
-                              <XCircle className="w-3 h-3" /> Nonaktif
+                              <XCircle className="w-3 h-3" /> Beku
                             </>
                           )}
                         </span>
                       </td>
 
-                      {/* Actions */}
+                      {/* Intervensi & Aksi */}
                       <td className="px-5 py-4 text-right">
-                        <button
-                          onClick={() => handleToggleActive(store)}
-                          disabled={isLoading}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition inline-flex items-center gap-1.5 ml-auto disabled:opacity-50 ${
-                            store.isActive
-                              ? "bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700/60"
-                              : "bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/60"
-                          }`}
-                          title="Toggle Status Toko"
-                        >
-                          {isLoading && loadingAction === "toggle" ? (
-                            <RefreshCw className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Power className="w-3 h-3" />
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Tombol Perpanjang Langganan */}
+                          <button
+                            onClick={() => setExtendModalStore(store)}
+                            title="Perpanjang Langganan (+Hari)"
+                            className="p-1.5 rounded-lg bg-slate-700 hover:bg-indigo-600/40 text-slate-300 hover:text-indigo-300 border border-slate-600 transition"
+                          >
+                            <CalendarPlus className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Tombol Reset Password Owner */}
+                          {store.owner && (
+                            <button
+                              onClick={() => {
+                                setPwdModalStore(store);
+                                setNewPassword("");
+                              }}
+                              title={`Reset Kata Sandi Akun ${store.owner.email}`}
+                              className="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-600/40 text-slate-300 hover:text-amber-300 border border-slate-600 transition"
+                            >
+                              <KeyRound className="w-3.5 h-3.5" />
+                            </button>
                           )}
-                          <span>{store.isActive ? "Bekukan" : "Aktifkan"}</span>
-                        </button>
+
+                          {/* Tombol Freeze / Unfreeze */}
+                          <button
+                            onClick={() => handleToggleActive(store)}
+                            disabled={isLoading}
+                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition inline-flex items-center gap-1 disabled:opacity-50 ${
+                              store.isActive
+                                ? "bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/80"
+                                : "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/80"
+                            }`}
+                            title="Bekukan / Aktifkan Toko"
+                          >
+                            {isLoading && loadingAction === "toggle" ? (
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Power className="w-3 h-3" />
+                            )}
+                            <span>{store.isActive ? "Bekukan" : "Aktifkan"}</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -363,6 +483,149 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreI
           </table>
         </div>
       </div>
+
+      {/* Modal: Reset Password Owner */}
+      {pwdModalStore && pwdModalStore.owner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-400 font-bold">
+                <KeyRound className="w-5 h-5" />
+                <h3 className="text-white text-base">Reset Password Pemilik Toko</h3>
+              </div>
+              <button
+                onClick={() => setPwdModalStore(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Anda akan mereset kata sandi login untuk Admin Utama Toko{" "}
+              <strong className="text-white">{pwdModalStore.name}</strong>:
+            </p>
+
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1">
+              <div>
+                <span className="text-slate-500">Nama:</span>{" "}
+                <span className="text-white font-medium">{pwdModalStore.owner.name}</span>
+              </div>
+              <div>
+                <span className="text-slate-500">Email Login:</span>{" "}
+                <span className="text-indigo-400 font-mono font-medium">{pwdModalStore.owner.email}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleConfirmResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Password Baru (Min. 6 Karakter):
+                </label>
+                <input
+                  type="text"
+                  required
+                  minLength={6}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Misal: Gadgetbdg2026!#"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPwdModalStore(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isResettingPwd}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 transition flex items-center gap-1.5"
+                >
+                  {isResettingPwd ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <KeyRound className="w-3.5 h-3.5" />
+                  )}
+                  <span>Simpan &amp; Terapkan</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Extend Subscription */}
+      {extendModalStore && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-indigo-400 font-bold">
+                <CalendarPlus className="w-5 h-5" />
+                <h3 className="text-white text-base">Perpanjang Langganan Toko</h3>
+              </div>
+              <button
+                onClick={() => setExtendModalStore(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Tambahkan masa aktif langganan toko <strong className="text-white">{extendModalStore.name}</strong>{" "}
+              (Paket {extendModalStore.tier}). Status toko akan otomatis dipastikan <strong>AKTIF</strong>.
+            </p>
+
+            <form onSubmit={handleConfirmExtendSubscription} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Tambahan Masa Aktif:
+                </label>
+                <select
+                  value={additionalDays}
+                  onChange={(e) => setAdditionalDays(parseInt(e.target.value, 10))}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value={7}>+7 Hari (Trial Tambahan)</option>
+                  <option value={14}>+14 Hari (Kompensasi)</option>
+                  <option value={30}>+30 Hari (1 Bulan Penuh)</option>
+                  <option value={60}>+60 Hari (2 Bulan)</option>
+                  <option value={90}>+90 Hari (3 Bulan)</option>
+                  <option value={180}>+180 Hari (6 Bulan)</option>
+                  <option value={365}>+365 Hari (1 Tahun Penuh)</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setExtendModalStore(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isExtendingSub}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition flex items-center gap-1.5"
+                >
+                  {isExtendingSub ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <CalendarPlus className="w-3.5 h-3.5" />
+                  )}
+                  <span>Perpanjang Sekarang</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

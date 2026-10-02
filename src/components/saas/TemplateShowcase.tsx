@@ -15,6 +15,11 @@ import {
   Flame,
   Crown,
   Table,
+  Home,
+  Smartphone,
+  RefreshCw,
+  Store as StoreIcon,
+  Search,
 } from "lucide-react";
 import {
   TEMPLATE_LIST,
@@ -71,7 +76,7 @@ const MOCK_PRODUCTS: MockProduct[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Dynamic Smartphone Mockup Screen (Adapts to Archetype Layout)
+// Dynamic Smartphone Mockup Screen (Adapts to Archetype Layout + 5 Pillars)
 // ---------------------------------------------------------------------------
 function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
   const c = activeTheme.colors;
@@ -82,77 +87,83 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
     <div
       className={`w-full h-full ${c.bgMain} flex flex-col overflow-hidden text-left transition-colors duration-300 font-sans`}
     >
-      {/* ── 1. Archetype-Specific Top Header ── */}
-      {archetype === "keynote-obsidian" ? (
-        <div className="pt-2 px-3 pb-1">
-          <div className="bg-black/90 border border-zinc-800 rounded-full px-3 py-1 flex items-center justify-between shadow-lg">
-            <span className="text-[9px] font-black text-white flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              GadgetBdg Keynote
+      {/* ── 1. PILAR 1: Header Identitas Toko Nyata ── */}
+      <div
+        className={`pt-2 px-3 pb-2 border-b flex items-center justify-between gap-1.5 backdrop-blur-md shrink-0 ${
+          isDark ? "bg-slate-950/90 border-slate-800 text-white" : "bg-white/95 border-slate-200 text-slate-900"
+        }`}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="relative shrink-0">
+            <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-black text-[9px] flex items-center justify-center shadow-xs">
+              G
+            </div>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 absolute bottom-0 right-0 border border-white dark:border-slate-950 animate-pulse" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1">
+              <span className="font-extrabold text-[9px] truncate leading-tight">GadgetBdg BEC</span>
+              <span className="text-[6.5px] font-black px-1 rounded-full bg-emerald-500 text-white leading-none">
+                ✓
+              </span>
+            </div>
+            <span className="text-[7.5px] text-emerald-600 dark:text-emerald-400 font-semibold block leading-tight truncate">
+              ● Buka • BEC Lt. 1
             </span>
-            <span className="text-[8px] text-zinc-400 font-mono">REVEAL 2026</span>
           </div>
         </div>
-      ) : archetype === "cyber-hud" ? (
-        <div className="bg-cyan-950 border-b border-cyan-800 px-3 py-1 text-[8px] text-cyan-300 font-mono flex items-center justify-between">
-          <span className="flex items-center gap-1 font-bold">
-            <Activity className="w-2.5 h-2.5 text-cyan-400 animate-pulse" /> HUD_TELEMETRY: OK
-          </span>
-          <span className="text-[7.5px] text-cyan-400">FPS: 144</span>
-        </div>
-      ) : archetype === "tokyo-editorial" ? (
-        <div className="bg-[#1c1a17] text-[#f4f1ea] px-3 py-1 text-[8px] font-black uppercase tracking-widest flex justify-between">
-          <span>// TOKYO ISSUE 024</span>
-          <span>CURATED MOBILE</span>
-        </div>
-      ) : archetype === "live-drop" ? (
-        <div className="bg-black/90 border-b border-neutral-800 px-3 py-2 flex items-center justify-between">
-          <span className="text-[9px] font-black text-white flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#fe2c55] animate-ping" /> LIVE DROPS
-          </span>
-          <span className="text-[8px] bg-[#fe2c55] text-white px-1.5 py-0.2 rounded font-bold">
-            4 READY
-          </span>
-        </div>
-      ) : archetype === "midnight-gold" ? (
-        <div className="bg-[#080705] border-b border-amber-900/60 px-3 py-2 flex items-center justify-between font-serif">
-          <span className="text-[10px] font-bold text-amber-200 flex items-center gap-1">
-            <Crown className="w-2.5 h-2.5 text-amber-400" /> GadgetBdg Haute
-          </span>
-          <span className="text-[7px] text-amber-400/70 uppercase tracking-widest font-mono">
-            VIP SALON
-          </span>
-        </div>
-      ) : (
-        /* Clean-ledger header */
-        <div className="bg-white border-b border-slate-200 px-3 py-2 flex items-center justify-between">
-          <div className="font-extrabold text-[10px] text-slate-900 flex items-center gap-1">
-            <Table className="w-3 h-3 text-slate-800" />
-            <span>LEDGER STOK TOKO</span>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <div className="p-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+            <Search className="w-2.5 h-2.5" />
           </div>
-          <span className="text-[8px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">
-            VERIFIED
-          </span>
+          <div className="bg-emerald-600 text-white font-black text-[7.5px] px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
+            <MessageCircle className="w-2 h-2 fill-current" />
+            <span>WA</span>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* ── 2. Scrollable Body Content ── */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-3">
-        {/* Banner Hero Mini */}
-        <div
-          className={`rounded-2xl p-3 relative overflow-hidden shadow-sm border ${c.heroGradient} ${c.heroBorder}`}
-        >
-          <div className="relative z-10 space-y-1">
-            <div className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[7px] font-bold uppercase tracking-wider bg-white/10 backdrop-blur-xs">
-              <Sparkles className="w-2 h-2" />
-              <span>{activeTheme.tagline}</span>
+      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-14">
+        {/* PILAR 2: Guaranteed High-Contrast Hero Banner */}
+        <div className="rounded-2xl p-2.5 relative overflow-hidden shadow-md bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-800">
+          <div className="relative z-10 flex items-center justify-between gap-2">
+            <div className="space-y-1 min-w-0">
+              <div className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[6.5px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                <Sparkles className="w-2 h-2 text-amber-300" />
+                <span>SPESIALIS HP SECOND</span>
+              </div>
+              <h3 className="text-[10px] font-black leading-tight text-white truncate">
+                {activeTheme.name}
+              </h3>
+              <p className="text-[7px] text-slate-300 line-clamp-1 leading-snug font-medium">
+                {activeTheme.tagline}
+              </p>
             </div>
-            <h2 className="text-xs font-black leading-tight drop-shadow-sm">
-              {activeTheme.name}
-            </h2>
-            <p className="text-[7.5px] opacity-80 line-clamp-2 leading-relaxed">
-              {activeTheme.description}
-            </p>
+            <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md p-1 flex items-center justify-center shrink-0 border border-white/20 shadow-md">
+              <img src="/images/items/iphone-15-pro.png" alt="Featured" className="w-full h-full object-contain" />
+            </div>
+          </div>
+        </div>
+
+        {/* PILAR 3: Quick Category Horizontal Pills */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 text-[7px] font-bold">
+            {["⚡ Semua", "🍎 iPhone", "📱 Samsung", "🎮 Gaming", "💰 < 3 Jt"].map((cat, idx) => (
+              <span
+                key={cat}
+                className={`px-2 py-0.5 rounded-full shrink-0 border transition ${
+                  idx === 0
+                    ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 shadow-2xs"
+                    : isDark
+                    ? "bg-slate-900/90 text-slate-300 border-slate-800"
+                    : "bg-white text-slate-700 border-slate-200"
+                }`}
+              >
+                {cat}
+              </span>
+            ))}
           </div>
         </div>
 
@@ -164,7 +175,7 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
           <span className={`font-bold ${c.accentText}`}>Lihat Semua →</span>
         </div>
 
-        {/* ── 3. Archetype-Specific Layout Structure ── */}
+        {/* ── 3. PILAR 4: Archetype-Specific Layout Structure with Modern Product Cards ── */}
         {archetype === "clean-ledger" ? (
           /* Dense horizontal row items */
           <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100 overflow-hidden shadow-xs">
@@ -177,8 +188,8 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[8.5px] font-black font-mono text-slate-950">{p.price}</div>
-                  <span className="text-[7px] bg-slate-900 text-white px-1.5 py-0.5 rounded font-bold">
-                    Detail
+                  <span className="text-[7px] bg-emerald-600 text-white px-1.5 py-0.5 rounded-full font-bold">
+                    WA
                   </span>
                 </div>
               </div>
@@ -186,43 +197,43 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
           </div>
         ) : archetype === "live-drop" ? (
           /* Vertical 9:16 Video Vibes Card */
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {MOCK_PRODUCTS.slice(0, 2).map((p, idx) => (
               <div
                 key={p.name}
-                className="rounded-2xl border border-neutral-800 bg-neutral-900 p-2.5 space-y-2 relative overflow-hidden"
+                className="rounded-2xl border border-neutral-800 bg-neutral-900 p-2 space-y-1.5 relative overflow-hidden"
               >
-                <div className="w-full h-32 bg-black rounded-xl p-2 flex items-center justify-center relative">
+                <div className="w-full h-24 bg-black rounded-xl p-1.5 flex items-center justify-center relative">
                   <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
                   <span className="absolute top-1.5 left-1.5 bg-[#fe2c55] text-white text-[7px] font-black px-1.5 py-0.2 rounded-full">
                     DROP #{idx + 1}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-[8.5px] font-black text-white truncate">{p.name}</div>
-                    <div className="text-[7px] text-neutral-400">{p.spec}</div>
+                  <div className="min-w-0">
+                    <div className="text-[8px] font-black text-white truncate">{p.name}</div>
+                    <div className="text-[6.5px] text-neutral-400">{p.spec}</div>
                   </div>
-                  <div className="text-[9.5px] font-black text-[#fe2c55]">{p.price}</div>
+                  <div className="text-[9px] font-black text-[#fe2c55] shrink-0">{p.price}</div>
                 </div>
-                <button className="w-full py-1 rounded-lg bg-[#fe2c55] text-white font-black text-[7.5px] uppercase">
-                  Ambil via WhatsApp
+                <button className="w-full py-1 rounded-xl bg-[#fe2c55] text-white font-black text-[7.5px] uppercase">
+                  Beli via WhatsApp
                 </button>
               </div>
             ))}
           </div>
         ) : (
-          /* 2-Column Cards for Keynote, Cyber-HUD, Tokyo-Editorial, Midnight-Gold */
+          /* 2-Column Cards with Rounded-2xl, Spec Badges, and Floating WA CTA */
           <div className="grid grid-cols-2 gap-2">
             {MOCK_PRODUCTS.map((p) => (
               <div
                 key={p.name}
-                className={`rounded-xl p-2 border transition flex flex-col justify-between space-y-1.5 ${c.bgContainer} ${c.cardBorder}`}
+                className={`rounded-2xl p-2 border transition flex flex-col justify-between space-y-1.5 ${c.bgContainer} ${c.cardBorder} shadow-xs`}
               >
-                <div className="w-full h-20 rounded-lg flex items-center justify-center p-1 bg-black/5 dark:bg-black/40 overflow-hidden relative">
+                <div className="w-full h-18 rounded-xl flex items-center justify-center p-1 bg-black/5 dark:bg-black/40 overflow-hidden relative">
                   <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
                   <span
-                    className={`absolute top-1 right-1 text-[6.5px] font-bold px-1 py-0.2 rounded ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
+                    className={`absolute top-1 right-1 text-[6px] font-bold px-1 py-0.2 rounded-full ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
                   >
                     {p.badge}
                   </span>
@@ -230,7 +241,7 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
 
                 <div>
                   <h4
-                    className={`text-[8px] font-bold line-clamp-1 ${
+                    className={`text-[8px] font-extrabold line-clamp-1 ${
                       isDark ? "text-white" : "text-slate-950"
                     }`}
                   >
@@ -240,10 +251,10 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
                 </div>
 
                 <div className="pt-1 border-t border-slate-700/10 flex items-center justify-between">
-                  <span className={`text-[8.5px] font-black ${isDark ? c.priceText : "text-slate-900"}`}>
+                  <span className={`text-[8px] font-black ${isDark ? c.priceText : "text-slate-900"}`}>
                     {p.price}
                   </span>
-                  <span className={`text-[7px] font-bold px-1.5 py-0.5 rounded ${c.accent} text-white`}>
+                  <span className="text-[6.5px] font-black px-1.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-xs">
                     WA
                   </span>
                 </div>
@@ -253,20 +264,38 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
         )}
       </div>
 
-      {/* ── 3. Bottom Navigation Bar ── */}
-      <div
-        className={`sticky bottom-0 z-20 border-t px-2 py-1.5 flex items-center justify-around text-[7.5px] font-bold backdrop-blur-md ${c.bottomNavBg} ${c.bottomNavBorder}`}
-      >
-        {["Home", "Katalog", "Trade-In"].map((label, idx) => (
-          <div
-            key={label}
-            className={`flex flex-col items-center gap-0.5 ${
-              idx === 0 ? c.bottomNavActive : c.bottomNavInactive
-            }`}
-          >
-            <span>{label}</span>
-          </div>
-        ))}
+      {/* ── 4. PILAR 5: Floating Bottom Dock Navigation (4 Tab Kapsul) ── */}
+      <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
+        <div
+          className={`w-full max-w-[260px] pointer-events-auto rounded-full backdrop-blur-xl border shadow-2xl py-1 px-1.5 grid grid-cols-4 select-none ${
+            isDark
+              ? "bg-slate-950/85 border-slate-800 text-white shadow-black/80"
+              : "bg-white/95 border-slate-200 text-slate-900 shadow-slate-900/15"
+          }`}
+        >
+          {[
+            { icon: Home, label: "Home" },
+            { icon: Smartphone, label: "Katalog" },
+            { icon: RefreshCw, label: "Trade-In" },
+            { icon: StoreIcon, label: "Profil" },
+          ].map(({ icon: Icon, label }, idx) => (
+            <div
+              key={label}
+              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer transition ${
+                idx === 0
+                  ? isDark
+                    ? "bg-indigo-600 text-white font-bold shadow-xs"
+                    : "bg-slate-950 text-white font-bold shadow-xs"
+                  : isDark
+                  ? "text-slate-400 hover:text-white"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              <Icon className="w-2.5 h-2.5" />
+              <span className="text-[6.5px] mt-0.5 leading-none">{label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

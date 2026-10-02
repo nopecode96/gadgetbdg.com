@@ -52,17 +52,17 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
   return (
     <div
       id={product.id}
-      className={`rounded-2xl p-3 border transition flex flex-col justify-between space-y-2.5 ${colors.cardBg} ${colors.cardBorder} ${colors.cardHoverBorder} shadow-sm`}
+      className={`group rounded-3xl p-3 sm:p-3.5 border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative flex flex-col justify-between ${colors.cardBg} ${colors.cardBorder} ${colors.cardHoverBorder} shadow-sm`}
     >
       <div>
         {/* Thumbnail Image with Automatic Watermark Protection (Clickable to Detail) */}
-        <Link href={detailUrl} className="block group">
-          <div className="aspect-square rounded-xl bg-neutral-100 dark:bg-slate-900 overflow-hidden relative border border-neutral-200/50 dark:border-slate-800 mb-2 select-none flex items-center justify-center p-1">
+        <Link href={detailUrl} className="block">
+          <div className="aspect-square rounded-2xl bg-neutral-100 dark:bg-slate-900/80 overflow-hidden relative border border-neutral-200/60 dark:border-slate-800/80 mb-2.5 select-none flex items-center justify-center p-2">
             {product.images && product.images.length > 0 ? (
               <img
                 src={product.images[0]}
                 alt={product.name}
-                className="w-full h-full object-contain p-0.5 transition-transform duration-200 group-hover:scale-105"
+                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
             ) : (
@@ -73,9 +73,7 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
 
             {/* Condition badge */}
             <span
-              className={`absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded shadow ${
-                isDark ? `${colors.accent} text-slate-950` : "bg-neutral-900 text-white"
-              }`}
+              className="absolute top-2 left-2 text-[9px] font-black px-2 py-0.5 rounded-full shadow-md backdrop-blur-md bg-black/75 text-white border border-white/20 uppercase tracking-wider"
             >
               {product.condition.slice(0, 10)}
             </span>
@@ -92,63 +90,63 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
             )}
 
             {/* Corner badge identifier */}
-            <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[8px] font-mono px-1 py-0.5 rounded opacity-80 pointer-events-none select-none">
+            <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-xs text-white text-[8px] font-mono px-1.5 py-0.5 rounded-md opacity-80 pointer-events-none select-none">
               @{store.slug}
             </div>
           </div>
         </Link>
 
         {/* Brand & Name (Clickable to Detail) */}
-        <span className={`text-[9px] font-bold uppercase tracking-wider ${colors.accentText}`}>
+        <span className={`text-[10px] font-black uppercase tracking-wider ${colors.accentText}`}>
           {product.brand}
         </span>
-        <Link href={detailUrl} className="block group">
-          <h3 className={`font-bold text-xs line-clamp-1 leading-snug group-hover:underline ${isDark ? "text-white" : "text-slate-950"}`}>
+        <Link href={detailUrl} className="block">
+          <h3 className={`font-extrabold text-xs sm:text-[13px] line-clamp-2 leading-snug group-hover:underline ${isDark ? "text-white" : "text-slate-900"}`}>
             {product.name}
           </h3>
         </Link>
 
         {/* Price */}
-        <div className={`font-black text-sm mt-0.5 ${isDark ? colors.priceText : "text-blue-700 font-extrabold"}`}>
+        <div className={`font-black text-sm sm:text-base mt-1 tracking-tight ${isDark ? colors.priceText : "text-blue-700 font-extrabold"}`}>
           {formatRupiah(product.price)}
         </div>
-        <div className={`text-[10px] ${colors.textSecondary} font-mono`}>
+        <div className={`text-[10px] ${colors.textSecondary} font-mono mt-0.5`}>
           {product.ramRom}
         </div>
 
-        {/* Badges: BH & IMEI & Branch */}
-        <div className="flex flex-wrap gap-1 mt-1.5">
+        {/* Badges: BH & IMEI & Branch in Modern Rounded Pills */}
+        <div className="flex flex-wrap gap-1 mt-2">
           {product.branch && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            <span className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
               <span>📍 {product.branch.name}</span>
             </span>
           )}
           {product.batteryHealth !== null && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-              <BatteryCharging className="w-2.5 h-2.5 text-amber-600" />
+            <span className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+              <BatteryCharging className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
               <span>BH {product.batteryHealth}%</span>
             </span>
           )}
-          <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300">
+          <span className="inline-flex items-center gap-1 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300 border border-neutral-200/60 dark:border-slate-700/60">
             <ShieldCheck className="w-2.5 h-2.5" />
             <span className="truncate max-w-[85px]">{product.imeiStatus}</span>
           </span>
         </div>
       </div>
 
-      {/* Direct WA Order Button with Intent Tracking */}
+      {/* Direct WA Order Floating CTA Button with Intent Tracking */}
       <a
         href={`https://wa.me/${cleanWa}?text=${waMessage}`}
         onClick={handleOrderClick}
         target="_blank"
         rel="noreferrer"
-        className={`w-full py-1.5 rounded-lg text-center text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm transition ${
+        className={`w-full mt-3 py-2 px-3 rounded-2xl text-center text-[11px] font-black flex items-center justify-center gap-1.5 shadow-md transition-all duration-200 active:scale-95 ${
           isDark
-            ? `${colors.accent} ${colors.accentHover} text-slate-950`
-            : "bg-emerald-600 hover:bg-emerald-700 text-white"
+            ? `${colors.accent} ${colors.accentHover} text-slate-950 shadow-indigo-500/20`
+            : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20"
         }`}
       >
-        <MessageCircle className="w-3 h-3 fill-current" />
+        <MessageCircle className="w-3.5 h-3.5 fill-current" />
         <span>Beli via WhatsApp</span>
       </a>
     </div>

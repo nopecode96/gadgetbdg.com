@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { SuperAdminNav } from "@/components/admin/SuperAdminNav";
 import { formatRupiah } from "@/lib/utils";
+import { TIER_LIMITS } from "@/lib/constants/pricing";
+import { requireSaasAdmin } from "@/lib/auth/session";
 import {
   Store,
   DollarSign,
@@ -17,44 +19,87 @@ import {
 
 export const revalidate = 0;
 
-// Harga resmi paket berlangganan (sinkron dengan TIER_LIMITS)
-const TIER_PRICE = {
-  STARTER: 250_000,
-  PRO: 600_000,
-  ADVANCE: 1_000_000,
-};
-
 export default async function SuperAdminDashboardPage() {
-  const [stores, productsCount] = await Promise.all([
+  await requireSaasAdmin();
+
+  const [
+    totalActiveStores,
+    totalInactiveStores,
+    totalCatalogUnits,
+    totalCustomDomains,
+    activeStoresByTier,
+    recentStoresRaw,
+  ] = await Promise.all([
+    prisma.store.count({ where: { isActive: true } }),
+    prisma.store.count({ where: { isActive: false } }),
+    prisma.product.count(),
+    prisma.store.count({ where: { customDomain: { not: null }, isActive: true } }),
+    prisma.store.groupBy({
+      by: ["tier"],
+      where: { isActive: true },
+      _count: { id: true },
+    }),
     prisma.store.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
       include: {
+        users: {
+          where: { role: "STORE_OWNER" },
+          select: { id: true, name: true, email: true },
+        },
         _count: {
-          select: { products: true, tradeInOffers: true },
+          select: { products: true },
         },
       },
-      orderBy: { createdAt: "desc" },
     }),
-    prisma.product.count(),
   ]);
 
-  const activeStores = stores.filter((s) => s.isActive);
-  const starterCount = activeStores.filter((s) => s.tier === "STARTER").length;
-  const proCount = activeStores.filter((s) => s.tier === "PRO").length;
-  const advanceCount = activeStores.filter((s) => s.tier === "ADVANCE").length;
+  const totalRegisteredStores = totalActiveStores + totalInactiveStores;
 
-  // MRR hanya dari toko AKTIF
-  const mrr =
-    starterCount * TIER_PRICE.STARTER +
-    proCount * TIER_PRICE.PRO +
-    advanceCount * TIER_PRICE.ADVANCE;
+  // Breakdown counts per tier
+  const tierCountMap = {
+    STARTER: 0,
+    PRO: 0,
+    ADVANCE: 0,
+  };
 
-  const customDomainStores = stores.filter((s) => s.customDomain);
-  const totalActive = activeStores.length;
-  const totalStores = stores.length;
+  activeStoresByTier.forEach((group) => {
+    if (group.tier in tierCountMap) {
+      tierCountMap[group.tier as keyof typeof tierCountMap] = group._count.id;
+    }
+  });
 
-  // Progress bar percentages
+  const starterCount = tierCountMap.STARTER;
+  const proCount = tierCountMap.PRO;
+  const advanceCount = tierCountMap.ADVANCE;
+
+  // MRR kalkulasi riil dari konstanta resmi TIER_LIMITS
+  const starterRevenue = starterCount * TIER_LIMITS.STARTER.price;
+  const proRevenue = proCount * TIER_LIMITS.PRO.price;
+  const advanceRevenue = advanceCount * TIER_LIMITS.ADVANCE.price;
+  const mrr = starterRevenue + proRevenue + advanceRevenue;
+
+  // Persentase kontribusi MRR
+  const starterMrrPct = mrr > 0 ? Math.round((starterRevenue / mrr) * 100) : 0;
+  const proMrrPct = mrr > 0 ? Math.round((proRevenue / mrr) * 100) : 0;
+  const advanceMrrPct = mrr > 0 ? Math.round((advanceRevenue / mrr) * 100) : 0;
+
+  // Progress bar percentages for store count
   const pct = (n: number) =>
-    totalStores > 0 ? Math.round((n / totalStores) * 100) : 0;
+    totalActiveStores > 0 ? Math.round((n / totalActiveStores) * 100) : 0;
+
+  const recentStores = recentStoresRaw.map((s) => ({
+    id: s.id,
+    name: s.name,
+    slug: s.slug,
+    tier: s.tier,
+    templateId: s.templateId,
+    hasWatermark: s.hasWatermark,
+    isActive: s.isActive,
+    productCount: s._count.products,
+    owner: s.users[0] || null,
+    createdAt: s.createdAt.toISOString(),
+  }));
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
@@ -87,7 +132,7 @@ export default async function SuperAdminDashboardPage() {
               href="/super-admin/stores"
               className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5"
             >
-              <span>Kelola Toko ({stores.length})</span>
+              <span>Kelola Toko ({totalRegisteredStores})</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -99,10 +144,10 @@ export default async function SuperAdminDashboardPage() {
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Store className="w-4 h-4 text-emerald-400" /> Total Toko Terdaftar
             </span>
-            <div className="text-3xl font-black text-white">{totalStores}</div>
+            <div className="text-3xl font-black text-white">{totalRegisteredStores}</div>
             <p className="text-[11px] text-emerald-400 font-medium">
-              {totalActive} Aktif &nbsp;·&nbsp;
-              <span className="text-rose-400">{totalStores - totalActive} Nonaktif</span>
+              {totalActiveStores} Aktif &nbsp;·&nbsp;
+              <span className="text-rose-400">{totalInactiveStores} Nonaktif</span>
             </p>
           </div>
 
@@ -111,23 +156,23 @@ export default async function SuperAdminDashboardPage() {
               <DollarSign className="w-4 h-4 text-indigo-400" /> Estimasi MRR Bulanan
             </span>
             <div className="text-3xl font-black text-indigo-400">{formatRupiah(mrr)}</div>
-            <p className="text-[11px] text-slate-400">Dari {totalActive} toko aktif berlangganan</p>
+            <p className="text-[11px] text-slate-400">Dari {totalActiveStores} toko aktif berlangganan</p>
           </div>
 
           <div className="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl shadow-sm space-y-1">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Smartphone className="w-4 h-4 text-blue-400" /> Total Unit HP Katalog
             </span>
-            <div className="text-3xl font-black text-white">{productsCount} Unit</div>
-            <p className="text-[11px] text-slate-400">Akumulasi seluruh toko merchant</p>
+            <div className="text-3xl font-black text-white">{totalCatalogUnits} Unit</div>
+            <p className="text-[11px] text-slate-400">Akumulasi seluruh unit terdaftar</p>
           </div>
 
           <div className="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl shadow-sm space-y-1">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Globe className="w-4 h-4 text-purple-400" /> Custom Domain Aktif
             </span>
-            <div className="text-3xl font-black text-purple-400">{customDomainStores.length} Domain</div>
-            <p className="text-[11px] text-slate-400">Paket Pro &amp; Advance</p>
+            <div className="text-3xl font-black text-purple-400">{totalCustomDomains} Domain</div>
+            <p className="text-[11px] text-slate-400">Paket Pro &amp; Advance aktif</p>
           </div>
         </div>
 
@@ -137,7 +182,7 @@ export default async function SuperAdminDashboardPage() {
           <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 shadow-sm space-y-5">
             <h2 className="font-bold text-sm text-white flex items-center gap-2">
               <Layers className="w-4 h-4 text-indigo-400" />
-              <span>Distribusi Paket Berlangganan</span>
+              <span>Distribusi Toko Aktif Berlangganan</span>
             </h2>
 
             <div className="space-y-4">
@@ -151,14 +196,14 @@ export default async function SuperAdminDashboardPage() {
                   <span className="font-black text-white">
                     {starterCount}{" "}
                     <span className="text-slate-500 font-normal text-[10px]">
-                      ({pct(stores.filter((s) => s.tier === "STARTER").length)}%)
+                      ({pct(starterCount)}%)
                     </span>
                   </span>
                 </div>
                 <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-slate-400 rounded-full transition-all"
-                    style={{ width: `${pct(stores.filter((s) => s.tier === "STARTER").length)}%` }}
+                    style={{ width: `${pct(starterCount)}%` }}
                   />
                 </div>
                 <p className="text-[11px] text-slate-500">Maks 15 unit · 1 admin · 2 template</p>
@@ -174,14 +219,14 @@ export default async function SuperAdminDashboardPage() {
                   <span className="font-black text-blue-300">
                     {proCount}{" "}
                     <span className="text-slate-500 font-normal text-[10px]">
-                      ({pct(stores.filter((s) => s.tier === "PRO").length)}%)
+                      ({pct(proCount)}%)
                     </span>
                   </span>
                 </div>
                 <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500 rounded-full transition-all"
-                    style={{ width: `${pct(stores.filter((s) => s.tier === "PRO").length)}%` }}
+                    style={{ width: `${pct(proCount)}%` }}
                   />
                 </div>
                 <p className="text-[11px] text-slate-500">Maks 30 unit · 3 admin · 10 template</p>
@@ -197,14 +242,14 @@ export default async function SuperAdminDashboardPage() {
                   <span className="font-black text-purple-300">
                     {advanceCount}{" "}
                     <span className="text-slate-500 font-normal text-[10px]">
-                      ({pct(stores.filter((s) => s.tier === "ADVANCE").length)}%)
+                      ({pct(advanceCount)}%)
                     </span>
                   </span>
                 </div>
                 <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-purple-500 rounded-full transition-all"
-                    style={{ width: `${pct(stores.filter((s) => s.tier === "ADVANCE").length)}%` }}
+                    style={{ width: `${pct(advanceCount)}%` }}
                   />
                 </div>
                 <p className="text-[11px] text-slate-500">Unlimited · 5 admin · 30 template</p>
@@ -212,22 +257,22 @@ export default async function SuperAdminDashboardPage() {
             </div>
 
             {/* MRR breakdown per tier */}
-            <div className="pt-3 border-t border-slate-700/60 text-xs space-y-1">
-              <p className="text-slate-400 font-semibold">Kontribusi MRR per Tier</p>
-              <div className="flex justify-between text-slate-300">
+            <div className="pt-3 border-t border-slate-700/60 text-xs space-y-1.5">
+              <p className="text-slate-400 font-semibold">Kontribusi Nominal &amp; Porsi MRR</p>
+              <div className="flex justify-between items-center text-slate-300">
                 <span>Starter ({starterCount} toko)</span>
-                <span className="font-bold">{formatRupiah(starterCount * TIER_PRICE.STARTER)}</span>
+                <span className="font-bold">{formatRupiah(starterRevenue)} <span className="text-[10px] text-slate-400 font-normal">({starterMrrPct}%)</span></span>
               </div>
-              <div className="flex justify-between text-blue-300">
+              <div className="flex justify-between items-center text-blue-300">
                 <span>Pro ({proCount} toko)</span>
-                <span className="font-bold">{formatRupiah(proCount * TIER_PRICE.PRO)}</span>
+                <span className="font-bold">{formatRupiah(proRevenue)} <span className="text-[10px] text-blue-400 font-normal">({proMrrPct}%)</span></span>
               </div>
-              <div className="flex justify-between text-purple-300">
+              <div className="flex justify-between items-center text-purple-300">
                 <span>Advance ({advanceCount} toko)</span>
-                <span className="font-bold">{formatRupiah(advanceCount * TIER_PRICE.ADVANCE)}</span>
+                <span className="font-bold">{formatRupiah(advanceRevenue)} <span className="text-[10px] text-purple-400 font-normal">({advanceMrrPct}%)</span></span>
               </div>
-              <div className="flex justify-between text-indigo-400 font-black border-t border-slate-700/50 pt-1 mt-1">
-                <span>Total MRR</span>
+              <div className="flex justify-between text-indigo-400 font-black border-t border-slate-700/50 pt-1.5 mt-1">
+                <span>Total MRR Platform</span>
                 <span>{formatRupiah(mrr)}</span>
               </div>
             </div>
@@ -303,12 +348,12 @@ export default async function SuperAdminDashboardPage() {
           </div>
         </div>
 
-        {/* Latest Registered Stores Table Preview */}
+        {/* 5 Toko Pendaftar Terbaru */}
         <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-sm text-white flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <span>Toko Terdaftar Terbaru</span>
+              <span>5 Toko Pendaftar Terbaru</span>
             </h2>
             <Link
               href="/super-admin/stores"
@@ -323,7 +368,8 @@ export default async function SuperAdminDashboardPage() {
               <thead className="bg-slate-900/80 text-slate-400 uppercase font-mono text-[10px]">
                 <tr>
                   <th className="px-4 py-3 rounded-l-xl">Nama Toko</th>
-                  <th className="px-4 py-3">Slug / Subdomain</th>
+                  <th className="px-4 py-3">Subdomain</th>
+                  <th className="px-4 py-3">Pemilik</th>
                   <th className="px-4 py-3">Tier</th>
                   <th className="px-4 py-3">Template</th>
                   <th className="px-4 py-3">Watermark</th>
@@ -332,7 +378,7 @@ export default async function SuperAdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/50">
-                {stores.slice(0, 10).map((s) => (
+                {recentStores.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-750 transition">
                     <td className="px-4 py-3 font-bold text-white">
                       <div className="flex items-center gap-2">
@@ -344,6 +390,16 @@ export default async function SuperAdminDashboardPage() {
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-300">
                       {s.slug}.gadgetbdg.com
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">
+                      {s.owner ? (
+                        <div>
+                          <div className="font-medium text-white">{s.owner.name}</div>
+                          <div className="text-[10px] text-slate-500">{s.owner.email}</div>
+                        </div>
+                      ) : (
+                        <span className="text-slate-500">–</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -369,7 +425,7 @@ export default async function SuperAdminDashboardPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 font-semibold text-slate-200">
-                      {s._count.products} Unit HP
+                      {s.productCount} Unit HP
                     </td>
                     <td className="px-4 py-3">
                       <span

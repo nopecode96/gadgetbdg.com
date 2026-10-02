@@ -2,9 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { SuperAdminNav } from "@/components/admin/SuperAdminNav";
 import { LeadsManagerClient } from "./LeadsManagerClient";
 
+import { requireSaasAdmin } from "@/lib/auth/session";
+
 export const revalidate = 0;
 
 export default async function SuperAdminLeadsPage() {
+  await requireSaasAdmin();
+
   const inactiveStoresRaw = await prisma.store.findMany({
     where: {
       isActive: false,

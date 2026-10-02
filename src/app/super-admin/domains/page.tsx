@@ -2,9 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { SuperAdminNav } from "@/components/admin/SuperAdminNav";
 import { DomainManagerClient } from "./DomainManagerClient";
 
+import { requireSaasAdmin } from "@/lib/auth/session";
+
 export const revalidate = 0;
 
 export default async function SuperAdminDomainsPage() {
+  await requireSaasAdmin();
+
   const storesRaw = await prisma.store.findMany({
     where: {
       tier: {

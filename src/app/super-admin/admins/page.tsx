@@ -2,9 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { SuperAdminNav } from "@/components/admin/SuperAdminNav";
 import { AdminsManagerClient } from "./AdminsManagerClient";
 
+import { requireSaasAdmin } from "@/lib/auth/session";
+
 export const revalidate = 0;
 
 export default async function SuperAdminStaffPage() {
+  await requireSaasAdmin();
+
   const adminsRaw = await prisma.user.findMany({
     where: {
       role: {

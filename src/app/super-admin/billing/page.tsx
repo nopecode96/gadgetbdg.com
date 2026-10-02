@@ -2,9 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { SuperAdminNav } from "@/components/admin/SuperAdminNav";
 import { BillingManagerClient } from "./BillingManagerClient";
 
+import { requireSaasAdmin } from "@/lib/auth/session";
+
 export const revalidate = 0;
 
 export default async function SuperAdminBillingPage() {
+  await requireSaasAdmin();
+
   const paymentsRaw = await prisma.subscriptionPayment.findMany({
     include: {
       store: {

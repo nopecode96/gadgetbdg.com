@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { SuperAdminNav } from "@/components/admin/SuperAdminNav";
 import { SalesPortalClient } from "./SalesPortalClient";
 
+import { requireSalesAgent } from "@/lib/auth/session";
+
 export const revalidate = 0;
 
 const COMMISSION_RATE = {
@@ -11,8 +13,13 @@ const COMMISSION_RATE = {
 };
 
 export default async function SalesPortalPage() {
+  const currentUser = await requireSalesAgent();
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN_SAAS";
+
   const salesAgentsRaw = await prisma.user.findMany({
-    where: { role: "SALES_AGENT" },
+    where: isSuperAdmin
+      ? { role: "SALES_AGENT" }
+      : { id: currentUser.id, role: "SALES_AGENT" },
     include: {
       clientStores: {
         orderBy: { createdAt: "desc" },
@@ -75,7 +82,7 @@ export default async function SalesPortalPage() {
       <SuperAdminNav />
 
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
-        <SalesPortalClient allAgents={allAgents} isSuperAdmin={true} />
+        <SalesPortalClient allAgents={allAgents} isSuperAdmin={isSuperAdmin} />
       </main>
     </div>
   );

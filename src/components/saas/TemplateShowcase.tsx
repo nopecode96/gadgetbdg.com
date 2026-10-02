@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ExternalLink,
   Sparkles,
@@ -19,42 +20,58 @@ import {
 } from "@/lib/constants/templates";
 
 // ---------------------------------------------------------------------------
+// Mock Phone Products with Real Physical Device Imagery
+// ---------------------------------------------------------------------------
+interface MockProduct {
+  name: string;
+  price: string;
+  spec: string;
+  badge: string;
+  brand: string;
+  image: string;
+}
+
+const MOCK_PRODUCTS: MockProduct[] = [
+  {
+    name: "iPhone 15 Pro Max 256GB",
+    price: "Rp 18.500.000",
+    spec: "BH 94% · Like New",
+    badge: "iBox Resmi",
+    brand: "Apple",
+    image: "/images/items/iphone-15-pro.png",
+  },
+  {
+    name: "Samsung S24 Ultra 12/512GB",
+    price: "Rp 15.900.000",
+    spec: "SEIN · Fullset Box",
+    badge: "Garansi On",
+    brand: "Samsung",
+    image: "/images/items/samsung-s24-ultra.png",
+  },
+  {
+    name: "Xiaomi 14T Pro 12/512GB",
+    price: "Rp 8.750.000",
+    spec: "Leica Optic · 99% Mulus",
+    badge: "Best Deal",
+    brand: "Xiaomi",
+    image: "/images/items/xiaomi-14t-pro.png",
+  },
+  {
+    name: "ASUS ROG Phone 8 16/256GB",
+    price: "Rp 10.800.000",
+    spec: "Snapdragon 8 Gen 3",
+    badge: "High FPS",
+    brand: "ASUS ROG",
+    image: "/images/items/rog-phone-8.png",
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Dynamic Smartphone Mockup Screen
 // ---------------------------------------------------------------------------
 function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
   const c = activeTheme.colors;
   const isDark = c.isDark;
-
-  const demoProducts = [
-    {
-      name: "iPhone 15 Pro Max 256GB",
-      price: "Rp 18.500.000",
-      spec: "BH 94% · Like New",
-      badge: "iBox Resmi",
-      brand: "Apple",
-    },
-    {
-      name: "Samsung S24 Ultra 12/512GB",
-      price: "Rp 15.900.000",
-      spec: "SEIN · Fullset Box",
-      badge: "Garansi On",
-      brand: "Samsung",
-    },
-    {
-      name: "Xiaomi 14T Pro 12/512GB",
-      price: "Rp 8.750.000",
-      spec: "Leica Optic · 99% Mulus",
-      badge: "Best Deal",
-      brand: "Xiaomi",
-    },
-    {
-      name: "ASUS ROG Phone 8 16/256GB",
-      price: "Rp 10.800.000",
-      spec: "Snapdragon 8 Gen 3",
-      badge: "High FPS",
-      brand: "ASUS ROG",
-    },
-  ];
 
   return (
     <div
@@ -95,70 +112,103 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
 
       {/* 2. Scrollable Body Content */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-3">
-        {/* Card Banner Hero di Layar HP (KUNCI KONTRAS) */}
-        <div
-          className={`rounded-2xl p-3.5 relative overflow-hidden shadow-md border transition-all duration-300 ${c.heroGradient} ${c.heroBorder}`}
-        >
-          <div className="relative z-10 space-y-1.5">
-            {/* Badge kecil: Background kontras tajam */}
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-extrabold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
-              <Sparkles className="w-2.5 h-2.5 text-emerald-300" />
-              <span>SPESIALIS HP SECOND</span>
+        {/* Card Banner Hero di Layar HP (100% Kontras Sempurna Baik Dark Maupun Clean) */}
+        {isDark ? (
+          /* TEMA GELAP / DARK: Slate-900 dengan Hero Gradient/Border khas tema */
+          <div
+            className={`rounded-2xl p-3.5 relative overflow-hidden shadow-md border transition-all duration-300 ${c.heroGradient} ${c.heroBorder}`}
+          >
+            <div className="relative z-10 space-y-1.5">
+              {/* Badge kecil */}
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-extrabold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                <Sparkles className="w-2.5 h-2.5 text-emerald-300" />
+                <span>SPESIALIS HP SECOND</span>
+              </div>
+
+              {/* Judul Hero */}
+              <h2 className="text-xs sm:text-[13px] font-black text-white leading-tight tracking-tight drop-shadow-sm">
+                Katalog iPhone &amp; Android Istimewa
+              </h2>
+
+              {/* Deskripsi */}
+              <p className="text-[8.5px] leading-relaxed max-w-[210px] text-slate-300 font-medium">
+                Semua unit lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
+              </p>
+
+              {/* Tombol CTA */}
+              <div className="pt-1 flex items-center gap-1.5">
+                <button
+                  type="button"
+                  className={`px-2.5 py-1 rounded-lg font-black text-[8.5px] shadow-sm flex items-center gap-1 transition ${c.accent} text-slate-950`}
+                >
+                  <span>Jelajahi Stok</span>
+                  <ArrowRight className="w-2.5 h-2.5" />
+                </button>
+
+                <button
+                  type="button"
+                  className="px-2 py-1 rounded-lg font-semibold text-[8px] border border-white/30 bg-black/40 text-white transition hover:bg-black/50"
+                >
+                  Tukar Tambah HP
+                </button>
+              </div>
             </div>
 
-            {/* Judul Hero: Wajib kontras mutlak */}
-            <h2
-              className={`text-xs sm:text-[13px] font-black leading-tight tracking-tight drop-shadow-sm ${
-                activeTheme.id === "clearance-yellow" ? "text-slate-950" : "text-white"
-              }`}
-            >
-              Katalog iPhone &amp; Android Istimewa
-            </h2>
-
-            {/* Deskripsi */}
-            <p
-              className={`text-[8.5px] leading-relaxed max-w-[210px] font-medium ${
-                activeTheme.id === "clearance-yellow" ? "text-slate-800" : "text-slate-100/90"
-              }`}
-            >
-              Semua unit lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
-            </p>
-
-            {/* Tombol CTA */}
-            <div className="pt-1 flex items-center gap-1.5">
-              <button
-                type="button"
-                className={`px-2.5 py-1 rounded-lg font-bold text-[8.5px] shadow-sm flex items-center gap-1 transition ${
-                  isDark
-                    ? `${c.accent} text-slate-950 font-black`
-                    : "bg-slate-900 text-white hover:bg-slate-800"
-                }`}
-              >
-                <span>Jelajahi Stok</span>
-                <ArrowRight className="w-2.5 h-2.5" />
-              </button>
-
-              <button
-                type="button"
-                className={`px-2 py-1 rounded-lg font-semibold text-[8px] border transition ${
-                  isDark
-                    ? "border-white/30 bg-black/40 text-white"
-                    : "border-slate-300 bg-white/95 text-slate-800 shadow-xs"
-                }`}
-              >
-                Tukar Tambah HP
-              </button>
-            </div>
+            {/* Decorative glow ornament */}
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
           </div>
+        ) : (
+          /* TEMA TERANG / CLEAN: Background Gradien Gelap Solid yang Elegan agar Selalu 100% Kontras & Terbaca Mewah */
+          <div className="rounded-2xl p-3.5 relative overflow-hidden shadow-md bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white border border-slate-800/40 transition-all duration-300">
+            <div className="relative z-10 space-y-1.5">
+              {/* Badge kecil */}
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-extrabold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                <Sparkles className="w-2.5 h-2.5 text-emerald-300" />
+                <span>SPESIALIS HP SECOND</span>
+              </div>
 
-          {/* Decorative glow ornament */}
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
-        </div>
+              {/* Judul Hero */}
+              <h2 className="text-xs sm:text-[13px] font-black text-white leading-tight tracking-tight drop-shadow-sm">
+                Katalog iPhone &amp; Android Istimewa
+              </h2>
+
+              {/* Deskripsi */}
+              <p className="text-[8.5px] leading-relaxed max-w-[210px] text-slate-200/90 font-medium">
+                Semua unit lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
+              </p>
+
+              {/* Tombol CTA */}
+              <div className="pt-1 flex items-center gap-1.5">
+                <button
+                  type="button"
+                  className="px-2.5 py-1 rounded-lg font-black text-[8.5px] shadow-sm flex items-center gap-1 transition bg-white text-slate-950 hover:bg-slate-100"
+                >
+                  <span>Jelajahi Stok</span>
+                  <ArrowRight className="w-2.5 h-2.5" />
+                </button>
+
+                <button
+                  type="button"
+                  className="px-2 py-1 rounded-lg font-semibold text-[8px] border border-white/30 bg-white/10 text-white transition hover:bg-white/20"
+                >
+                  Tukar Tambah HP
+                </button>
+              </div>
+            </div>
+
+            {/* Decorative glow ornament */}
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/20 rounded-full blur-xl pointer-events-none" />
+          </div>
+        )}
 
         {/* Section Title */}
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-1.5">
-            <span className={`font-black text-[10px] tracking-tight ${c.textPrimary}`}>
+            <span
+              className={`font-black text-[10px] tracking-tight ${
+                isDark ? "text-white" : "text-slate-950"
+              }`}
+            >
               Unit Pilihan Hari Ini
             </span>
             <span
@@ -170,32 +220,49 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
           <span className={`text-[8.5px] font-bold ${c.accentText}`}>Lihat Semua →</span>
         </div>
 
-        {/* Kartu Produk di Mockup HP */}
+        {/* Kartu Produk di Mockup HP (dengan Gambar HP Fisik Asli) */}
         <div className="grid grid-cols-2 gap-2">
-          {demoProducts.map((p) => (
+          {MOCK_PRODUCTS.map((p) => (
             <div
               key={p.name}
               className={`rounded-xl p-2.5 border transition-all duration-300 flex flex-col justify-between space-y-2 shadow-xs ${c.bgContainer} ${c.cardBorder}`}
             >
               <div className="space-y-1.5">
-                {/* Visual Phone Box Art / Placeholder */}
+                {/* Visual Phone Box Art / Real Phone Image */}
                 <div
-                  className={`w-full aspect-[4/3] rounded-lg flex flex-col items-center justify-center relative overflow-hidden ${
+                  className={`w-full h-24 rounded-lg flex items-center justify-center relative overflow-hidden p-1 ${
                     isDark
-                      ? "bg-white/5 border border-white/5"
-                      : "bg-slate-100 border border-slate-200/60"
+                      ? "bg-slate-950/70 border border-white/5"
+                      : "bg-slate-50 border border-slate-200/60"
                   }`}
                 >
-                  <ShoppingBag
-                    className={`w-6 h-6 ${isDark ? "text-white/20" : "text-slate-300"}`}
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="w-full h-full object-contain p-0.5 transition-transform duration-300 hover:scale-105"
+                    onError={(e) => {
+                      // Fallback jika image gagal load
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      const parent = (e.currentTarget as HTMLImageElement).parentElement;
+                      if (parent) {
+                        const icon = parent.querySelector(".fallback-icon");
+                        if (icon) (icon as HTMLElement).style.display = "flex";
+                      }
+                    }}
                   />
+                  <div className="fallback-icon hidden flex-col items-center justify-center">
+                    <ShoppingBag
+                      className={`w-6 h-6 ${isDark ? "text-white/20" : "text-slate-300"}`}
+                    />
+                    <span
+                      className={`text-[7px] font-mono uppercase tracking-wider mt-1 opacity-70 ${c.textSecondary}`}
+                    >
+                      {p.brand}
+                    </span>
+                  </div>
+
                   <span
-                    className={`text-[7px] font-mono uppercase tracking-wider mt-1 opacity-70 ${c.textSecondary}`}
-                  >
-                    {p.brand}
-                  </span>
-                  <span
-                    className={`absolute top-1 right-1 text-[6.5px] font-bold px-1.5 py-0.2 rounded ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
+                    className={`absolute top-1 right-1 text-[6.5px] font-bold px-1.5 py-0.2 rounded shadow-xs ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
                   >
                     {p.badge}
                   </span>
@@ -214,7 +281,11 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
               </div>
 
               <div className="space-y-1.5 pt-1 border-t border-dashed border-slate-700/20">
-                <div className={`text-[9.5px] font-black leading-none ${c.priceText}`}>
+                <div
+                  className={`text-[9.5px] font-extrabold leading-none ${
+                    isDark ? c.priceText : "text-blue-700 font-extrabold"
+                  }`}
+                >
                   {p.price}
                 </div>
 
@@ -473,7 +544,11 @@ export function TemplateShowcase() {
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
                       {/* Swatch Pill */}
                       <div
-                        className={`h-7 px-2.5 rounded-lg flex items-center justify-center text-[10px] font-black shadow-xs border ${t.colors.heroGradient} ${t.colors.heroBorder}`}
+                        className={`h-7 px-2.5 rounded-lg flex items-center justify-center text-[10px] font-black shadow-xs border ${
+                          t.colors.isDark
+                            ? t.colors.heroGradient + " " + t.colors.heroBorder
+                            : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-500"
+                        }`}
                       >
                         <span>{t.badge || "Preset"}</span>
                       </div>

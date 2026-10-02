@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ExternalLink,
   Sparkles,
@@ -11,6 +10,11 @@ import {
   CheckCircle2,
   ShieldCheck,
   MessageCircle,
+  Zap,
+  Activity,
+  Flame,
+  Crown,
+  Table,
 } from "lucide-react";
 import {
   TEMPLATE_LIST,
@@ -67,202 +71,158 @@ const MOCK_PRODUCTS: MockProduct[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Dynamic Smartphone Mockup Screen
+// Dynamic Smartphone Mockup Screen (Adapts to Archetype Layout)
 // ---------------------------------------------------------------------------
 function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
   const c = activeTheme.colors;
   const isDark = c.isDark;
+  const archetype = activeTheme.archetype;
 
   return (
     <div
       className={`w-full h-full ${c.bgMain} flex flex-col overflow-hidden text-left transition-colors duration-300 font-sans`}
     >
-      {/* 1. Header HP (Status Bar & Nama Toko) */}
-      <div
-        className={`sticky top-0 z-20 px-3.5 py-2.5 flex items-center justify-between transition-colors duration-300 ${
-          isDark
-            ? "bg-slate-900 border-b border-slate-800 text-white"
-            : "bg-white border-b border-slate-200 text-slate-950 shadow-xs"
-        }`}
-      >
-        <div className="flex items-center gap-1.5 min-w-0">
-          <div
-            className={`w-6 h-6 rounded-lg ${c.accent} text-white flex items-center justify-center font-black text-[10px] shrink-0 shadow-sm`}
-          >
-            G
-          </div>
-          <div className="truncate">
-            <div className="font-extrabold text-[11px] leading-tight truncate">
-              GadgetBDG Bandung
-            </div>
-            <div className="text-[8px] opacity-75 flex items-center gap-1 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Online Siap COD
-            </div>
+      {/* ── 1. Archetype-Specific Top Header ── */}
+      {archetype === "keynote-obsidian" ? (
+        <div className="pt-2 px-3 pb-1">
+          <div className="bg-black/90 border border-zinc-800 rounded-full px-3 py-1 flex items-center justify-between shadow-lg">
+            <span className="text-[9px] font-black text-white flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              GadgetBdg Keynote
+            </span>
+            <span className="text-[8px] text-zinc-400 font-mono">REVEAL 2026</span>
           </div>
         </div>
-
-        <div
-          className={`px-2 py-0.5 rounded-full text-[8px] font-bold shrink-0 border ${c.badgeVerifiedBg} ${c.badgeVerifiedText} ${c.badgeVerifiedBorder} flex items-center gap-0.5`}
-        >
-          <ShieldCheck className="w-2.5 h-2.5" />
-          <span>Verified</span>
+      ) : archetype === "cyber-hud" ? (
+        <div className="bg-cyan-950 border-b border-cyan-800 px-3 py-1 text-[8px] text-cyan-300 font-mono flex items-center justify-between">
+          <span className="flex items-center gap-1 font-bold">
+            <Activity className="w-2.5 h-2.5 text-cyan-400 animate-pulse" /> HUD_TELEMETRY: OK
+          </span>
+          <span className="text-[7.5px] text-cyan-400">FPS: 144</span>
         </div>
-      </div>
+      ) : archetype === "tokyo-editorial" ? (
+        <div className="bg-[#1c1a17] text-[#f4f1ea] px-3 py-1 text-[8px] font-black uppercase tracking-widest flex justify-between">
+          <span>// TOKYO ISSUE 024</span>
+          <span>CURATED MOBILE</span>
+        </div>
+      ) : archetype === "live-drop" ? (
+        <div className="bg-black/90 border-b border-neutral-800 px-3 py-2 flex items-center justify-between">
+          <span className="text-[9px] font-black text-white flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#fe2c55] animate-ping" /> LIVE DROPS
+          </span>
+          <span className="text-[8px] bg-[#fe2c55] text-white px-1.5 py-0.2 rounded font-bold">
+            4 READY
+          </span>
+        </div>
+      ) : archetype === "midnight-gold" ? (
+        <div className="bg-[#080705] border-b border-amber-900/60 px-3 py-2 flex items-center justify-between font-serif">
+          <span className="text-[10px] font-bold text-amber-200 flex items-center gap-1">
+            <Crown className="w-2.5 h-2.5 text-amber-400" /> GadgetBdg Haute
+          </span>
+          <span className="text-[7px] text-amber-400/70 uppercase tracking-widest font-mono">
+            VIP SALON
+          </span>
+        </div>
+      ) : (
+        /* Clean-ledger header */
+        <div className="bg-white border-b border-slate-200 px-3 py-2 flex items-center justify-between">
+          <div className="font-extrabold text-[10px] text-slate-900 flex items-center gap-1">
+            <Table className="w-3 h-3 text-slate-800" />
+            <span>LEDGER STOK TOKO</span>
+          </div>
+          <span className="text-[8px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">
+            VERIFIED
+          </span>
+        </div>
+      )}
 
-      {/* 2. Scrollable Body Content */}
+      {/* ── 2. Scrollable Body Content ── */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-3">
-        {/* Card Banner Hero di Layar HP (100% Kontras Sempurna Baik Dark Maupun Clean) */}
-        {isDark ? (
-          /* TEMA GELAP / DARK: Slate-900 dengan Hero Gradient/Border khas tema */
-          <div
-            className={`rounded-2xl p-3.5 relative overflow-hidden shadow-md border transition-all duration-300 ${c.heroGradient} ${c.heroBorder}`}
-          >
-            <div className="relative z-10 space-y-1.5">
-              {/* Badge kecil */}
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-extrabold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
-                <Sparkles className="w-2.5 h-2.5 text-emerald-300" />
-                <span>SPESIALIS HP SECOND</span>
-              </div>
-
-              {/* Judul Hero */}
-              <h2 className="text-xs sm:text-[13px] font-black text-white leading-tight tracking-tight drop-shadow-sm">
-                Katalog iPhone &amp; Android Istimewa
-              </h2>
-
-              {/* Deskripsi */}
-              <p className="text-[8.5px] leading-relaxed max-w-[210px] text-slate-300 font-medium">
-                Semua unit lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
-              </p>
-
-              {/* Tombol CTA */}
-              <div className="pt-1 flex items-center gap-1.5">
-                <button
-                  type="button"
-                  className={`px-2.5 py-1 rounded-lg font-black text-[8.5px] shadow-sm flex items-center gap-1 transition ${c.accent} text-slate-950`}
-                >
-                  <span>Jelajahi Stok</span>
-                  <ArrowRight className="w-2.5 h-2.5" />
-                </button>
-
-                <button
-                  type="button"
-                  className="px-2 py-1 rounded-lg font-semibold text-[8px] border border-white/30 bg-black/40 text-white transition hover:bg-black/50"
-                >
-                  Tukar Tambah HP
-                </button>
-              </div>
+        {/* Banner Hero Mini */}
+        <div
+          className={`rounded-2xl p-3 relative overflow-hidden shadow-sm border ${c.heroGradient} ${c.heroBorder}`}
+        >
+          <div className="relative z-10 space-y-1">
+            <div className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[7px] font-bold uppercase tracking-wider bg-white/10 backdrop-blur-xs">
+              <Sparkles className="w-2 h-2" />
+              <span>{activeTheme.tagline}</span>
             </div>
+            <h2 className="text-xs font-black leading-tight drop-shadow-sm">
+              {activeTheme.name}
+            </h2>
+            <p className="text-[7.5px] opacity-80 line-clamp-2 leading-relaxed">
+              {activeTheme.description}
+            </p>
+          </div>
+        </div>
 
-            {/* Decorative glow ornament */}
-            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
+        {/* Section Header */}
+        <div className="flex items-center justify-between px-0.5 text-[8.5px]">
+          <span className={`font-black tracking-tight ${isDark ? "text-white" : "text-slate-950"}`}>
+            {archetype === "clean-ledger" ? "Data Baris Unit" : "Koleksi Unit Siap COD"}
+          </span>
+          <span className={`font-bold ${c.accentText}`}>Lihat Semua →</span>
+        </div>
+
+        {/* ── 3. Archetype-Specific Layout Structure ── */}
+        {archetype === "clean-ledger" ? (
+          /* Dense horizontal row items */
+          <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100 overflow-hidden shadow-xs">
+            {MOCK_PRODUCTS.slice(0, 3).map((p) => (
+              <div key={p.name} className="p-2 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-[7px] font-mono text-slate-400 uppercase font-bold">{p.brand}</div>
+                  <div className="text-[8.5px] font-bold text-slate-900 truncate">{p.name}</div>
+                  <div className="text-[7px] text-slate-500">{p.spec}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-[8.5px] font-black font-mono text-slate-950">{p.price}</div>
+                  <span className="text-[7px] bg-slate-900 text-white px-1.5 py-0.5 rounded font-bold">
+                    Detail
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : archetype === "live-drop" ? (
+          /* Vertical 9:16 Video Vibes Card */
+          <div className="space-y-2.5">
+            {MOCK_PRODUCTS.slice(0, 2).map((p, idx) => (
+              <div
+                key={p.name}
+                className="rounded-2xl border border-neutral-800 bg-neutral-900 p-2.5 space-y-2 relative overflow-hidden"
+              >
+                <div className="w-full h-32 bg-black rounded-xl p-2 flex items-center justify-center relative">
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                  <span className="absolute top-1.5 left-1.5 bg-[#fe2c55] text-white text-[7px] font-black px-1.5 py-0.2 rounded-full">
+                    DROP #{idx + 1}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-[8.5px] font-black text-white truncate">{p.name}</div>
+                    <div className="text-[7px] text-neutral-400">{p.spec}</div>
+                  </div>
+                  <div className="text-[9.5px] font-black text-[#fe2c55]">{p.price}</div>
+                </div>
+                <button className="w-full py-1 rounded-lg bg-[#fe2c55] text-white font-black text-[7.5px] uppercase">
+                  Ambil via WhatsApp
+                </button>
+              </div>
+            ))}
           </div>
         ) : (
-          /* TEMA TERANG / CLEAN: Background Gradien Gelap Solid yang Elegan agar Selalu 100% Kontras & Terbaca Mewah */
-          <div className="rounded-2xl p-3.5 relative overflow-hidden shadow-md bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white border border-slate-800/40 transition-all duration-300">
-            <div className="relative z-10 space-y-1.5">
-              {/* Badge kecil */}
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-extrabold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
-                <Sparkles className="w-2.5 h-2.5 text-emerald-300" />
-                <span>SPESIALIS HP SECOND</span>
-              </div>
-
-              {/* Judul Hero */}
-              <h2 className="text-xs sm:text-[13px] font-black text-white leading-tight tracking-tight drop-shadow-sm">
-                Katalog iPhone &amp; Android Istimewa
-              </h2>
-
-              {/* Deskripsi */}
-              <p className="text-[8.5px] leading-relaxed max-w-[210px] text-slate-200/90 font-medium">
-                Semua unit lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
-              </p>
-
-              {/* Tombol CTA */}
-              <div className="pt-1 flex items-center gap-1.5">
-                <button
-                  type="button"
-                  className="px-2.5 py-1 rounded-lg font-black text-[8.5px] shadow-sm flex items-center gap-1 transition bg-white text-slate-950 hover:bg-slate-100"
-                >
-                  <span>Jelajahi Stok</span>
-                  <ArrowRight className="w-2.5 h-2.5" />
-                </button>
-
-                <button
-                  type="button"
-                  className="px-2 py-1 rounded-lg font-semibold text-[8px] border border-white/30 bg-white/10 text-white transition hover:bg-white/20"
-                >
-                  Tukar Tambah HP
-                </button>
-              </div>
-            </div>
-
-            {/* Decorative glow ornament */}
-            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/20 rounded-full blur-xl pointer-events-none" />
-          </div>
-        )}
-
-        {/* Section Title */}
-        <div className="flex items-center justify-between px-0.5">
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`font-black text-[10px] tracking-tight ${
-                isDark ? "text-white" : "text-slate-950"
-              }`}
-            >
-              Unit Pilihan Hari Ini
-            </span>
-            <span
-              className={`text-[8px] px-1.5 py-0.2 rounded-full font-bold ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
-            >
-              4 Ready
-            </span>
-          </div>
-          <span className={`text-[8.5px] font-bold ${c.accentText}`}>Lihat Semua →</span>
-        </div>
-
-        {/* Kartu Produk di Mockup HP (dengan Gambar HP Fisik Asli) */}
-        <div className="grid grid-cols-2 gap-2">
-          {MOCK_PRODUCTS.map((p) => (
-            <div
-              key={p.name}
-              className={`rounded-xl p-2.5 border transition-all duration-300 flex flex-col justify-between space-y-2 shadow-xs ${c.bgContainer} ${c.cardBorder}`}
-            >
-              <div className="space-y-1.5">
-                {/* Visual Phone Box Art / Real Phone Image */}
-                <div
-                  className={`w-full h-24 rounded-lg flex items-center justify-center relative overflow-hidden p-1 ${
-                    isDark
-                      ? "bg-slate-950/70 border border-white/5"
-                      : "bg-slate-50 border border-slate-200/60"
-                  }`}
-                >
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    className="w-full h-full object-contain p-0.5 transition-transform duration-300 hover:scale-105"
-                    onError={(e) => {
-                      // Fallback jika image gagal load
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                      const parent = (e.currentTarget as HTMLImageElement).parentElement;
-                      if (parent) {
-                        const icon = parent.querySelector(".fallback-icon");
-                        if (icon) (icon as HTMLElement).style.display = "flex";
-                      }
-                    }}
-                  />
-                  <div className="fallback-icon hidden flex-col items-center justify-center">
-                    <ShoppingBag
-                      className={`w-6 h-6 ${isDark ? "text-white/20" : "text-slate-300"}`}
-                    />
-                    <span
-                      className={`text-[7px] font-mono uppercase tracking-wider mt-1 opacity-70 ${c.textSecondary}`}
-                    >
-                      {p.brand}
-                    </span>
-                  </div>
-
+          /* 2-Column Cards for Keynote, Cyber-HUD, Tokyo-Editorial, Midnight-Gold */
+          <div className="grid grid-cols-2 gap-2">
+            {MOCK_PRODUCTS.map((p) => (
+              <div
+                key={p.name}
+                className={`rounded-xl p-2 border transition flex flex-col justify-between space-y-1.5 ${c.bgContainer} ${c.cardBorder}`}
+              >
+                <div className="w-full h-20 rounded-lg flex items-center justify-center p-1 bg-black/5 dark:bg-black/40 overflow-hidden relative">
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
                   <span
-                    className={`absolute top-1 right-1 text-[6.5px] font-bold px-1.5 py-0.2 rounded shadow-xs ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
+                    className={`absolute top-1 right-1 text-[6.5px] font-bold px-1 py-0.2 rounded ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
                   >
                     {p.badge}
                   </span>
@@ -270,64 +230,41 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
 
                 <div>
                   <h4
-                    className={`text-[8.5px] font-bold leading-tight line-clamp-1 ${
+                    className={`text-[8px] font-bold line-clamp-1 ${
                       isDark ? "text-white" : "text-slate-950"
                     }`}
                   >
                     {p.name}
                   </h4>
-                  <p className={`text-[7px] font-medium ${c.textSecondary}`}>{p.spec}</p>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 pt-1 border-t border-dashed border-slate-700/20">
-                <div
-                  className={`text-[9.5px] font-extrabold leading-none ${
-                    isDark ? c.priceText : "text-blue-700 font-extrabold"
-                  }`}
-                >
-                  {p.price}
+                  <p className={`text-[6.5px] ${c.textSecondary}`}>{p.spec}</p>
                 </div>
 
-                {/* Tombol Aksi di Mockup */}
-                <button
-                  type="button"
-                  className={`w-full py-1 rounded-md text-[8px] font-bold flex items-center justify-center gap-1 transition shadow-xs text-white ${c.accent} ${c.accentHover}`}
-                >
-                  <MessageCircle className="w-2.5 h-2.5" />
-                  <span>Order via WA</span>
-                </button>
+                <div className="pt-1 border-t border-slate-700/10 flex items-center justify-between">
+                  <span className={`text-[8.5px] font-black ${isDark ? c.priceText : "text-slate-900"}`}>
+                    {p.price}
+                  </span>
+                  <span className={`text-[7px] font-bold px-1.5 py-0.5 rounded ${c.accent} text-white`}>
+                    WA
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Spacer */}
-        <div className="h-2" />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* 3. Bottom Nav Bar */}
+      {/* ── 3. Bottom Navigation Bar ── */}
       <div
-        className={`sticky bottom-0 z-20 border-t px-2 py-1.5 flex items-center justify-around text-[7.5px] font-bold backdrop-blur-md transition-colors duration-300 ${c.bottomNavBg} ${c.bottomNavBorder}`}
+        className={`sticky bottom-0 z-20 border-t px-2 py-1.5 flex items-center justify-around text-[7.5px] font-bold backdrop-blur-md ${c.bottomNavBg} ${c.bottomNavBorder}`}
       >
-        {[
-          { label: "Beranda", active: true },
-          { label: "Katalog", active: false },
-          { label: "Trade-In", active: false },
-          { label: "Tentang", active: false },
-        ].map((item) => (
+        {["Home", "Katalog", "Trade-In"].map((label, idx) => (
           <div
-            key={item.label}
-            className={`flex flex-col items-center gap-0.5 px-2 py-0.5 rounded cursor-pointer ${
-              item.active ? c.bottomNavActive : c.bottomNavInactive
+            key={label}
+            className={`flex flex-col items-center gap-0.5 ${
+              idx === 0 ? c.bottomNavActive : c.bottomNavInactive
             }`}
           >
-            <div
-              className={`w-3.5 h-1 rounded-full ${
-                item.active ? (isDark ? "bg-white" : "bg-slate-900") : "bg-transparent"
-              }`}
-            />
-            <span>{item.label}</span>
+            <span>{label}</span>
           </div>
         ))}
       </div>
@@ -340,7 +277,7 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
 // ---------------------------------------------------------------------------
 export function TemplateShowcase() {
   const [filterTier, setFilterTier] = useState<"ALL" | "STARTER" | "PRO" | "ADVANCE">("ALL");
-  const [selectedId, setSelectedId] = useState<string>("minimal-clean");
+  const [selectedId, setSelectedId] = useState<string>("clean-ledger");
 
   const templatesToDisplay =
     filterTier === "ALL"
@@ -353,10 +290,6 @@ export function TemplateShowcase() {
 
   const activeTheme = getTemplateConfig(selectedId);
 
-  // URL Demo tab baru
-  const liveDemoUrl =
-    activeTheme.id === "dark-gaming" ? "/gamersgadget" : "/berkahcell";
-
   return (
     <section
       id="showcase"
@@ -366,15 +299,14 @@ export function TemplateShowcase() {
         {/* Section Heading */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold mb-3 border border-indigo-200 shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Katalog 30 Template Storefront Interaktif
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            <span>6 Arketipe Desain Storefront Sinematik 2026</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Pilih Desain &amp; Lihat Langsung di HP
+            Bukan Katalog Kaku. Pilih Karakter Toko Anda.
           </h2>
           <p className="mt-3 text-slate-600 text-sm leading-relaxed">
-            Klik kartu desain di sebelah kanan. Layar smartphone di sebelah kiri akan{" "}
-            <b className="text-slate-900">seketika bertransformasi</b> menyesuaikan palet warna,
-            tipografi, banner hero, hingga tombol aksi tema pilihan Anda.
+            Setiap arketipe memiliki <b className="text-slate-900">struktur tata letak, ritme visual, dan animasi yang benar-benar berbeda</b>—dari format terminal data ringkas, panggung Apple Keynote, hingga feed vertikal Reels 9:16.
           </p>
 
           {/* Tier Filter Tabs */}
@@ -387,7 +319,7 @@ export function TemplateShowcase() {
                   : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              Semua Koleksi (30)
+              Semua Arketipe (6)
             </button>
             <button
               onClick={() => setFilterTier("STARTER")}
@@ -397,7 +329,7 @@ export function TemplateShowcase() {
                   : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              Paket Starter (2)
+              Starter (Clean Ledger)
             </button>
             <button
               onClick={() => setFilterTier("PRO")}
@@ -407,7 +339,7 @@ export function TemplateShowcase() {
                   : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              Paket Pro (10)
+              Pro (+Keynote &amp; Tokyo)
             </button>
             <button
               onClick={() => setFilterTier("ADVANCE")}
@@ -417,7 +349,7 @@ export function TemplateShowcase() {
                   : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              Paket Advance (30)
+              Advance (Semua 6 Arketipe)
             </button>
           </div>
         </div>
@@ -431,7 +363,7 @@ export function TemplateShowcase() {
             <div className="sticky top-24 flex flex-col items-center">
               {/* Smartphone Frame Outer Bezel */}
               <div className="relative border-slate-900 bg-slate-950 border-[12px] rounded-[3rem] h-[610px] w-[310px] sm:w-[330px] shadow-2xl ring-1 ring-slate-800">
-                {/* Speaker & Camera Notch */}
+                {/* Dynamic Island / Notch */}
                 <div className="w-[120px] h-[18px] bg-slate-950 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-[1rem] z-30 flex items-center justify-center gap-2">
                   <div className="w-8 h-1 bg-slate-800 rounded-full" />
                   <div className="w-2 h-2 rounded-full bg-slate-800" />
@@ -448,7 +380,7 @@ export function TemplateShowcase() {
                 <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-between text-xs">
                   <div className="text-left min-w-0">
                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      Aktif di HP:
+                      Arketipe Aktif:
                     </div>
                     <div className="font-black text-slate-900 truncate">{activeTheme.name}</div>
                   </div>
@@ -464,33 +396,24 @@ export function TemplateShowcase() {
                     {activeTheme.category}
                   </span>
                 </div>
-
-                <Link
-                  href={liveDemoUrl}
-                  target="_blank"
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition"
-                >
-                  <span>Buka Full Storefront Demo</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
               </div>
             </div>
           </div>
 
           {/* ----------------------------------------------------------------
-              RIGHT COLUMN — 30 Template Interactive Cards Grid
+              RIGHT COLUMN — 6 Archetype Interactive Cards Grid
           ----------------------------------------------------------------- */}
           <div className="lg:col-span-7 space-y-4">
             <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-200">
               <span className="font-extrabold text-slate-800 text-sm">
-                Koleksi Template ({templatesToDisplay.length})
+                Pilihan Arketipe Layout ({templatesToDisplay.length})
               </span>
               <span className="text-[11px] text-indigo-600 font-bold bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
-                👆 Klik kartu untuk ganti tema HP
+                👆 Klik untuk ganti layout di layar HP
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[640px] overflow-y-auto pr-2 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {templatesToDisplay.map((t) => {
                 const isSelected = selectedId === t.id;
                 const isDark = t.colors.isDark;
@@ -510,13 +433,16 @@ export function TemplateShowcase() {
                     <div>
                       {/* Card Header: Name & Tier Badge */}
                       <div className="flex items-start justify-between gap-2">
-                        <h4
-                          className={`font-black text-sm leading-snug ${
-                            isSelected ? "text-indigo-600" : isDark ? "text-white" : "text-slate-900"
-                          }`}
-                        >
-                          {t.name}
-                        </h4>
+                        <div>
+                          <h4
+                            className={`font-black text-sm leading-snug ${
+                              isSelected ? "text-indigo-600" : isDark ? "text-white" : "text-slate-900"
+                            }`}
+                          >
+                            {t.name}
+                          </h4>
+                          <span className="text-[10px] text-slate-500 font-medium">{t.tagline}</span>
+                        </div>
                         <span
                           className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full shrink-0 ${
                             t.category === "Starter"
@@ -532,7 +458,7 @@ export function TemplateShowcase() {
 
                       {/* Description */}
                       <p
-                        className={`text-xs mt-1.5 line-clamp-2 leading-relaxed font-medium ${
+                        className={`text-xs mt-2 line-clamp-3 leading-relaxed font-medium ${
                           isSelected ? "text-slate-600" : isDark ? "text-slate-400" : "text-slate-600"
                         }`}
                       >
@@ -540,20 +466,12 @@ export function TemplateShowcase() {
                       </p>
                     </div>
 
-                    {/* Card Footer: Palette preview & Selection button */}
+                    {/* Card Footer */}
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
-                      {/* Swatch Pill */}
-                      <div
-                        className={`h-7 px-2.5 rounded-lg flex items-center justify-center text-[10px] font-black shadow-xs border ${
-                          t.colors.isDark
-                            ? t.colors.heroGradient + " " + t.colors.heroBorder
-                            : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-500"
-                        }`}
-                      >
-                        <span>{t.badge || "Preset"}</span>
-                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        {t.badge}
+                      </span>
 
-                      {/* Status indicator */}
                       <span
                         className={`text-xs font-black flex items-center gap-1 transition ${
                           isSelected

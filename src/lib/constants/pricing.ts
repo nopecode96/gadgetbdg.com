@@ -5,8 +5,8 @@ export const TIER_LIMITS = {
     period: "/ bulan",
     maxActiveProducts: 15,
     maxAdmins: 1,
-    allowedTemplates: 2,
-    templateChangeCooldownDays: 0, // Bebas di 2 template
+    allowedTemplates: 1,
+    templateChangeCooldownDays: 0, // Bebas
     hasWatermark: false,
     customDomain: false,
     description: "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
@@ -23,7 +23,7 @@ export const TIER_LIMITS = {
     period: "/ bulan",
     maxActiveProducts: 30,
     maxAdmins: 3,
-    allowedTemplates: 10,
+    allowedTemplates: 3,
     templateChangeCooldownDays: 30, // 1x per 30 hari
     hasWatermark: true,
     customDomain: true,
@@ -41,7 +41,7 @@ export const TIER_LIMITS = {
     period: "/ bulan",
     maxActiveProducts: Infinity,
     maxAdmins: 5,
-    allowedTemplates: 30,
+    allowedTemplates: 6,
     templateChangeCooldownDays: 0, // Bebas ganti kapan saja
     hasWatermark: true,
     customDomain: true,

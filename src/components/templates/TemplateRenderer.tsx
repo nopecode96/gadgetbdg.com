@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { StoreData, ProductData, StoreTabType } from "./shared/types";
-import { StoreShell } from "./shared/StoreShell";
-import { StoreHomeView } from "./shared/StoreHomeView";
-import { StoreListView } from "./shared/StoreListView";
-import { StoreTradeInView } from "./shared/StoreTradeInView";
-import { StoreAboutView } from "./shared/StoreAboutView";
+import React from "react";
+import { StoreData, ProductData } from "./shared/types";
+import { getTemplateConfig } from "@/lib/constants/templates";
+import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
+import { CyberHudLayout } from "./archetypes/CyberHudLayout";
+import { TokyoEditorialLayout } from "./archetypes/TokyoEditorialLayout";
+import { LiveDropLayout } from "./archetypes/LiveDropLayout";
+import { MidnightGoldLayout } from "./archetypes/MidnightGoldLayout";
+import { CleanLedgerLayout } from "./archetypes/CleanLedgerLayout";
 
 interface TemplateRendererProps {
   store: StoreData;
@@ -14,45 +16,27 @@ interface TemplateRendererProps {
 }
 
 export function TemplateRenderer({ store, products }: TemplateRendererProps) {
-  const [activeTab, setActiveTab] = useState<StoreTabType>("home");
-  const [selectedBrand, setSelectedBrand] = useState<string>("ALL");
+  const currentConfig = getTemplateConfig(store.templateId);
+  const archetype = currentConfig.archetype || "clean-ledger";
 
-  const currentThemeId = store.templateId || "minimal-clean";
+  switch (archetype) {
+    case "keynote-obsidian":
+      return <KeynoteObsidianLayout store={store} products={products} />;
 
-  return (
-    <StoreShell
-      store={store}
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-      theme={currentThemeId}
-    >
-      {activeTab === "home" && (
-        <StoreHomeView
-          store={store}
-          products={products}
-          onNavigateTab={setActiveTab}
-          onSelectBrand={setSelectedBrand}
-          theme={currentThemeId}
-        />
-      )}
+    case "cyber-hud":
+      return <CyberHudLayout store={store} products={products} />;
 
-      {activeTab === "list" && (
-        <StoreListView
-          store={store}
-          products={products}
-          selectedBrand={selectedBrand}
-          onBrandChange={setSelectedBrand}
-          theme={currentThemeId}
-        />
-      )}
+    case "tokyo-editorial":
+      return <TokyoEditorialLayout store={store} products={products} />;
 
-      {activeTab === "trade-in" && (
-        <StoreTradeInView store={store} theme={currentThemeId} />
-      )}
+    case "live-drop":
+      return <LiveDropLayout store={store} products={products} />;
 
-      {activeTab === "about" && (
-        <StoreAboutView store={store} theme={currentThemeId} />
-      )}
-    </StoreShell>
-  );
+    case "midnight-gold":
+      return <MidnightGoldLayout store={store} products={products} />;
+
+    case "clean-ledger":
+    default:
+      return <CleanLedgerLayout store={store} products={products} />;
+  }
 }

@@ -46,32 +46,50 @@ export function StoreHomeView({
         className={`rounded-3xl p-5 relative overflow-hidden shadow-lg border ${colors.heroGradient} ${colors.heroBorder}`}
       >
         <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/20 backdrop-blur-sm">
+          {/* Badge — dark theme: white/20 glass; light theme: dark solid contrast */}
+          <div
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${
+              isDark
+                ? "bg-white/20 backdrop-blur-sm"
+                : "bg-black/70 text-white"
+            }`}
+          >
             <Sparkles className="w-3 h-3 text-amber-300" />
             <span>Spesialis HP Second Terpercaya</span>
           </div>
 
+          {/* Heading — inherits heroGradient text color, always has high contrast */}
           <h2 className="text-xl font-black tracking-tight leading-snug">
             {isDark ? "Gear Flagship & HP High-Spec Murah" : "Katalog iPhone & Android Istimewa"}
           </h2>
 
+          {/* Description — use opacity-90 which relies on inherited text color from heroGradient */}
           <p className="text-xs leading-relaxed max-w-[280px] opacity-90">
-            Semua unit telah lolos 30 titik uji fungsi, IMEI aman seumur hidup & garansi toko terpercaya.
+            Semua unit telah lolos 30 titik uji fungsi, IMEI aman seumur hidup &amp; garansi toko terpercaya.
           </p>
 
           <div className="pt-2 flex items-center gap-2">
+            {/* Jelajahi Stok button */}
             <button
               onClick={() => onNavigateTab("list")}
               className={`px-4 py-2 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-1.5 ${
-                isDark ? `${colors.accent} text-slate-950 ${colors.accentHover}` : "bg-white text-slate-900 hover:bg-neutral-100"
+                isDark
+                  ? `${colors.accent} text-slate-950 ${colors.accentHover}`
+                  : "bg-slate-900 text-white hover:bg-slate-800"
               }`}
             >
               <span>Jelajahi Stok</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
+
+            {/* Tukar Tambah — dark: semi-transparent white; light: white opaque with dark text */}
             <button
               onClick={() => onNavigateTab("trade-in")}
-              className="px-3.5 py-2 rounded-xl font-semibold text-xs transition border border-white/30 bg-black/20 hover:bg-black/30 text-white"
+              className={`px-3.5 py-2 rounded-xl font-semibold text-xs transition ${
+                isDark
+                  ? "border border-white/30 bg-black/20 hover:bg-black/30 text-white"
+                  : "border border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
+              }`}
             >
               Tukar Tambah HP
             </button>
@@ -80,6 +98,7 @@ export function StoreHomeView({
 
         {/* Decorative backdrop shapes */}
         <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+
       </div>
 
       {/* 2. Quick Brand Chips */}

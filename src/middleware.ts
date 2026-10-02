@@ -45,12 +45,22 @@ export default async function middleware(req: NextRequest) {
 
     // 2a. admin.gadgetbdg.com -> Super Admin SaaS Panel (/super-admin)
     if (subdomain === "admin" || subdomain === "super-admin" || subdomain === "superadmin") {
-      return NextResponse.rewrite(new URL(`/super-admin${path}`, req.url));
+      let targetPath = url.pathname;
+      if (!targetPath.startsWith("/super-admin")) {
+        targetPath = targetPath === "/" ? "/super-admin" : `/super-admin${targetPath}`;
+      }
+      const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
+      return NextResponse.rewrite(new URL(`${targetPath}${targetQuery}`, req.url));
     }
 
     // 2b. toko.gadgetbdg.com -> Admin Toko Merchant Panel (/admin)
     if (subdomain === "toko") {
-      return NextResponse.rewrite(new URL(`/admin${path}`, req.url));
+      let targetPath = url.pathname;
+      if (!targetPath.startsWith("/admin")) {
+        targetPath = targetPath === "/" ? "/admin" : `/admin${targetPath}`;
+      }
+      const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
+      return NextResponse.rewrite(new URL(`${targetPath}${targetQuery}`, req.url));
     }
 
     // 2c. www -> pass through ke root domain

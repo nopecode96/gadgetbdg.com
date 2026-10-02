@@ -99,13 +99,33 @@ export async function approvePaymentAction(paymentId: string) {
   return baseApprovePayment(paymentId);
 }
 
-export {
-  resetStoreOwnerPasswordAction,
-  extendStoreSubscriptionAction,
-  createSaasStaffAction,
-  deleteSaasStaffAction,
-  manualActivateStoreAction,
+import {
+  resetStoreOwnerPasswordAction as baseResetStoreOwnerPassword,
+  extendStoreSubscriptionAction as baseExtendStoreSubscription,
+  createSaasStaffAction as baseCreateSaasStaff,
+  deleteSaasStaffAction as baseDeleteSaasStaff,
+  manualActivateStoreAction as baseManualActivateStore,
 } from "./actions/saas-admin-actions";
+
+export async function resetStoreOwnerPasswordAction(storeId: string, newPassword: string) {
+  return baseResetStoreOwnerPassword(storeId, newPassword);
+}
+
+export async function extendStoreSubscriptionAction(storeId: string, additionalDays: number = 30) {
+  return baseExtendStoreSubscription(storeId, additionalDays);
+}
+
+export async function createSaasStaffAction(data: { name: string; email: string; password: string; role: "SUPER_ADMIN" | "ADMIN_SAAS" }) {
+  return baseCreateSaasStaff(data);
+}
+
+export async function deleteSaasStaffAction(staffId: string) {
+  return baseDeleteSaasStaff(staffId);
+}
+
+export async function manualActivateStoreAction(storeId: string, days: number = 30) {
+  return baseManualActivateStore(storeId, days);
+}
 
 export async function rejectPaymentAction(paymentId: string, notes: string) {
   return baseRejectPayment(paymentId, notes);

@@ -67,9 +67,9 @@ export async function createTradeInOffer(formData: FormData) {
 }
 
 import {
-  createProduct as guardedCreateProduct,
-  updateProductStatus as guardedUpdateProductStatus,
-  deleteProduct as guardedDeleteProduct,
+  createProductAction as guardedCreateProduct,
+  updateProductStatusAction as guardedUpdateProductStatus,
+  deleteProductAction as guardedDeleteProduct,
 } from "./actions/product-actions";
 
 import {
@@ -153,12 +153,15 @@ export async function deleteStaffUserAction(userId: string) {
   return baseDeleteStaffUser(userId);
 }
 
-
+// ─── Product action wrappers (session-secured) ────────────────────
 export async function createProduct(formData: FormData) {
   return guardedCreateProduct(formData);
 }
 
-export async function updateProductStatus(productId: string, newStatus: "AVAILABLE" | "BOOKED" | "SOLD") {
+export async function updateProductStatus(
+  productId: string,
+  newStatus: "AVAILABLE" | "BOOKED" | "SOLD"
+) {
   return guardedUpdateProductStatus(productId, newStatus);
 }
 
@@ -174,14 +177,20 @@ export async function updateStoreSettings(formData: FormData) {
   return guardedUpdateStoreSettings(formData);
 }
 
-export async function toggleProductStatus(productId: string, newStatus: "AVAILABLE" | "BOOKED" | "SOLD") {
+/** Alias used by ProductManagerClient */
+export async function toggleProductStatus(
+  productId: string,
+  newStatus: "AVAILABLE" | "BOOKED" | "SOLD"
+) {
   return guardedUpdateProductStatus(productId, newStatus);
 }
 
+/** Alias used by ProductManagerClient */
 export async function createProductAction(formData: FormData) {
   return guardedCreateProduct(formData);
 }
 
+/** Alias used by ProductManagerClient */
 export async function deleteProductAction(productId: string) {
   return guardedDeleteProduct(productId);
 }

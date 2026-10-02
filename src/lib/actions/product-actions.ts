@@ -2,11 +2,41 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
 import { TIER_LIMITS } from "@/lib/constants/pricing";
 
-export async function createProduct(formData: FormData) {
+// ─── Helper: serialize product (Date → string, Decimal → number) ──
+function serializeProduct(p: any) {
+  return {
+    ...p,
+    price: Number(p.price),
+    createdAt: p.createdAt instanceof Date ? p.createdAt.toISOString() : p.createdAt,
+    updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : p.updatedAt,
+  };
+}
+
+// ─── 1. getStoreProductsAction ────────────────────────────────────
+export async function getStoreProductsAction() {
+  const ctx = await requireStoreOwnerOrStaff();
+  const { store } = ctx;
+
+  const products = await prisma.product.findMany({
+    where: { storeId: store.id },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return {
+    success: true,
+    products: products.map(serializeProduct),
+  };
+}
+
+// ─── 2. createProductAction ───────────────────────────────────────
+export async function createProductAction(formData: FormData) {
   try {
-    const storeId = formData.get("storeId") as string;
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store } = ctx;
+
     const name = formData.get("name") as string;
     const brand = formData.get("brand") as string;
     const priceRaw = formData.get("price") as string;
@@ -15,27 +45,17 @@ export async function createProduct(formData: FormData) {
     const imeiStatus = formData.get("imeiStatus") as string;
     const completeness = formData.get("completeness") as string;
     const condition = formData.get("condition") as string;
-    const minusNotes = formData.get("minusNotes") as string;
-    const imageUrl = formData.get("imageUrl") as string;
+    const minusNotes = (formData.get("minusNotes") as string) || null;
+    const imageUrl = (formData.get("imageUrl") as string) || null;
 
-    if (!storeId || !name || !brand || !priceRaw || !ramRom || !imeiStatus || !completeness || !condition) {
+    if (!name || !brand || !priceRaw || !ramRom || !imeiStatus || !completeness || !condition) {
       return { success: false, error: "Mohon lengkapi seluruh field wajib." };
     }
 
-    // 1. Ambil data store untuk pengecekan batasan tier
-    const store = await prisma.store.findUnique({
-      where: { id: storeId },
-      select: { id: true, slug: true, tier: true },
-    });
-
-    if (!store) {
-      return { success: false, error: "Toko tidak ditemukan." };
-    }
-
-    // 2. Hitung jumlah produk aktif toko saat ini (AVAILABLE & BOOKED)
+    // Hitung stok aktif (AVAILABLE + BOOKED) milik toko ini
     const activeCount = await prisma.product.count({
       where: {
-        storeId,
+        storeId: store.id,
         status: { in: ["AVAILABLE", "BOOKED"] },
       },
     });
@@ -43,11 +63,11 @@ export async function createProduct(formData: FormData) {
     const tierConfig = TIER_LIMITS[store.tier as keyof typeof TIER_LIMITS] || TIER_LIMITS.STARTER;
     const maxActive = tierConfig.maxActiveProducts;
 
-    // 3. Validasi batas kuota tier
-    if (activeCount >= maxActive) {
+    // Validasi kuota tier
+    if (maxActive !== Infinity && activeCount >= maxActive) {
       return {
         success: false,
-        error: `Kapasitas stok penuh untuk paket Anda (Maksimal ${maxActive} unit). Silakan upgrade paket untuk menambah unit HP lagi.`,
+        error: `Kuota stok aktif paket ${tierConfig.name} sudah penuh (${maxActive} unit). Ubah status unit lama ke SOLD, atau upgrade paket untuk menambah lebih banyak unit.`,
       };
     }
 
@@ -57,7 +77,7 @@ export async function createProduct(formData: FormData) {
 
     const product = await prisma.product.create({
       data: {
-        storeId,
+        storeId: store.id, // ← selalu dari session, bukan dari formData
         name,
         brand,
         price,
@@ -66,56 +86,60 @@ export async function createProduct(formData: FormData) {
         imeiStatus,
         completeness,
         condition,
-        minusNotes: minusNotes || null,
+        minusNotes,
         status: "AVAILABLE",
         images,
-      },
-      include: {
-        store: true,
       },
     });
 
     revalidatePath("/admin/products");
     revalidatePath("/admin");
-    if (product.store?.slug) {
-      revalidatePath(`/${product.store.slug}`);
-    }
+    revalidatePath(`/${store.slug}`);
 
-    return { success: true, product };
+    return { success: true, product: serializeProduct(product) };
   } catch (error: any) {
-    console.error("Error creating product:", error);
+    console.error("createProductAction error:", error);
     return { success: false, error: error?.message || "Gagal menambahkan produk." };
   }
 }
 
-export async function updateProductStatus(productId: string, newStatus: "AVAILABLE" | "BOOKED" | "SOLD") {
+// ─── 3. updateProductStatusAction ────────────────────────────────
+export async function updateProductStatusAction(
+  productId: string,
+  newStatus: "AVAILABLE" | "BOOKED" | "SOLD"
+) {
   try {
-    const existingProduct = await prisma.product.findUnique({
-      where: { id: productId },
-      include: { store: true },
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store } = ctx;
+
+    // Verifikasi kepemilikan: produk harus milik toko yang sedang login
+    const existing = await prisma.product.findUnique({
+      where: { id: productId, storeId: store.id }, // ← tenant guard
     });
 
-    if (!existingProduct) {
-      return { success: false, error: "Produk tidak ditemukan." };
+    if (!existing) {
+      return { success: false, error: "Produk tidak ditemukan atau bukan milik toko Anda." };
     }
 
-    // Jika beralih dari SOLD kembali ke AVAILABLE / BOOKED, verifikasi batas kapasitas tier
-    if (existingProduct.status === "SOLD" && (newStatus === "AVAILABLE" || newStatus === "BOOKED")) {
+    // Jika mengaktifkan kembali dari SOLD → AVAILABLE/BOOKED, cek kuota dulu
+    if (
+      existing.status === "SOLD" &&
+      (newStatus === "AVAILABLE" || newStatus === "BOOKED")
+    ) {
       const activeCount = await prisma.product.count({
         where: {
-          storeId: existingProduct.storeId,
+          storeId: store.id,
           status: { in: ["AVAILABLE", "BOOKED"] },
         },
       });
 
-      const tierConfig =
-        TIER_LIMITS[existingProduct.store.tier as keyof typeof TIER_LIMITS] || TIER_LIMITS.STARTER;
+      const tierConfig = TIER_LIMITS[store.tier as keyof typeof TIER_LIMITS] || TIER_LIMITS.STARTER;
       const maxActive = tierConfig.maxActiveProducts;
 
-      if (activeCount >= maxActive) {
+      if (maxActive !== Infinity && activeCount >= maxActive) {
         return {
           success: false,
-          error: `Tidak dapat mengaktifkan kembali unit. Kuota stok aktif paket ${tierConfig.name} Anda sudah penuh (${maxActive} unit).`,
+          error: `Tidak dapat mengaktifkan kembali unit. Kuota stok aktif paket ${tierConfig.name} sudah penuh (${maxActive} unit).`,
         };
       }
     }
@@ -123,38 +147,49 @@ export async function updateProductStatus(productId: string, newStatus: "AVAILAB
     const updated = await prisma.product.update({
       where: { id: productId },
       data: { status: newStatus },
-      include: { store: true },
     });
 
     revalidatePath("/admin/products");
     revalidatePath("/admin");
-    if (updated.store?.slug) {
-      revalidatePath(`/${updated.store.slug}`);
-    }
+    revalidatePath(`/${store.slug}`);
 
-    return { success: true, product: updated };
+    return { success: true, product: serializeProduct(updated) };
   } catch (error: any) {
-    console.error("Error updating product status:", error);
+    console.error("updateProductStatusAction error:", error);
     return { success: false, error: error?.message || "Gagal mengubah status unit." };
   }
 }
 
-export async function deleteProduct(productId: string) {
+// ─── 4. deleteProductAction ───────────────────────────────────────
+export async function deleteProductAction(productId: string) {
   try {
-    const deleted = await prisma.product.delete({
-      where: { id: productId },
-      include: { store: true },
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store } = ctx;
+
+    // Verifikasi kepemilikan sebelum hapus
+    const existing = await prisma.product.findUnique({
+      where: { id: productId, storeId: store.id }, // ← tenant guard
     });
+
+    if (!existing) {
+      return { success: false, error: "Produk tidak ditemukan atau bukan milik toko Anda." };
+    }
+
+    await prisma.product.delete({ where: { id: productId } });
 
     revalidatePath("/admin/products");
     revalidatePath("/admin");
-    if (deleted.store?.slug) {
-      revalidatePath(`/${deleted.store.slug}`);
-    }
+    revalidatePath(`/${store.slug}`);
 
     return { success: true };
   } catch (error: any) {
-    console.error("Error deleting product:", error);
+    console.error("deleteProductAction error:", error);
     return { success: false, error: error?.message || "Gagal menghapus produk." };
   }
 }
+
+// ─── Legacy aliases (backward compatibility) ─────────────────────
+// Keep old names working so actions.ts wrappers don't break
+export const createProduct = createProductAction;
+export const updateProductStatus = updateProductStatusAction;
+export const deleteProduct = deleteProductAction;

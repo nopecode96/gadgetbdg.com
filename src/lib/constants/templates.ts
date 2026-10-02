@@ -7,6 +7,8 @@ export interface TemplateThemeConfig {
   description: string;
   badge?: string;
   archetype:
+    | "minimal-clean"
+    | "dark-gaming"
     | "keynote-obsidian"
     | "cyber-hud"
     | "tokyo-editorial"
@@ -42,18 +44,18 @@ export interface TemplateThemeConfig {
 
 export const TEMPLATE_REGISTRY: Record<string, TemplateThemeConfig> = {
   // ==========================================
-  // 1. CLEAN-LEDGER (Starter / Pro / Advance)
+  // 1. MINIMAL-CLEAN (Starter)
   // ==========================================
-  "clean-ledger": {
-    id: "clean-ledger",
-    name: "Clean Ledger",
-    tagline: "Minimalist Terminal Data",
+  "minimal-clean": {
+    id: "minimal-clean",
+    name: "Minimal Clean",
+    tagline: "Oraimo & Modern E-Commerce Standard",
     category: "Starter",
     tierRequired: "STARTER",
-    archetype: "clean-ledger",
+    archetype: "minimal-clean",
     description:
-      "Format baris horizontal modern & padat informasi. Status IMEI, BH %, dan catatan minus langsung terbaca dengan pencarian instan super cepat.",
-    badge: "Terminal Data",
+      "Desain mobile e-commerce terang modern. Dilengkapi visual quick category icons, hero promo banner melayang, dan kartu produk rounded-3xl kontras tinggi.",
+    badge: "Populer Starter",
     colors: {
       isDark: false,
       bgMain: "bg-slate-50",
@@ -64,25 +66,65 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateThemeConfig> = {
       accent: "bg-slate-900",
       accentHover: "hover:bg-slate-800",
       accentText: "text-slate-900",
-      badgeVerifiedBg: "bg-slate-100",
-      badgeVerifiedText: "text-slate-800",
-      badgeVerifiedBorder: "border-slate-300",
+      badgeVerifiedBg: "bg-emerald-50",
+      badgeVerifiedText: "text-emerald-700",
+      badgeVerifiedBorder: "border-emerald-200",
       cardBg: "bg-white",
-      cardBorder: "border-slate-200",
+      cardBorder: "border-slate-200/80",
       cardHoverBorder: "hover:border-slate-400",
-      headerBg: "bg-white/90 border-slate-200 text-slate-900",
+      headerBg: "bg-white/95 border-slate-200 text-slate-900",
       bottomNavBg: "bg-white/95 border-slate-200",
       bottomNavBorder: "border-slate-200",
-      bottomNavActive: "text-slate-900 font-extrabold",
+      bottomNavActive: "text-slate-950 font-black",
       bottomNavInactive: "text-slate-400 hover:text-slate-800",
-      priceText: "text-slate-900 font-mono font-black",
-      heroGradient: "bg-gradient-to-r from-slate-900 via-slate-800 to-zinc-900 text-white",
+      priceText: "text-slate-950 font-black",
+      heroGradient: "bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white",
       heroBorder: "border-slate-800",
     },
   },
 
   // ==========================================
-  // 2. KEYNOTE-OBSIDIAN (Pro / Advance)
+  // 2. DARK-GAMING (Starter)
+  // ==========================================
+  "dark-gaming": {
+    id: "dark-gaming",
+    name: "Dark Gaming Neon",
+    tagline: "Spectra Dark & High-FPS Glow",
+    category: "Starter",
+    tierRequired: "STARTER",
+    archetype: "dark-gaming",
+    description:
+      "Gaya gelap gaming Spectra dengan aksen neon mint-teal (#00e5b3), featured hero showcase besar, spec chips teknis (FPS & Chipset), dan floating CTA order.",
+    badge: "Dark Spectra",
+    colors: {
+      isDark: true,
+      bgMain: "bg-[#0c0f12]",
+      bgContainer: "bg-[#14191f]",
+      borderContainer: "border-emerald-950/60",
+      textPrimary: "text-emerald-50",
+      textSecondary: "text-emerald-400/60",
+      accent: "bg-[#00e5b3] text-slate-950",
+      accentHover: "hover:bg-[#00c99d]",
+      accentText: "text-[#00e5b3]",
+      badgeVerifiedBg: "bg-emerald-950/80",
+      badgeVerifiedText: "text-[#00e5b3]",
+      badgeVerifiedBorder: "border-emerald-800/60",
+      cardBg: "bg-[#12161c]/90",
+      cardBorder: "border-emerald-900/40",
+      cardHoverBorder: "hover:border-[#00e5b3]/60",
+      headerBg: "bg-[#0c0f12]/90 border-emerald-950 text-emerald-50 backdrop-blur-md",
+      bottomNavBg: "bg-[#0c0f12]/95 border-emerald-950",
+      bottomNavBorder: "border-emerald-950",
+      bottomNavActive: "text-[#00e5b3] font-black",
+      bottomNavInactive: "text-slate-500 hover:text-emerald-300",
+      priceText: "text-[#00e5b3] font-mono font-black",
+      heroGradient: "bg-gradient-to-br from-[#0c151b] via-[#102428] to-[#0c0f12] text-white",
+      heroBorder: "border-[#00e5b3]/30",
+    },
+  },
+
+  // ==========================================
+  // 3. KEYNOTE-OBSIDIAN (Pro)
   // ==========================================
   "keynote-obsidian": {
     id: "keynote-obsidian",
@@ -122,17 +164,17 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateThemeConfig> = {
   },
 
   // ==========================================
-  // 3. TOKYO-EDITORIAL (Pro / Advance)
+  // 4. TOKYO-EDITORIAL (Pro)
   // ==========================================
   "tokyo-editorial": {
     id: "tokyo-editorial",
-    name: "Tokyo Editorial",
-    tagline: "Streetwear Magazine & Raw Typography",
+    name: "Tokyo Street Clean",
+    tagline: "Streetwear Magazine & Asymmetric Pop",
     category: "Pro",
     tierRequired: "PRO",
     archetype: "tokyo-editorial",
     description:
-      "Gaya Streetwear / Editorial Magazine Tech. Latar stone/off-white, tipografi bold asimetris, infinite marquee text, layout majalah dengan kartu foto resolusi tinggi dan label grade transparan.",
+      "Gaya Streetwear / Editorial Magazine Tech. Latar stone/off-white dengan kartu pastel asimetris, tipografi brutalist bold, dan showcase produk 3D melayang.",
     badge: "Street Editorial",
     colors: {
       isDark: false,
@@ -162,18 +204,18 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateThemeConfig> = {
   },
 
   // ==========================================
-  // 4. CYBER-HUD (Advance Only)
+  // 5. CYBER-HUD (Advance)
   // ==========================================
   "cyber-hud": {
     id: "cyber-hud",
-    name: "Cyber HUD",
-    tagline: "Hyper-Performance Console Gaming",
+    name: "Cyber HUD Telemetry",
+    tagline: "Hyper-Performance Console & Tactical Tech",
     category: "Advance",
     tierRequired: "ADVANCE",
     archetype: "cyber-hud",
     description:
-      "Gaya Console Gaming / Hyper-Performance (ROG & High-FPS Gadgets). Ticker marquee berjalan 'STATUS STOK BEC READY COD', sudut kartu tegas chamfered, bar spek visual, dan neon glow border.",
-    badge: "ROG Cyber HUD",
+      "Gaya Console Gaming / Hyper-Performance (ROG & High-FPS Gadgets). Ticker marquee berjalan, radar circular icon gadgets, bar spek visual baterai & sinyal, dan neon cyan glow.",
+    badge: "Tactical HUD",
     colors: {
       isDark: true,
       bgMain: "bg-[#05070a]",
@@ -181,7 +223,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateThemeConfig> = {
       borderContainer: "border-cyan-900/60",
       textPrimary: "text-cyan-100",
       textSecondary: "text-cyan-400/60",
-      accent: "bg-cyan-500",
+      accent: "bg-cyan-500 text-slate-950",
       accentHover: "hover:bg-cyan-400",
       accentText: "text-cyan-400",
       badgeVerifiedBg: "bg-cyan-950/80",
@@ -202,61 +244,21 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateThemeConfig> = {
   },
 
   // ==========================================
-  // 5. LIVE-DROP (Advance Only)
-  // ==========================================
-  "live-drop": {
-    id: "live-drop",
-    name: "Live Drop",
-    tagline: "TikTok & Reels Mobile-First Feed",
-    category: "Advance",
-    tierRequired: "ADVANCE",
-    archetype: "live-drop",
-    description:
-      "Gaya TikTok & Reels-First. Format kartu vertikal 9:16 sinematik, swipe horizontal snap untuk galeri foto fisik, floating pulsing button 'Ambil via WhatsApp', dan live inventory vibes.",
-    badge: "9:16 Video Vibes",
-    colors: {
-      isDark: true,
-      bgMain: "bg-black",
-      bgContainer: "bg-[#111111]",
-      borderContainer: "border-neutral-800",
-      textPrimary: "text-white",
-      textSecondary: "text-neutral-400",
-      accent: "bg-[#fe2c55]",
-      accentHover: "hover:bg-[#e0264b]",
-      accentText: "text-[#fe2c55]",
-      badgeVerifiedBg: "bg-[#fe2c55]/20",
-      badgeVerifiedText: "text-[#ff6b87]",
-      badgeVerifiedBorder: "border-[#fe2c55]/40",
-      cardBg: "bg-[#141414]",
-      cardBorder: "border-neutral-800",
-      cardHoverBorder: "hover:border-[#fe2c55]/60",
-      headerBg: "bg-black/80 border-neutral-900 text-white backdrop-blur-md",
-      bottomNavBg: "bg-black/90 border-neutral-900",
-      bottomNavBorder: "border-neutral-900",
-      bottomNavActive: "text-[#fe2c55] font-black",
-      bottomNavInactive: "text-neutral-500 hover:text-white",
-      priceText: "text-white font-black",
-      heroGradient: "bg-gradient-to-b from-neutral-950 via-[#1a080d] to-black text-white",
-      heroBorder: "border-[#fe2c55]/30",
-    },
-  },
-
-  // ==========================================
-  // 6. MIDNIGHT-GOLD (Advance Only)
+  // 6. MIDNIGHT-GOLD (Advance)
   // ==========================================
   "midnight-gold": {
     id: "midnight-gold",
-    name: "Midnight Gold",
-    tagline: "VIP Concierge & Luxury Boutique",
+    name: "Midnight Gold Luxury",
+    tagline: "VIP Concierge & Haute Horlogerie",
     category: "Advance",
     tierRequired: "ADVANCE",
     archetype: "midnight-gold",
     description:
-      "Gaya VIP Concierge / Butik Mewah. Hitam pekat aksen emas/amber mewah, kartu jaminan garansi toko interaktif, dan kurasi katalog seperti perhiasan berharga.",
-    badge: "VIP Concierge",
+      "Gaya VIP Concierge / Butik Mewah. Hitam pekat aksen emas/amber mewah, kartu kurasi flagship bak perhiasan berharga, dan hotline booking concierge VIP.",
+    badge: "VIP Luxury",
     colors: {
       isDark: true,
-      bgMain: "bg-[#0a0907]",
+      bgMain: "bg-[#0a0805]",
       bgContainer: "bg-[#14120e]",
       borderContainer: "border-amber-900/40",
       textPrimary: "text-amber-100",
@@ -270,13 +272,13 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateThemeConfig> = {
       cardBg: "bg-[#16130d]/90",
       cardBorder: "border-amber-900/30",
       cardHoverBorder: "hover:border-amber-500/60",
-      headerBg: "bg-[#0a0907]/90 border-amber-950 text-amber-100 backdrop-blur-md",
-      bottomNavBg: "bg-[#0a0907]/95 border-amber-950",
+      headerBg: "bg-[#0a0805]/90 border-amber-950 text-amber-100 backdrop-blur-md",
+      bottomNavBg: "bg-[#0a0805]/95 border-amber-950",
       bottomNavBorder: "border-amber-950",
       bottomNavActive: "text-amber-400 font-bold",
       bottomNavInactive: "text-stone-500 hover:text-amber-200",
       priceText: "text-amber-300 font-mono font-black",
-      heroGradient: "bg-gradient-to-b from-[#1b160e] via-[#100d08] to-[#0a0907] text-amber-100",
+      heroGradient: "bg-gradient-to-b from-[#1b160e] via-[#100d08] to-[#0a0805] text-amber-100",
       heroBorder: "border-amber-600/40",
     },
   },
@@ -286,35 +288,35 @@ export const TEMPLATE_LIST = Object.values(TEMPLATE_REGISTRY);
 
 /**
  * Filter template yang tersedia berdasarkan tier langganan toko:
- * - STARTER: clean-ledger (1 template)
- * - PRO: clean-ledger, keynote-obsidian, tokyo-editorial (3 template)
- * - ADVANCE: semua 6 arketipe layout
+ * - STARTER: minimal-clean, dark-gaming (2 template)
+ * - PRO: minimal-clean, dark-gaming, keynote-obsidian, tokyo-editorial (4 template)
+ * - ADVANCE / ALL: semua 6 arketipe lengkap
  */
 export function getAvailableTemplatesForTier(tier: string | undefined): TemplateThemeConfig[] {
-  const cleanTier = (tier || "STARTER").toUpperCase();
-  if (cleanTier === "ADVANCE") {
+  const cleanTier = (tier || "ALL").toUpperCase();
+  if (cleanTier === "ALL" || cleanTier === "ADVANCE") {
     return TEMPLATE_LIST;
   }
   if (cleanTier === "PRO") {
     return TEMPLATE_LIST.filter(
-      (t) =>
-        t.id === "clean-ledger" ||
-        t.id === "keynote-obsidian" ||
-        t.id === "tokyo-editorial"
+      (t) => t.tierRequired === "STARTER" || t.tierRequired === "PRO"
     );
   }
-  // STARTER tier
-  return TEMPLATE_LIST.filter((t) => t.id === "clean-ledger");
+  if (cleanTier === "STARTER") {
+    return TEMPLATE_LIST.filter((t) => t.tierRequired === "STARTER");
+  }
+  return TEMPLATE_LIST;
 }
 
 export function getTemplateConfig(templateId: string | undefined): TemplateThemeConfig {
   if (templateId && TEMPLATE_REGISTRY[templateId]) {
     return TEMPLATE_REGISTRY[templateId];
   }
-  // Fallback map untuk legacy template ids yang mungkin tersimpan di DB
-  if (templateId === "dark-gaming") return TEMPLATE_REGISTRY["cyber-hud"];
+  // Fallback map untuk legacy template ids
+  if (templateId === "clean-ledger") return TEMPLATE_REGISTRY["minimal-clean"];
+  if (templateId === "live-drop") return TEMPLATE_REGISTRY["dark-gaming"];
   if (templateId === "flagship-gold") return TEMPLATE_REGISTRY["midnight-gold"];
   if (templateId === "tokyo-street") return TEMPLATE_REGISTRY["tokyo-editorial"];
 
-  return TEMPLATE_REGISTRY["clean-ledger"];
+  return TEMPLATE_REGISTRY["minimal-clean"];
 }

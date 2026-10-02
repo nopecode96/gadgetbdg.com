@@ -3,23 +3,31 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  ExternalLink,
   Sparkles,
   ArrowRight,
-  ShoppingBag,
-  CheckCircle2,
   ShieldCheck,
   MessageCircle,
   Zap,
   Activity,
   Flame,
   Crown,
-  Table,
   Home,
   Smartphone,
+  Tablet,
+  Watch,
+  Headphones,
   RefreshCw,
   Store as StoreIcon,
   Search,
+  SlidersHorizontal,
+  MapPin,
+  Heart,
+  Plus,
+  Star,
+  ExternalLink,
+  ChevronRight,
+  Radio,
+  Eye,
 } from "lucide-react";
 import {
   TEMPLATE_LIST,
@@ -34,261 +42,725 @@ import {
 interface MockProduct {
   name: string;
   price: string;
+  oldPrice?: string;
   spec: string;
   badge: string;
   brand: string;
   image: string;
+  rating: string;
 }
 
 const MOCK_PRODUCTS: MockProduct[] = [
   {
     name: "iPhone 15 Pro Max 256GB",
     price: "Rp 18.500.000",
-    spec: "BH 94% · Like New",
+    oldPrice: "Rp 20.900.000",
+    spec: "BH 94% • Like New",
     badge: "iBox Resmi",
     brand: "Apple",
     image: "/images/items/iphone-15-pro.png",
+    rating: "4.9",
   },
   {
     name: "Samsung S24 Ultra 12/512GB",
     price: "Rp 15.900.000",
-    spec: "SEIN · Fullset Box",
+    oldPrice: "Rp 17.500.000",
+    spec: "SEIN • Fullset Box",
     badge: "Garansi On",
     brand: "Samsung",
     image: "/images/items/samsung-s24-ultra.png",
+    rating: "4.8",
   },
   {
     name: "Xiaomi 14T Pro 12/512GB",
     price: "Rp 8.750.000",
-    spec: "Leica Optic · 99% Mulus",
+    oldPrice: "Rp 9.900.000",
+    spec: "Leica Optic • 99% Mulus",
     badge: "Best Deal",
     brand: "Xiaomi",
     image: "/images/items/xiaomi-14t-pro.png",
+    rating: "4.7",
   },
   {
     name: "ASUS ROG Phone 8 16/256GB",
     price: "Rp 10.800.000",
+    oldPrice: "Rp 12.000.000",
     spec: "Snapdragon 8 Gen 3",
-    badge: "High FPS",
+    badge: "165Hz FPS",
     brand: "ASUS ROG",
     image: "/images/items/rog-phone-8.png",
+    rating: "4.9",
   },
 ];
 
 // ---------------------------------------------------------------------------
-// Dynamic Smartphone Mockup Screen (Adapts to Archetype Layout + 5 Pillars)
+// 6 DISTINCT ARCHETYPE PHONE SCREEN RENDERERS
 // ---------------------------------------------------------------------------
-function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
-  const c = activeTheme.colors;
-  const isDark = c.isDark;
-  const archetype = activeTheme.archetype;
 
+/** 1. MINIMAL CLEAN (Starter - Oraimo / Clean Light E-Commerce, Image 1) */
+function MinimalCleanScreen() {
   return (
-    <div
-      className={`w-full h-full ${c.bgMain} flex flex-col overflow-hidden text-left transition-colors duration-300 font-sans`}
-    >
-      {/* ── 1. PILAR 1: Header Identitas Toko Nyata ── */}
-      <div
-        className={`pt-2 px-3 pb-2 border-b flex items-center justify-between gap-1.5 backdrop-blur-md shrink-0 ${
-          isDark ? "bg-slate-950/90 border-slate-800 text-white" : "bg-white/95 border-slate-200 text-slate-900"
-        }`}
-      >
+    <div className="w-full h-full bg-slate-50 text-slate-900 flex flex-col overflow-hidden text-left font-sans">
+      {/* Top App Bar: Row 1 Location & Hotline */}
+      <div className="pt-2 px-3 pb-1.5 flex items-center justify-between gap-1 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <div className="relative shrink-0">
-            <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-black text-[9px] flex items-center justify-center shadow-xs">
-              G
-            </div>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 absolute bottom-0 right-0 border border-white dark:border-slate-950 animate-pulse" />
+          <div className="w-5 h-5 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
+            <MapPin className="w-3 h-3 fill-rose-500 text-white" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1">
-              <span className="font-extrabold text-[9px] truncate leading-tight">GadgetBdg BEC</span>
-              <span className="text-[6.5px] font-black px-1 rounded-full bg-emerald-500 text-white leading-none">
-                ✓
-              </span>
+            <div className="text-[8.5px] font-black truncate leading-tight flex items-center gap-1">
+              <span>BEC Lt. 1 Blok C-05, Bandung</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
             </div>
-            <span className="text-[7.5px] text-emerald-600 dark:text-emerald-400 font-semibold block leading-tight truncate">
-              ● Buka • BEC Lt. 1
-            </span>
+            <div className="text-[7px] text-slate-400 font-medium leading-none">
+              Store Resmi • Siap COD
+            </div>
           </div>
         </div>
-
-        <div className="flex items-center gap-1 shrink-0">
-          <div className="p-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            <Search className="w-2.5 h-2.5" />
-          </div>
-          <div className="bg-emerald-600 text-white font-black text-[7.5px] px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
-            <MessageCircle className="w-2 h-2 fill-current" />
-            <span>WA</span>
-          </div>
+        <div className="bg-emerald-600 text-white font-black text-[7px] px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-2xs shrink-0">
+          <MessageCircle className="w-2 h-2 fill-current" />
+          <span>WA</span>
         </div>
       </div>
 
-      {/* ── 2. Scrollable Body Content ── */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-14">
-        {/* PILAR 2: Guaranteed High-Contrast Hero Banner */}
-        <div className="rounded-2xl p-2.5 relative overflow-hidden shadow-md bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-800">
+      {/* Top App Bar: Row 2 Search Bar */}
+      <div className="px-3 py-1.5 bg-white border-b border-slate-100 shrink-0">
+        <div className="rounded-2xl bg-slate-100/90 border border-slate-200/80 px-2.5 py-1.5 flex items-center gap-1.5">
+          <Search className="w-3 h-3 text-slate-400 shrink-0" />
+          <span className="text-[8px] text-slate-400 font-medium truncate flex-1">
+            Cari iPhone 15, S24 Ultra...
+          </span>
+          <SlidersHorizontal className="w-2.5 h-2.5 text-slate-500 shrink-0" />
+        </div>
+      </div>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-12">
+        {/* Hero Promo Card: Oraimo style dark navy card with floating phone */}
+        <div className="rounded-3xl p-3 relative overflow-hidden shadow-md bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-800">
           <div className="relative z-10 flex items-center justify-between gap-2">
             <div className="space-y-1 min-w-0">
-              <div className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[6.5px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              <span className="inline-flex items-center gap-0.5 px-2 py-0.2 rounded-full text-[6.5px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30">
                 <Sparkles className="w-2 h-2 text-amber-300" />
-                <span>SPESIALIS HP SECOND</span>
-              </div>
-              <h3 className="text-[10px] font-black leading-tight text-white truncate">
-                {activeTheme.name}
-              </h3>
-              <p className="text-[7px] text-slate-300 line-clamp-1 leading-snug font-medium">
-                {activeTheme.tagline}
-              </p>
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md p-1 flex items-center justify-center shrink-0 border border-white/20 shadow-md">
-              <img src="/images/items/iphone-15-pro.png" alt="Featured" className="w-full h-full object-contain" />
-            </div>
-          </div>
-        </div>
-
-        {/* PILAR 3: Quick Category Horizontal Pills */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 text-[7px] font-bold">
-            {["⚡ Semua", "🍎 iPhone", "📱 Samsung", "🎮 Gaming", "💰 < 3 Jt"].map((cat, idx) => (
-              <span
-                key={cat}
-                className={`px-2 py-0.5 rounded-full shrink-0 border transition ${
-                  idx === 0
-                    ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 shadow-2xs"
-                    : isDark
-                    ? "bg-slate-900/90 text-slate-300 border-slate-800"
-                    : "bg-white text-slate-700 border-slate-200"
-                }`}
-              >
-                {cat}
+                <span>PROMO SPESIAL GAJIAN</span>
               </span>
+              <h3 className="text-[11px] font-black leading-tight text-white">
+                Diskon Unit Flagship
+              </h3>
+              <p className="text-[7px] text-slate-300 line-clamp-1">
+                Lolos 30 titik uji • Garansi 30 hari
+              </p>
+              <button className="px-2.5 py-1 rounded-full text-[7px] font-black bg-white text-slate-950 shadow-xs hover:bg-slate-100 mt-0.5">
+                Beli Sekarang →
+              </button>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md p-1 flex items-center justify-center shrink-0 border border-white/20 shadow-md">
+              <img
+                src="/images/items/iphone-15-pro.png"
+                alt="Promo"
+                className="w-full h-full object-contain drop-shadow-md"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Visual Quick Category Icons (Pilar C) */}
+        <div className="space-y-1">
+          <div className="text-[8px] font-extrabold text-slate-800">Kategori Pilihan</div>
+          <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-0.5">
+            {[
+              { label: "Phone", icon: Smartphone, bg: "bg-blue-50 text-blue-600 border-blue-200" },
+              { label: "Tablet", icon: Tablet, bg: "bg-cyan-50 text-cyan-600 border-cyan-200" },
+              { label: "Watch", icon: Watch, bg: "bg-purple-50 text-purple-600 border-purple-200" },
+              { label: "Audio", icon: Headphones, bg: "bg-rose-50 text-rose-600 border-rose-200" },
+              { label: "Charger", icon: Zap, bg: "bg-amber-50 text-amber-600 border-amber-200" },
+            ].map(({ label, icon: Icon, bg }) => (
+              <div key={label} className="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+                <div
+                  className={`w-9 h-9 rounded-2xl flex items-center justify-center shadow-2xs border ${bg}`}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+                <span className="text-[7px] font-bold text-slate-600">{label}</span>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Section Header */}
-        <div className="flex items-center justify-between px-0.5 text-[8.5px]">
-          <span className={`font-black tracking-tight ${isDark ? "text-white" : "text-slate-950"}`}>
-            {archetype === "clean-ledger" ? "Data Baris Unit" : "Koleksi Unit Siap COD"}
-          </span>
-          <span className={`font-bold ${c.accentText}`}>Lihat Semua →</span>
-        </div>
+        {/* 2-Column Product Grid (Pilar D: Rounded-3xl + Plus Button) */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-[8px]">
+            <span className="font-extrabold text-slate-900">Rekomendasi Siap COD</span>
+            <span className="font-bold text-indigo-600">Semua →</span>
+          </div>
 
-        {/* ── 3. PILAR 4: Archetype-Specific Layout Structure with Modern Product Cards ── */}
-        {archetype === "clean-ledger" ? (
-          /* Dense horizontal row items */
-          <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100 overflow-hidden shadow-xs">
-            {MOCK_PRODUCTS.slice(0, 3).map((p) => (
-              <div key={p.name} className="p-2 flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-[7px] font-mono text-slate-400 uppercase font-bold">{p.brand}</div>
-                  <div className="text-[8.5px] font-bold text-slate-900 truncate">{p.name}</div>
-                  <div className="text-[7px] text-slate-500">{p.spec}</div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="text-[8.5px] font-black font-mono text-slate-950">{p.price}</div>
-                  <span className="text-[7px] bg-emerald-600 text-white px-1.5 py-0.5 rounded-full font-bold">
-                    WA
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : archetype === "live-drop" ? (
-          /* Vertical 9:16 Video Vibes Card */
-          <div className="space-y-2">
-            {MOCK_PRODUCTS.slice(0, 2).map((p, idx) => (
-              <div
-                key={p.name}
-                className="rounded-2xl border border-neutral-800 bg-neutral-900 p-2 space-y-1.5 relative overflow-hidden"
-              >
-                <div className="w-full h-24 bg-black rounded-xl p-1.5 flex items-center justify-center relative">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
-                  <span className="absolute top-1.5 left-1.5 bg-[#fe2c55] text-white text-[7px] font-black px-1.5 py-0.2 rounded-full">
-                    DROP #{idx + 1}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0">
-                    <div className="text-[8px] font-black text-white truncate">{p.name}</div>
-                    <div className="text-[6.5px] text-neutral-400">{p.spec}</div>
-                  </div>
-                  <div className="text-[9px] font-black text-[#fe2c55] shrink-0">{p.price}</div>
-                </div>
-                <button className="w-full py-1 rounded-xl bg-[#fe2c55] text-white font-black text-[7.5px] uppercase">
-                  Beli via WhatsApp
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* 2-Column Cards with Rounded-2xl, Spec Badges, and Floating WA CTA */
           <div className="grid grid-cols-2 gap-2">
-            {MOCK_PRODUCTS.map((p) => (
+            {MOCK_PRODUCTS.slice(0, 2).map((p) => (
               <div
                 key={p.name}
-                className={`rounded-2xl p-2 border transition flex flex-col justify-between space-y-1.5 ${c.bgContainer} ${c.cardBorder} shadow-xs`}
+                className="rounded-3xl p-2 bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-1 relative"
               >
-                <div className="w-full h-18 rounded-xl flex items-center justify-center p-1 bg-black/5 dark:bg-black/40 overflow-hidden relative">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
-                  <span
-                    className={`absolute top-1 right-1 text-[6px] font-bold px-1 py-0.2 rounded-full ${c.badgeVerifiedBg} ${c.badgeVerifiedText}`}
-                  >
+                <div className="flex items-center justify-between">
+                  <span className="text-[6px] font-extrabold px-1.5 py-0.2 rounded-full bg-slate-900 text-white">
                     {p.badge}
                   </span>
+                  <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                    <Heart className="w-2.5 h-2.5" />
+                  </div>
+                </div>
+
+                <div className="w-full h-16 rounded-xl bg-slate-50 p-1 flex items-center justify-center overflow-hidden">
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
                 </div>
 
                 <div>
-                  <h4
-                    className={`text-[8px] font-extrabold line-clamp-1 ${
-                      isDark ? "text-white" : "text-slate-950"
-                    }`}
-                  >
-                    {p.name}
-                  </h4>
-                  <p className={`text-[6.5px] ${c.textSecondary}`}>{p.spec}</p>
+                  <div className="text-[8px] font-black text-slate-900 truncate">{p.name}</div>
+                  <div className="flex items-center gap-1 text-[6.5px] text-slate-500 font-semibold">
+                    <Star className="w-2 h-2 fill-amber-400 text-amber-400" />
+                    <span>{p.rating}</span>
+                    <span>•</span>
+                    <span className="truncate">{p.spec}</span>
+                  </div>
                 </div>
 
-                <div className="pt-1 border-t border-slate-700/10 flex items-center justify-between">
-                  <span className={`text-[8px] font-black ${isDark ? c.priceText : "text-slate-900"}`}>
-                    {p.price}
-                  </span>
-                  <span className="text-[6.5px] font-black px-1.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-xs">
-                    WA
-                  </span>
+                <div className="pt-1 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-[8px] font-black text-slate-950">{p.price}</span>
+                  <div className="w-5 h-5 rounded-full bg-slate-950 text-white flex items-center justify-center shadow-xs">
+                    <Plus className="w-3 h-3 stroke-[3]" />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* ── 4. PILAR 5: Floating Bottom Dock Navigation (4 Tab Kapsul) ── */}
+      {/* Floating Bottom Dock Nav (Pilar E) */}
       <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
-        <div
-          className={`w-full max-w-[260px] pointer-events-auto rounded-full backdrop-blur-xl border shadow-2xl py-1 px-1.5 grid grid-cols-4 select-none ${
-            isDark
-              ? "bg-slate-950/85 border-slate-800 text-white shadow-black/80"
-              : "bg-white/95 border-slate-200 text-slate-900 shadow-slate-900/15"
-          }`}
-        >
+        <div className="w-full max-w-[240px] pointer-events-auto rounded-full backdrop-blur-xl border border-slate-200/90 bg-white/95 shadow-xl py-1 px-1.5 grid grid-cols-4 select-none">
           {[
             { icon: Home, label: "Home" },
             { icon: Smartphone, label: "Katalog" },
             { icon: RefreshCw, label: "Trade-In" },
-            { icon: StoreIcon, label: "Profil" },
+            { icon: StoreIcon, label: "Toko" },
           ].map(({ icon: Icon, label }, idx) => (
             <div
               key={label}
-              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer transition ${
-                idx === 0
-                  ? isDark
-                    ? "bg-indigo-600 text-white font-bold shadow-xs"
-                    : "bg-slate-950 text-white font-bold shadow-xs"
-                  : isDark
-                  ? "text-slate-400 hover:text-white"
-                  : "text-slate-500 hover:text-slate-900"
+              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer ${
+                idx === 0 ? "bg-slate-950 text-white font-bold" : "text-slate-500"
+              }`}
+            >
+              <Icon className="w-2.5 h-2.5" />
+              <span className="text-[6.5px] mt-0.5 leading-none">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 2. DARK GAMING NEON (Starter - Spectra Dark Cyan/Mint, Image 4) */
+function DarkGamingScreen() {
+  return (
+    <div className="w-full h-full bg-[#0c0f12] text-white flex flex-col overflow-hidden text-left font-sans">
+      {/* Top Bar: Spectra Brand + Notification */}
+      <div className="pt-2 px-3 pb-1.5 flex items-center justify-between border-b border-emerald-950/60 bg-[#0c0f12]/95 backdrop-blur-md shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-5 h-5 rounded-full bg-[#00e5b3]/20 text-[#00e5b3] flex items-center justify-center font-black text-[8px] border border-[#00e5b3]/40">
+            ⚡
+          </div>
+          <div>
+            <span className="font-black text-[9px] text-[#00e5b3] tracking-wide block leading-tight">
+              SPECTRA ARENA BEC
+            </span>
+            <span className="text-[7px] text-emerald-400/60 font-mono block leading-none">
+              HIGH-FPS STOK READY
+            </span>
+          </div>
+        </div>
+        <div className="bg-[#00e5b3] text-slate-950 font-black text-[7px] px-2 py-0.5 rounded-full shadow-md shadow-[#00e5b3]/20 flex items-center gap-0.5">
+          <MessageCircle className="w-2 h-2 fill-current" />
+          <span>WA</span>
+        </div>
+      </div>
+
+      {/* Pill Filters Horizontal */}
+      <div className="px-3 py-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar border-b border-emerald-950/40 shrink-0">
+        {["All Gaming", "ROG Phone", "165Hz AMOLED", "Snapdragon 8"].map((f, i) => (
+          <span
+            key={f}
+            className={`px-2 py-0.5 rounded-full text-[6.5px] font-bold shrink-0 border ${
+              i === 0
+                ? "bg-[#00e5b3] text-slate-950 border-[#00e5b3] shadow-xs"
+                : "bg-slate-900 text-slate-400 border-slate-800"
+            }`}
+          >
+            {f}
+          </span>
+        ))}
+      </div>
+
+      {/* Scrollable Body: Spectra Big Hero Featured Card (Image 4) */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-12">
+        {/* Featured Showcase Card with Mint Glow */}
+        <div className="rounded-3xl p-3 bg-[#12161c] border border-[#00e5b3]/40 shadow-xl space-y-2 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[6.5px] font-mono font-black text-[#00e5b3] uppercase tracking-wider bg-[#00e5b3]/15 px-2 py-0.2 rounded-full border border-[#00e5b3]/30">
+              FEATURED UNIT
+            </span>
+            <Heart className="w-3 h-3 text-slate-500" />
+          </div>
+
+          <div className="w-full h-24 rounded-2xl bg-black/60 p-2 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-[#00e5b3]/10 blur-xl pointer-events-none" />
+            <img
+              src="/images/items/rog-phone-8.png"
+              alt="ROG Phone 8"
+              className="w-full h-full object-contain relative z-10 drop-shadow-xl"
+            />
+          </div>
+
+          <div>
+            <h4 className="text-[9.5px] font-black text-white leading-tight">
+              ASUS ROG Phone 8 Pro
+            </h4>
+            <p className="text-[7px] text-slate-400 font-mono">
+              16/256GB • Snapdragon 8 Gen 3 • 165Hz
+            </p>
+          </div>
+
+          <div className="pt-1.5 border-t border-slate-800 flex items-center justify-between">
+            <span className="text-[9px] font-black font-mono text-[#00e5b3]">
+              Rp 10.800.000
+            </span>
+            <div className="w-6 h-6 rounded-full bg-[#00e5b3] text-slate-950 flex items-center justify-center shadow-lg shadow-[#00e5b3]/30">
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Secondary Specs Mini Strip */}
+        <div className="rounded-2xl p-2 bg-[#12161c] border border-emerald-950/60 flex items-center justify-between text-[7px] font-mono text-emerald-400">
+          <span>FPS: 165Hz</span>
+          <span>•</span>
+          <span>BH: 99% LIKE NEW</span>
+          <span>•</span>
+          <span>GARANSI 30 HARI</span>
+        </div>
+      </div>
+
+      {/* Floating Bottom Dock Nav */}
+      <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
+        <div className="w-full max-w-[240px] pointer-events-auto rounded-full backdrop-blur-xl border border-emerald-950 bg-[#0c0f12]/95 shadow-xl py-1 px-1.5 grid grid-cols-4 select-none">
+          {[
+            { icon: Home, label: "Home" },
+            { icon: Smartphone, label: "Katalog" },
+            { icon: RefreshCw, label: "Trade-In" },
+            { icon: StoreIcon, label: "Toko" },
+          ].map(({ icon: Icon, label }, idx) => (
+            <div
+              key={label}
+              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer ${
+                idx === 0 ? "bg-[#00e5b3] text-slate-950 font-black" : "text-slate-400"
+              }`}
+            >
+              <Icon className="w-2.5 h-2.5" />
+              <span className="text-[6.5px] mt-0.5 leading-none">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 3. KEYNOTE OBSIDIAN (Pro - Apple Keynote Reveal Experience) */
+function KeynoteObsidianScreen() {
+  return (
+    <div className="w-full h-full bg-black text-white flex flex-col overflow-hidden text-left font-sans">
+      {/* Dynamic Island Header */}
+      <div className="pt-2 px-3 pb-1 shrink-0">
+        <div className="bg-zinc-900/90 border border-zinc-800 rounded-full px-3 py-1 flex items-center justify-between shadow-lg">
+          <span className="text-[8.5px] font-black text-white flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            Keynote Reveal
+          </span>
+          <span className="text-[7px] text-zinc-400 font-mono">REVEAL 2026</span>
+        </div>
+      </div>
+
+      {/* Scrollable Stage Body */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-12">
+        {/* Spotlight Stage Card */}
+        <div className="rounded-3xl p-3.5 bg-gradient-to-b from-zinc-900 via-black to-[#09090b] border border-zinc-800 shadow-2xl relative overflow-hidden text-center space-y-2">
+          <div className="inline-block px-2 py-0.2 rounded-full text-[6.5px] font-mono tracking-widest text-zinc-400 uppercase bg-zinc-800/80 border border-zinc-700">
+            FLAGSHIP REVEAL
+          </div>
+
+          <h2 className="text-[12px] font-black text-white tracking-tight">
+            iPhone 15 Pro Max
+          </h2>
+          <p className="text-[7px] text-zinc-400">
+            Titanium. Sangat Kokoh. Sangat Ringan.
+          </p>
+
+          <div className="w-full h-24 flex items-center justify-center relative my-1">
+            <div className="w-24 h-24 rounded-full bg-indigo-500/15 blur-2xl absolute inset-0 m-auto pointer-events-none" />
+            <img
+              src="/images/items/iphone-15-pro.png"
+              alt="Titanium"
+              className="w-full h-full object-contain relative z-10 drop-shadow-2xl"
+            />
+          </div>
+
+          <div className="flex items-center justify-center gap-2 text-[7px] text-zinc-300 font-mono">
+            <span>BH: 100%</span>
+            <span>•</span>
+            <span>Grade A++</span>
+            <span>•</span>
+            <span>iBox Resmi</span>
+          </div>
+
+          <button className="w-full py-1.5 rounded-full bg-white text-black font-black text-[8px] shadow-lg">
+            Ambil Unit Sekarang — Rp 18.500.000
+          </button>
+        </div>
+
+        {/* Slide 2: Minimal Specs Cards */}
+        <div className="rounded-2xl p-2.5 bg-zinc-950 border border-zinc-800 space-y-1.5">
+          <div className="flex items-center justify-between text-[7px] text-zinc-400">
+            <span>Kondisi Fisik: 99% Mulus No Dent</span>
+            <span className="text-emerald-400 font-bold">READY COD</span>
+          </div>
+          <div className="text-[8px] font-bold text-white">
+            Bandung Electronic Center (BEC) Lantai 1
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Bottom Dock Nav */}
+      <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
+        <div className="w-full max-w-[240px] pointer-events-auto rounded-full backdrop-blur-xl border border-zinc-800 bg-black/90 shadow-xl py-1 px-1.5 grid grid-cols-4 select-none">
+          {[
+            { icon: Home, label: "Reveal" },
+            { icon: Smartphone, label: "Stok" },
+            { icon: RefreshCw, label: "Trade-In" },
+            { icon: StoreIcon, label: "Toko" },
+          ].map(({ icon: Icon, label }, idx) => (
+            <div
+              key={label}
+              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer ${
+                idx === 0 ? "bg-white text-black font-bold" : "text-zinc-500"
+              }`}
+            >
+              <Icon className="w-2.5 h-2.5" />
+              <span className="text-[6.5px] mt-0.5 leading-none">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 4. TOKYO STREET CLEAN (Pro - Streetwear & Pastel Asymmetric, Image 3) */
+function TokyoEditorialScreen() {
+  return (
+    <div className="w-full h-full bg-[#f4f1ea] text-[#1c1a17] flex flex-col overflow-hidden text-left font-sans">
+      {/* Top Header Tokyo Issue */}
+      <div className="pt-2 px-3 pb-1.5 border-b border-[#dfd8cc] bg-[#faf8f4] flex items-center justify-between text-[7.5px] font-black uppercase tracking-wider shrink-0">
+        <span>// TOKYO ISSUE 024</span>
+        <span className="bg-[#1c1a17] text-white px-1.5 py-0.2 rounded">SHIBUYA</span>
+      </div>
+
+      {/* Scrollable Asymmetric Body (Image 3) */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-12">
+        {/* Large Lavender Asymmetric Featured Card (Image 3: Pattern AirPod / Phone) */}
+        <div className="rounded-3xl p-3 bg-[#ede9fe] border border-[#ddd6fe] shadow-sm space-y-1.5 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[7px] font-black uppercase tracking-wider text-purple-900 bg-white/70 px-2 py-0.2 rounded-full">
+              POPULAR DESIGN
+            </span>
+            <span className="text-[8px] font-mono font-bold text-purple-900">
+              Rp 18.5M
+            </span>
+          </div>
+
+          <h3 className="text-[11px] font-black text-purple-950 leading-tight">
+            iPhone 15 Pro Shibuya
+          </h3>
+          <p className="text-[7px] text-purple-700">Curated Streetwear Mobile</p>
+
+          <div className="w-full h-20 rounded-2xl bg-white/60 p-1 flex items-center justify-center overflow-hidden">
+            <img
+              src="/images/items/iphone-15-pro.png"
+              alt="Tokyo"
+              className="w-full h-full object-contain drop-shadow-md"
+            />
+          </div>
+        </div>
+
+        {/* 2 Asymmetric Pastel Cards Side-by-Side (Image 3 style) */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Coral Card */}
+          <div className="rounded-3xl p-2.5 bg-[#ffe4e6] border border-[#fecdd3] space-y-1">
+            <span className="text-[6.5px] font-bold text-rose-800">Studio Pro</span>
+            <div className="w-full h-12 flex items-center justify-center">
+              <img
+                src="/images/items/samsung-s24-ultra.png"
+                alt="S24"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="text-[7.5px] font-black text-rose-950 truncate">
+              Samsung S24
+            </div>
+            <div className="text-[7.5px] font-mono font-black text-rose-900">
+              Rp 15.9M
+            </div>
+          </div>
+
+          {/* Mint Card */}
+          <div className="rounded-3xl p-2.5 bg-[#ccfbf1] border border-[#99f6e4] space-y-1">
+            <span className="text-[6.5px] font-bold text-teal-800">Leica Lens</span>
+            <div className="w-full h-12 flex items-center justify-center">
+              <img
+                src="/images/items/xiaomi-14t-pro.png"
+                alt="Xiaomi"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="text-[7.5px] font-black text-teal-950 truncate">
+              Xiaomi 14T
+            </div>
+            <div className="text-[7.5px] font-mono font-black text-teal-900">
+              Rp 8.75M
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Bottom Dock Nav */}
+      <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
+        <div className="w-full max-w-[240px] pointer-events-auto rounded-full backdrop-blur-xl border border-[#dfd8cc] bg-[#faf8f4]/95 shadow-xl py-1 px-1.5 grid grid-cols-4 select-none">
+          {[
+            { icon: Home, label: "Home" },
+            { icon: Smartphone, label: "Catalog" },
+            { icon: RefreshCw, label: "Trade" },
+            { icon: StoreIcon, label: "Store" },
+          ].map(({ icon: Icon, label }, idx) => (
+            <div
+              key={label}
+              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer ${
+                idx === 0 ? "bg-[#d94823] text-white font-bold" : "text-[#736c62]"
+              }`}
+            >
+              <Icon className="w-2.5 h-2.5" />
+              <span className="text-[6.5px] mt-0.5 leading-none">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 5. CYBER HUD TELEMETRY (Advance - Tactical Military Tech HUD, Image 2) */
+function CyberHudScreen() {
+  return (
+    <div className="w-full h-full bg-[#05070a] text-cyan-100 flex flex-col overflow-hidden text-left font-mono">
+      {/* Top Telemetry Bar (Image 2 style) */}
+      <div className="pt-2 px-3 pb-1 border-b border-cyan-950 bg-[#080d14] flex items-center justify-between text-[7px] text-cyan-400 shrink-0">
+        <span className="flex items-center gap-1 font-bold">
+          <Activity className="w-2.5 h-2.5 text-cyan-400 animate-pulse" /> HUD_TELEMETRY: OK
+        </span>
+        <span className="text-cyan-300">FPS: 144</span>
+      </div>
+
+      {/* Location Bar */}
+      <div className="px-3 py-1 bg-[#05070a] border-b border-cyan-900/40 text-[7px] text-slate-400 flex items-center gap-1 shrink-0">
+        <MapPin className="w-2.5 h-2.5 text-cyan-400" />
+        <span className="truncate">HQ_LOC: BEC_BANDUNG_C05</span>
+      </div>
+
+      {/* Scrollable Tactical Body */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-12">
+        {/* Tactical Launch Banner (Image 2) */}
+        <div className="rounded-3xl p-3 bg-gradient-to-r from-[#040d1a] via-[#091f38] to-[#040d1a] border border-cyan-500/40 shadow-xl space-y-1 relative">
+          <span className="text-[6.5px] font-bold text-cyan-300 uppercase">
+            // TACTICAL LAUNCH
+          </span>
+          <h3 className="text-[10px] font-black text-white">
+            ROG Phone 8 Black Edition
+          </h3>
+          <p className="text-[7px] text-cyan-300/70">High-Precision Cooling System</p>
+          <button className="px-2 py-0.5 rounded-lg bg-cyan-500 text-slate-950 font-black text-[7px] uppercase mt-1">
+            Pre-Order Unit →
+          </button>
+        </div>
+
+        {/* Circular Radar Gadget Icons (Image 2 style) */}
+        <div className="space-y-1">
+          <div className="text-[7.5px] font-bold text-cyan-400 uppercase">
+            // GADGET_COLLECTION
+          </div>
+          <div className="flex items-center justify-between gap-1">
+            {[
+              { label: "Audio", icon: Headphones },
+              { label: "Smart", icon: Zap },
+              { label: "Mobile", icon: Smartphone },
+              { label: "Gear", icon: Watch },
+            ].map(({ label, icon: Icon }) => (
+              <div key={label} className="flex flex-col items-center gap-1 cursor-pointer">
+                <div className="w-9 h-9 rounded-full bg-[#0a1420] border border-cyan-800/80 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/10">
+                  <Icon className="w-4 h-4" />
+                </div>
+                <span className="text-[6.5px] text-cyan-300">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Tactical Chamfered Cards */}
+        <div className="rounded-2xl p-2 bg-[#080d14] border border-cyan-900/60 space-y-1">
+          <div className="flex items-center justify-between text-[7px]">
+            <span className="font-bold text-white">XIAOMI 14T PRO LEICA</span>
+            <span className="text-cyan-400 font-black">Rp 8.750.000</span>
+          </div>
+          <div className="text-[6.5px] text-slate-400">
+            BATTERY: 100% • SIGNAL: 5G ALL OPERATOR
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Bottom Dock Nav */}
+      <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
+        <div className="w-full max-w-[240px] pointer-events-auto rounded-full backdrop-blur-xl border border-cyan-950 bg-[#05070a]/95 shadow-xl py-1 px-1.5 grid grid-cols-4 select-none">
+          {[
+            { icon: Home, label: "Home" },
+            { icon: Smartphone, label: "Catalog" },
+            { icon: RefreshCw, label: "Trade" },
+            { icon: StoreIcon, label: "Base" },
+          ].map(({ icon: Icon, label }, idx) => (
+            <div
+              key={label}
+              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer ${
+                idx === 0 ? "bg-cyan-500 text-slate-950 font-black" : "text-cyan-600"
+              }`}
+            >
+              <Icon className="w-2.5 h-2.5" />
+              <span className="text-[6.5px] mt-0.5 leading-none">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 6. MIDNIGHT GOLD LUXURY (Advance - VIP Concierge & Warm Amber, Image 5) */
+function MidnightGoldScreen() {
+  return (
+    <div className="w-full h-full bg-[#0a0805] text-amber-100 flex flex-col overflow-hidden text-left font-serif">
+      {/* Top Header VIP Concierge */}
+      <div className="pt-2 px-3 pb-1.5 flex items-center justify-between border-b border-amber-900/40 bg-[#0a0805]/95 backdrop-blur-md shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-[8px] border border-amber-500/40">
+            <Crown className="w-3 h-3 text-amber-400" />
+          </div>
+          <div>
+            <span className="font-bold text-[9px] text-amber-200 block leading-tight">
+              VIP Haute Salon
+            </span>
+            <span className="text-[6.5px] text-amber-400/60 font-mono block leading-none">
+              CONCIERGE BEC
+            </span>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-bold text-[7px] px-2 py-0.5 rounded-full shadow-xs">
+          VIP Hotline
+        </div>
+      </div>
+
+      {/* Scrollable Luxury Body (Clearance / Luxury Card Image 5) */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-2.5 space-y-2.5 pb-12 font-sans">
+        {/* Warm Amber-Orange Gradient Hero Card (Image 5) */}
+        <div className="rounded-3xl p-3 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-500 text-white shadow-xl space-y-1 relative overflow-hidden">
+          <span className="inline-block px-2 py-0.2 rounded-full text-[6px] font-black uppercase tracking-wider bg-white/20 backdrop-blur-xs">
+            CLEARANCE SALE // UP TO 15% OFF
+          </span>
+          <h3 className="text-[11px] font-black leading-tight text-white">
+            Curated Gold Series
+          </h3>
+          <p className="text-[7px] text-amber-100 line-clamp-1">
+            Exclusive Flagship &amp; VIP Warranty
+          </p>
+          <button className="px-2.5 py-0.8 rounded-full bg-white text-orange-950 font-black text-[7px] shadow-sm mt-0.5">
+            Explore Collection →
+          </button>
+        </div>
+
+        {/* 2-Column Luxury Curated Grid (Image 5 style) */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-[8px] font-serif">
+            <span className="font-bold text-amber-300">Pilihan Flagship Mewah</span>
+            <span className="text-[7px] text-amber-400/70 font-sans font-bold">Semua →</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {MOCK_PRODUCTS.slice(0, 2).map((p) => (
+              <div
+                key={p.name}
+                className="rounded-3xl p-2 bg-[#16130d] border border-amber-900/40 shadow-md flex flex-col justify-between space-y-1 relative"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[6px] font-bold px-1.5 py-0.2 rounded-full bg-amber-950 text-amber-300 border border-amber-700/40 font-mono">
+                    VIP SELECT
+                  </span>
+                  <Heart className="w-2.5 h-2.5 text-amber-500/70" />
+                </div>
+
+                <div className="w-full h-16 rounded-xl bg-black/40 p-1 flex items-center justify-center overflow-hidden">
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                </div>
+
+                <div>
+                  <div className="text-[8px] font-extrabold text-amber-100 truncate">
+                    {p.name}
+                  </div>
+                  <div className="text-[6.5px] text-amber-300/60 font-mono">
+                    {p.spec}
+                  </div>
+                </div>
+
+                <div className="pt-1 border-t border-amber-900/30 flex items-center justify-between">
+                  <span className="text-[8px] font-black font-mono text-amber-400">
+                    {p.price}
+                  </span>
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center shadow-xs">
+                    <Plus className="w-3 h-3 stroke-[3]" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Bottom Dock Nav */}
+      <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
+        <div className="w-full max-w-[240px] pointer-events-auto rounded-full backdrop-blur-xl border border-amber-950 bg-[#0a0805]/95 shadow-xl py-1 px-1.5 grid grid-cols-4 select-none">
+          {[
+            { icon: Home, label: "Salon" },
+            { icon: Smartphone, label: "Vault" },
+            { icon: RefreshCw, label: "Trade" },
+            { icon: StoreIcon, label: "Concierge" },
+          ].map(({ icon: Icon, label }, idx) => (
+            <div
+              key={label}
+              className={`flex flex-col items-center justify-center py-0.5 rounded-full cursor-pointer ${
+                idx === 0 ? "bg-amber-400 text-slate-950 font-bold" : "text-amber-300/60"
               }`}
             >
               <Icon className="w-2.5 h-2.5" />
@@ -302,11 +774,32 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
 }
 
 // ---------------------------------------------------------------------------
+// Dynamic Switcher for Smartphone Mockup Screen
+// ---------------------------------------------------------------------------
+function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
+  switch (activeTheme.id) {
+    case "dark-gaming":
+      return <DarkGamingScreen />;
+    case "keynote-obsidian":
+      return <KeynoteObsidianScreen />;
+    case "tokyo-editorial":
+      return <TokyoEditorialScreen />;
+    case "cyber-hud":
+      return <CyberHudScreen />;
+    case "midnight-gold":
+      return <MidnightGoldScreen />;
+    case "minimal-clean":
+    default:
+      return <MinimalCleanScreen />;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main TemplateShowcase Component
 // ---------------------------------------------------------------------------
 export function TemplateShowcase() {
   const [filterTier, setFilterTier] = useState<"ALL" | "STARTER" | "PRO" | "ADVANCE">("ALL");
-  const [selectedId, setSelectedId] = useState<string>("clean-ledger");
+  const [selectedId, setSelectedId] = useState<string>("minimal-clean");
 
   const templatesToDisplay =
     filterTier === "ALL"
@@ -335,10 +828,10 @@ export function TemplateShowcase() {
             Bukan Katalog Kaku. Pilih Karakter Toko Anda.
           </h2>
           <p className="mt-3 text-slate-600 text-sm leading-relaxed">
-            Setiap arketipe memiliki <b className="text-slate-900">struktur tata letak, ritme visual, dan animasi yang benar-benar berbeda</b>—dari format terminal data ringkas, panggung Apple Keynote, hingga feed vertikal Reels 9:16.
+            Setiap arketipe memiliki <b className="text-slate-900">struktur tata letak, ritme visual, dan animasi yang benar-benar berbeda</b>—dari format mobile e-commerce terang Oraimo, dark gaming Spectra, panggung Apple Keynote, hingga Tokyo streetwear pop.
           </p>
 
-          {/* Tier Filter Tabs */}
+          {/* Tier Filter Tabs (Memuat 6 Arketipe Lengkap) */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
             <button
               onClick={() => setFilterTier("ALL")}
@@ -358,7 +851,7 @@ export function TemplateShowcase() {
                   : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              Starter (Clean Ledger)
+              Starter (2 Arketipe)
             </button>
             <button
               onClick={() => setFilterTier("PRO")}
@@ -368,7 +861,7 @@ export function TemplateShowcase() {
                   : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              Pro (+Keynote &amp; Tokyo)
+              Pro (4 Arketipe)
             </button>
             <button
               onClick={() => setFilterTier("ADVANCE")}
@@ -470,10 +963,12 @@ export function TemplateShowcase() {
                           >
                             {t.name}
                           </h4>
-                          <span className="text-[10px] text-slate-500 font-medium">{t.tagline}</span>
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            {t.tagline}
+                          </span>
                         </div>
                         <span
-                          className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full shrink-0 ${
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
                             t.category === "Starter"
                               ? "bg-blue-100 text-blue-800 border border-blue-200"
                               : t.category === "Pro"
@@ -486,39 +981,29 @@ export function TemplateShowcase() {
                       </div>
 
                       {/* Description */}
-                      <p
-                        className={`text-xs mt-2 line-clamp-3 leading-relaxed font-medium ${
-                          isSelected ? "text-slate-600" : isDark ? "text-slate-400" : "text-slate-600"
-                        }`}
-                      >
+                      <p className={`text-xs mt-2 leading-relaxed ${isDark ? "text-slate-400" : "text-slate-600"}`}>
                         {t.description}
                       </p>
                     </div>
 
-                    {/* Card Footer */}
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        {t.badge}
+                    {/* Footer: Archetype Pill & Selection Indicator */}
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-400">
+                        <span>Layout:</span>
+                        <b className={isSelected ? "text-indigo-600" : isDark ? "text-slate-200" : "text-slate-700"}>
+                          {t.archetype}
+                        </b>
                       </span>
 
-                      <span
-                        className={`text-xs font-black flex items-center gap-1 transition ${
-                          isSelected
-                            ? "text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200"
-                            : isDark
-                            ? "text-slate-400 hover:text-white"
-                            : "text-slate-500 hover:text-slate-900"
-                        }`}
-                      >
-                        {isSelected ? (
-                          <>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
-                            <span>✓ Tampil di HP</span>
-                          </>
-                        ) : (
-                          <span>Pilih Preview →</span>
-                        )}
-                      </span>
+                      {isSelected ? (
+                        <span className="font-black text-[11px] text-indigo-600 flex items-center gap-1">
+                          Aktif di HP ✓
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-bold text-slate-400 group-hover:text-indigo-600 flex items-center gap-1">
+                          Pilih →
+                        </span>
+                      )}
                     </div>
                   </div>
                 );

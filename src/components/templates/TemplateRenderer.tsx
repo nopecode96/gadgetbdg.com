@@ -3,12 +3,13 @@
 import React from "react";
 import { StoreData, ProductData } from "./shared/types";
 import { getTemplateConfig } from "@/lib/constants/templates";
+import { MinimalCleanStorefront } from "./minimal-clean/Storefront";
+import { DarkGamingStorefront } from "./dark-gaming/Storefront";
 import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
 import { CyberHudLayout } from "./archetypes/CyberHudLayout";
 import { TokyoEditorialLayout } from "./archetypes/TokyoEditorialLayout";
 import { LiveDropLayout } from "./archetypes/LiveDropLayout";
 import { MidnightGoldLayout } from "./archetypes/MidnightGoldLayout";
-import { CleanLedgerLayout } from "./archetypes/CleanLedgerLayout";
 
 interface TemplateRendererProps {
   store: StoreData;
@@ -17,9 +18,15 @@ interface TemplateRendererProps {
 
 export function TemplateRenderer({ store, products }: TemplateRendererProps) {
   const currentConfig = getTemplateConfig(store.templateId);
-  const archetype = currentConfig.archetype || "clean-ledger";
+  const archetype = currentConfig.archetype || "minimal-clean";
 
   switch (archetype) {
+    case "minimal-clean":
+      return <MinimalCleanStorefront store={store} products={products} />;
+
+    case "dark-gaming":
+      return <DarkGamingStorefront store={store} products={products} />;
+
     case "keynote-obsidian":
       return <KeynoteObsidianLayout store={store} products={products} />;
 
@@ -37,6 +44,6 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
 
     case "clean-ledger":
     default:
-      return <CleanLedgerLayout store={store} products={products} />;
+      return <MinimalCleanStorefront store={store} products={products} />;
   }
 }

@@ -54,9 +54,30 @@ function createWatermarkSvg(storeName: string, width: number, height: number): B
 
 export async function POST(req: NextRequest) {
   try {
+    const formData = await req.formData();
+    const type = formData.get("type") as string | null;
+
+    // A. Upload foto trade-in unit oleh customer (publik / storefront)
+    if (type === "trade-in") {
+      const file = formData.get("file") as File | null;
+      if (!file) {
+        return NextResponse.json({ error: "File foto HP tidak ditemukan." }, { status: 400 });
+      }
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const ext = path.extname(file.name) || ".jpg";
+      const filename = `tradein-${Date.now()}-${Math.random().toString(36).substring(2, 8)}${ext}`;
+      const uploadDir = path.join(process.cwd(), "public", "uploads", "tradein");
+      await mkdir(uploadDir, { recursive: true });
+      await writeFile(path.join(uploadDir, filename), buffer);
+
+      return NextResponse.json({ success: true, url: `/uploads/tradein/${filename}` });
+    }
+
     const user = await getCurrentUser();
 
-    // 1. Validasi sesi pemanggil
+    // 1. Validasi sesi pemanggil untuk upload admin / internal
     if (!user) {
       return NextResponse.json(
         { error: "Unauthorized. Silakan login terlebih dahulu." },
@@ -64,10 +85,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const formData = await req.formData();
-
-    // Cek jika ini adalah upload bukti bayar QRIS pendaftaran (publik / onboarding)
-    const type = formData.get("type") as string | null;
+    // Cek jika ini adalah upload bukti bayar QRIS pendaftaran (onboarding)
     if (type === "receipt" || !user.storeId) {
       const file = formData.get("file") as File | null;
       if (!file) {

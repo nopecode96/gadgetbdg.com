@@ -43,6 +43,13 @@ enum CommissionStatus {
   PAID
 }
 
+enum TradeInStatus {
+  PENDING
+  CONTACTED
+  DEAL
+  REJECTED
+}
+
 // ============================================================
 // MODELS
 // ============================================================
@@ -174,21 +181,29 @@ model Product {
 }
 
 model TradeInOffer {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   storeId       String
   customerName  String
-  customerWa    String
-  deviceModel   String
-  expectedPrice Int?
-  conditionDesc String
+  customerPhone String?
+  customerWa    String        // Keep for backward compat
+  phoneModel    String?
+  deviceModel   String        // Keep for backward compat
+  condition     String?
+  conditionDesc String        // Keep for backward compat
+  batteryHealth Int?
+  imeiStatus    String?
+  completeness  String?
   minusNotes    String?
-  photoUrls     String[] @default([])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  expectedPrice Int?
+  photoUrls     String[]      @default([])
+  status        TradeInStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store         Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@index([storeId])
+  @@index([status])
 }
 
 model SubscriptionPayment {

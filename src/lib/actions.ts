@@ -66,10 +66,17 @@ export async function createTradeInOffer(formData: FormData) {
   }
 }
 
-import { submitTradeInOfferAction as baseSubmitTradeInOfferAction } from "./actions/tradein-actions";
+import {
+  submitTradeInOfferAction as baseSubmitTradeInOfferAction,
+  updateTradeInStatusAction as baseUpdateTradeInStatusAction,
+} from "./actions/tradein-actions";
 
 export async function submitTradeInOfferAction(formData: FormData) {
   return baseSubmitTradeInOfferAction(formData);
+}
+
+export async function updateTradeInStatusAction(offerId: string, newStatus: any) {
+  return baseUpdateTradeInStatusAction(offerId, newStatus);
 }
 
 import {

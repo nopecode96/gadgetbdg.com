@@ -23,6 +23,7 @@ import {
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
 import { StoreAboutView } from "../shared/StoreAboutView";
+import { StoreTradeInView } from "../shared/StoreTradeInView";
 
 interface MinimalCleanLayoutProps {
   store: StoreData;
@@ -653,29 +654,7 @@ export function MinimalCleanLayout({
 
           {/* TAB 3: TRADE-IN */}
           {activeTab === "trade-in" && (
-            <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm text-left space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                  <RefreshCw className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm text-slate-950">Estimasi Tukar Tambah</h3>
-                  <p className="text-[10px] text-slate-500">Tukar HP lama ke unit impian di {store.name}</p>
-                </div>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Bawa HP lama Anda ke konter fisik kami di <b>{locationLabel}</b> untuk uji fisik langsung atau ajukan konsultasi via WhatsApp.
-              </p>
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-2.5 rounded-2xl bg-emerald-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20"
-              >
-                <MessageCircle className="w-4 h-4 fill-current" />
-                <span>Konsultasi Trade-In via WhatsApp</span>
-              </a>
-            </div>
+            <StoreTradeInView store={store} theme="minimal-clean" isMockup={isMockup} />
           )}
 
           {/* TAB 4: TOKO */}

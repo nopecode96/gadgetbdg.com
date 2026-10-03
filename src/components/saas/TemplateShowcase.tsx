@@ -5,6 +5,10 @@ import Link from "next/link";
 import {
   Sparkles,
   ArrowRight,
+  Home,
+  Smartphone,
+  RefreshCw,
+  Store,
 } from "lucide-react";
 import {
   TEMPLATE_LIST,
@@ -105,9 +109,16 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const currentMockStore = createMockStore(activeTheme);
 
-  // If minimal-clean, render the dedicated MinimalCleanLayout
+  // If minimal-clean, render the dedicated MinimalCleanLayout (dock is rendered at the phone frame level)
   if (activeTheme.id === "minimal-clean") {
-    return <MinimalCleanLayout store={currentMockStore} products={MOCK_PRODUCTS} isMockup={true} />;
+    return (
+      <MinimalCleanLayout
+        store={currentMockStore}
+        products={MOCK_PRODUCTS}
+        isMockup={true}
+        hideDock={true}
+      />
+    );
   }
 
   // If dark-gaming, render StoreShell with StoreHomeView
@@ -231,16 +242,37 @@ export function TemplateShowcase() {
           <div className="lg:col-span-5 flex flex-col items-center">
             <div className="sticky top-24 flex flex-col items-center">
               {/* Smartphone Frame Outer Bezel */}
-              <div className="relative w-full max-w-[350px] mx-auto h-[620px] rounded-[44px] border-[8px] border-slate-900 bg-slate-50 overflow-hidden flex flex-col shadow-2xl">
-                {/* Dynamic Island / Notch */}
-                <div className="w-[120px] h-[18px] bg-slate-950 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-[1rem] z-30 flex items-center justify-center gap-2 pointer-events-none">
-                  <div className="w-8 h-1 bg-slate-800 rounded-full" />
-                  <div className="w-2 h-2 rounded-full bg-slate-800" />
+              <div className="relative w-full max-w-[350px] sm:max-w-[370px] mx-auto h-[730px] rounded-[48px] border-[10px] border-slate-900 bg-slate-50 dark:bg-slate-950 shadow-2xl overflow-hidden flex flex-col">
+                {/* Notch / Speaker Bar Speaker HP */}
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-4 bg-slate-900 rounded-full z-40 pointer-events-none flex items-center justify-center">
+                  <div className="w-10 h-1 bg-slate-800 rounded-full" />
                 </div>
 
-                {/* Inner Screen Canvas */}
-                <div className="w-full h-full relative overflow-hidden flex flex-col">
+                {/* Screen Content Scrollable Area */}
+                <div className="w-full h-full overflow-y-auto no-scrollbar pb-24 pt-2">
                   <PhoneMockupScreen key={activeTheme.id} activeTheme={activeTheme} />
+                </div>
+
+                {/* Floating Bottom Nav Dock Terkunci Permanen di Bawah */}
+                <div className="absolute bottom-3 left-3 right-3 z-30 pointer-events-none">
+                  <div className="rounded-full backdrop-blur-xl bg-white/95 border border-slate-200/90 shadow-2xl px-4 py-2 flex items-center justify-between text-slate-800">
+                    <div className="flex flex-col items-center gap-0.5 text-slate-950 font-black">
+                      <Home className="w-4 h-4" />
+                      <span className="text-[9px]">Home</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5 text-slate-500 font-medium">
+                      <Smartphone className="w-4 h-4" />
+                      <span className="text-[9px]">Katalog</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5 text-slate-500 font-medium">
+                      <RefreshCw className="w-4 h-4" />
+                      <span className="text-[9px]">Trade-In</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5 text-slate-500 font-medium">
+                      <Store className="w-4 h-4" />
+                      <span className="text-[9px]">Toko</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

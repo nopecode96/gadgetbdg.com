@@ -27,12 +27,14 @@ interface MinimalCleanLayoutProps {
   store: StoreData;
   products: ProductData[];
   isMockup?: boolean;
+  hideDock?: boolean;
 }
 
 export function MinimalCleanLayout({
   store,
   products,
   isMockup = false,
+  hideDock = false,
 }: MinimalCleanLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [searchQuery, setSearchQuery] = useState("");
@@ -666,83 +668,85 @@ export function MinimalCleanLayout({
         </main>
 
         {/* ── 3. FLOATING BOTTOM DOCK NAV (TERKUNCI DI BAWAH) ── */}
-        <div
-          className={`${
-            isMockup
-              ? "absolute bottom-3 left-3 right-3"
-              : "fixed bottom-4 left-4 right-4 max-w-md mx-auto"
-          } z-30 pointer-events-none flex justify-center`}
-        >
-          <nav className="w-full max-w-sm rounded-full px-4 py-2 flex items-center justify-between border bg-white/95 border-slate-200 text-slate-800 shadow-xl backdrop-blur-xl pointer-events-auto select-none transition-all duration-300">
-            {/* Tab 1: Home */}
-            <button
-              type="button"
-              onClick={() => setActiveTab("home")}
-              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
-                activeTab === "home"
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-500 hover:text-slate-900 font-medium"
-              }`}
-            >
-              <Home className={`w-4 h-4 ${activeTab === "home" ? "scale-110" : ""}`} />
-              <span className="text-[9px] tracking-tight leading-none font-bold">
-                Home
-              </span>
-            </button>
-
-            {/* Tab 2: Katalog */}
-            <button
-              type="button"
-              onClick={() => setActiveTab("list")}
-              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
-                activeTab === "list"
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-500 hover:text-slate-900 font-medium"
-              }`}
-            >
-              <Smartphone className={`w-4 h-4 ${activeTab === "list" ? "scale-110" : ""}`} />
-              <span className="text-[9px] tracking-tight leading-none font-bold">
-                Katalog
-              </span>
-            </button>
-
-            {/* Tab 3: Trade-In */}
-            <button
-              type="button"
-              onClick={() => setActiveTab("trade-in")}
-              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
-                activeTab === "trade-in"
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-500 hover:text-slate-900 font-medium"
-              }`}
-            >
-              <RefreshCw
-                className={`w-4 h-4 ${
-                  activeTab === "trade-in" ? "scale-110 rotate-180 transition-transform duration-500" : ""
+        {!hideDock && (
+          <div
+            className={`${
+              isMockup
+                ? "absolute bottom-3 left-3 right-3"
+                : "fixed bottom-4 left-4 right-4 max-w-md mx-auto"
+            } z-30 pointer-events-none flex justify-center`}
+          >
+            <nav className="w-full max-w-sm rounded-full px-4 py-2 flex items-center justify-between border bg-white/95 border-slate-200 text-slate-800 shadow-xl backdrop-blur-xl pointer-events-auto select-none transition-all duration-300">
+              {/* Tab 1: Home */}
+              <button
+                type="button"
+                onClick={() => setActiveTab("home")}
+                className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                  activeTab === "home"
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-900 font-medium"
                 }`}
-              />
-              <span className="text-[9px] tracking-tight leading-none font-bold">
-                Trade-In
-              </span>
-            </button>
+              >
+                <Home className={`w-4 h-4 ${activeTab === "home" ? "scale-110" : ""}`} />
+                <span className="text-[9px] tracking-tight leading-none font-bold">
+                  Home
+                </span>
+              </button>
 
-            {/* Tab 4: Toko */}
-            <button
-              type="button"
-              onClick={() => setActiveTab("about")}
-              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
-                activeTab === "about"
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-500 hover:text-slate-900 font-medium"
-              }`}
-            >
-              <StoreIcon className={`w-4 h-4 ${activeTab === "about" ? "scale-110" : ""}`} />
-              <span className="text-[9px] tracking-tight leading-none font-bold">
-                Toko
-              </span>
-            </button>
-          </nav>
-        </div>
+              {/* Tab 2: Katalog */}
+              <button
+                type="button"
+                onClick={() => setActiveTab("list")}
+                className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                  activeTab === "list"
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-900 font-medium"
+                }`}
+              >
+                <Smartphone className={`w-4 h-4 ${activeTab === "list" ? "scale-110" : ""}`} />
+                <span className="text-[9px] tracking-tight leading-none font-bold">
+                  Katalog
+                </span>
+              </button>
+
+              {/* Tab 3: Trade-In */}
+              <button
+                type="button"
+                onClick={() => setActiveTab("trade-in")}
+                className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                  activeTab === "trade-in"
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-900 font-medium"
+                }`}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${
+                    activeTab === "trade-in" ? "scale-110 rotate-180 transition-transform duration-500" : ""
+                  }`}
+                />
+                <span className="text-[9px] tracking-tight leading-none font-bold">
+                  Trade-In
+                </span>
+              </button>
+
+              {/* Tab 4: Toko */}
+              <button
+                type="button"
+                onClick={() => setActiveTab("about")}
+                className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                  activeTab === "about"
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-900 font-medium"
+                }`}
+              >
+                <StoreIcon className={`w-4 h-4 ${activeTab === "about" ? "scale-110" : ""}`} />
+                <span className="text-[9px] tracking-tight leading-none font-bold">
+                  Toko
+                </span>
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
     </div>
   );

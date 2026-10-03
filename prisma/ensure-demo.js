@@ -217,6 +217,104 @@ async function ensureDemoData() {
     });
   }
 
+  // 3. Tokyo Street Cell (tokyo-editorial / tokyo-street theme, Pro Tier)
+  const tokyoStore = await prisma.store.upsert({
+    where: { slug: "tokyostreet" },
+    update: {
+      name: "Tokyo Street Cell",
+      tier: "PRO",
+      templateId: "tokyo-editorial",
+      whatsapp: "6281234567890",
+      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      primaryColor: "#e11d48",
+      logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: true,
+      isActive: true,
+    },
+    create: {
+      name: "Tokyo Street Cell",
+      slug: "tokyostreet",
+      customDomain: null,
+      whatsapp: "6281234567890",
+      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      tier: "PRO",
+      templateId: "tokyo-editorial",
+      primaryColor: "#e11d48",
+      logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: true,
+      lastTemplateChangeAt: new Date(Date.now() - 20 * 24 * 3600 * 1000),
+      isActive: true,
+    },
+  });
+
+  const tokyoCount = await prisma.product.count({ where: { storeId: tokyoStore.id } });
+  if (tokyoCount === 0) {
+    await prisma.product.createMany({
+      data: [
+        {
+          storeId: tokyoStore.id,
+          name: "iPhone 15 Pro 128GB Black Titanium",
+          brand: "Apple",
+          price: 15400000,
+          ramRom: "8GB / 128GB",
+          batteryHealth: 96,
+          imeiStatus: "Resmi iBox Indonesia",
+          completeness: "Fullset Original Box & Kabel",
+          condition: "99% Like New",
+          minusNotes: "Fisik istimewa terawat tanpa lecet, 3uTools skor 100",
+          status: "AVAILABLE",
+          images: ["/images/items/iphone-15-pro.png"],
+        },
+        {
+          storeId: tokyoStore.id,
+          name: "Samsung Galaxy S24 Ultra 12/256GB Titanium Black",
+          brand: "Samsung",
+          price: 15800000,
+          ramRom: "12GB / 256GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi SEIN Indonesia",
+          completeness: "Fullset Box Original + Stylus Pen",
+          condition: "98% Mulus",
+          minusNotes: "Layar & body mulus, Galaxy AI aktif permanen",
+          status: "AVAILABLE",
+          images: ["/images/items/samsung-s24-ultra.png"],
+        },
+        {
+          storeId: tokyoStore.id,
+          name: "Xiaomi 14T Pro 12/512GB Titan Black",
+          brand: "Xiaomi",
+          price: 8400000,
+          ramRom: "12GB / 512GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi Xiaomi Indonesia",
+          completeness: "Fullset Charger 120W & Box",
+          condition: "99% Seperti Baru",
+          minusNotes: "Kamera Leica jernih maksimal, pemakaian 2 bulan",
+          status: "AVAILABLE",
+          images: ["/images/items/xiaomi-14t-pro.png"],
+        },
+        {
+          storeId: tokyoStore.id,
+          name: "ASUS ROG Phone 8 16/256GB Rebel Grey",
+          brand: "ASUS",
+          price: 10200000,
+          ramRom: "16GB / 256GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi ASUS Indonesia",
+          completeness: "Fullset Original Box & AeroActive Cooler",
+          condition: "98% Mulus",
+          minusNotes: "Siap hajar game berat rata kanan 120fps",
+          status: "AVAILABLE",
+          images: ["/images/items/rog-phone-8.png"],
+        },
+      ],
+    });
+  }
+
   console.log("✅ Demo stores and products are guaranteed to exist!");
 }
 

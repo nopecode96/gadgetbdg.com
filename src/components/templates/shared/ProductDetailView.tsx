@@ -233,7 +233,11 @@ export function ProductDetailView({
             </h1>
             <div
               className={`text-2xl sm:text-3xl font-black tracking-tight ${
-                isDark ? colors.priceText : "text-blue-700 font-black"
+                isDark
+                  ? colors.priceText
+                  : colors.accentText
+                  ? `${colors.accentText} font-black`
+                  : "text-neutral-950 font-black"
               }`}
             >
               {formatRupiah(product.price)}

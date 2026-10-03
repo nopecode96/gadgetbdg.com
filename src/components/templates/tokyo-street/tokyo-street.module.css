@@ -1,0 +1,176 @@
+/* ============================================================
+   Tokyo Street Clean — Isolated CSS Module
+   Template 4: "Tokyo Street Clean" (`tokyo-street`)
+   Palette: Warm Alabaster #f7f7f5 / Pure White #ffffff / Ink Black #171717 / Vermilion #e11d48
+   100% Zero Contrast Bug - All text in white cards is dark & bold
+   ============================================================ */
+
+/* === CANVAS === */
+.streetCanvas {
+  background: #f7f7f5;
+  color: #171717;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* === BOX CARD === */
+.boxCard {
+  background: #ffffff;
+  border: 1px solid #e5e5e3;
+  box-shadow: 0 2px 0 #e5e5e3;
+  color: #171717;
+}
+
+.boxCardInteractive {
+  background: #ffffff;
+  border: 1px solid #e5e5e3;
+  box-shadow: 0 2px 0 #e5e5e3;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  color: #171717;
+}
+
+.boxCardInteractive:hover {
+  border-color: #171717;
+  box-shadow: 0 4px 0 #171717;
+  transform: translateY(-1px);
+}
+
+/* === TOKYO BADGE === */
+.tokyoBadge {
+  border: 1px solid #262626;
+  background: #fafafa;
+  color: #171717;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tokyoBadgeVermilion {
+  border: 1px solid #e11d48;
+  background: #fff1f2;
+  color: #be123c;
+  font-weight: 800;
+}
+
+/* === VERMILION CTA BUTTON === */
+.vermilionButton {
+  background: #e11d48;
+  color: #ffffff;
+  font-weight: 800;
+  border: 1px solid #be123c;
+  box-shadow: 0 2px 0 #9f1239;
+  transition: all 0.15s ease;
+}
+
+.vermilionButton:hover {
+  background: #be123c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 #881337;
+}
+
+.vermilionButton:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #881337;
+}
+
+/* === MONOCHROME OUTLINE BUTTON === */
+.monoButton {
+  background: #ffffff;
+  color: #171717;
+  font-weight: 800;
+  border: 1px solid #171717;
+  box-shadow: 0 2px 0 #171717;
+  transition: all 0.15s ease;
+}
+
+.monoButton:hover {
+  background: #171717;
+  color: #ffffff;
+}
+
+/* === MINIMAL BOTTOM DOCK === */
+.minimalBottomDock {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #e5e5e3;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.dockActiveTab {
+  color: #e11d48;
+  position: relative;
+  font-weight: 900;
+}
+
+.dockActiveTab::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 2.5px;
+  background: #e11d48;
+  border-radius: 999px;
+}
+
+/* === URBAN HERO === */
+.urbanHero {
+  background: #171717;
+  color: #ffffff;
+  border: 1px solid #262626;
+  box-shadow: 0 4px 0 #000000;
+}
+
+/* === FILTER PILLS === */
+.pillInactive {
+  background: #ffffff;
+  color: #404040;
+  border: 1px solid #e5e5e3;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.pillInactive:hover {
+  background: #f5f5f4;
+  border-color: #d6d3d1;
+  color: #171717;
+}
+
+.pillActive {
+  background: #171717;
+  color: #ffffff;
+  border: 1px solid #171717;
+  font-weight: 800;
+  box-shadow: 0 2px 0 #000000;
+}
+
+/* === INPUT FORM (100% CONTRAST LOCKED) === */
+.tokyoInput {
+  background: #ffffff;
+  border: 1px solid #d4d4d4;
+  color: #0a0a0a;
+  font-weight: 600;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tokyoInput::placeholder {
+  color: #a3a3a3;
+  font-weight: 400;
+}
+
+.tokyoInput:focus {
+  outline: none;
+  border-color: #171717;
+  box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.08);
+}
+
+/* === NO SCROLLBAR === */
+.noScrollbar::-webkit-scrollbar {
+  display: none;
+}
+.noScrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -60,7 +60,10 @@ model Store {
   id           String        @id @default(cuid())
   name         String
   slug         String        @unique
-  customDomain String?       @unique
+  customDomain           String?   @unique
+  customDomainStatus     String?   @default("PENDING") // PENDING, ACTIVE, FAILED
+  customDomainVerifiedAt DateTime?
+  customDomainDnsType    String?   @default("CNAME") // CNAME atau A
   whatsapp     String
   address      String?
   storeImage      String?

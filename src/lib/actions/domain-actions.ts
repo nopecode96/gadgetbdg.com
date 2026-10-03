@@ -6,8 +6,169 @@ import { requireStoreOwnerOrStaff, requireSaasAdmin } from "@/lib/auth/session";
 import { isReservedSlug } from "@/lib/constants/reserved-slugs";
 import { verifyDomainDns, VerifyDnsResult } from "@/lib/services/dns-service";
 
+export interface CustomDomainItem {
+  id: string;
+  name: string;
+  slug: string;
+  customDomain: string;
+  customDomainStatus: string;
+  customDomainVerifiedAt: string | null;
+  customDomainDnsType: string;
+  tier: string;
+  whatsapp: string;
+  createdAt: string;
+}
+
+export interface StoreWithoutDomainItem {
+  id: string;
+  name: string;
+  slug: string;
+  tier: string;
+  whatsapp: string;
+}
+
+export interface CustomDomainsOverviewData {
+  totalRegistered: number;
+  verifiedCount: number;
+  pendingSetupCount: number;
+  registeredStores: CustomDomainItem[];
+  storesWithoutDomain: StoreWithoutDomainItem[];
+  serverIp: string;
+  cnameTarget: string;
+}
+
 /**
- * 1. Check Domain DNS (Store Admin & Merchant)
+ * 1. Overview for Super Admin Custom Domain Manager
+ * Queries real database for PRO & ADVANCE stores and their custom domain states.
+ */
+export async function getCustomDomainsOverviewAction(): Promise<CustomDomainsOverviewData> {
+  await requireSaasAdmin();
+
+  const proAndAdvanceStores = await prisma.store.findMany({
+    where: {
+      tier: { in: ["PRO", "ADVANCE"] },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      customDomain: true,
+      customDomainStatus: true,
+      customDomainVerifiedAt: true,
+      customDomainDnsType: true,
+      tier: true,
+      whatsapp: true,
+      createdAt: true,
+    },
+  });
+
+  const registeredStores: CustomDomainItem[] = [];
+  const storesWithoutDomain: StoreWithoutDomainItem[] = [];
+
+  for (const s of proAndAdvanceStores) {
+    if (s.customDomain && s.customDomain.trim().length > 0) {
+      registeredStores.push({
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        customDomain: s.customDomain,
+        customDomainStatus: s.customDomainStatus || "PENDING",
+        customDomainVerifiedAt: s.customDomainVerifiedAt ? s.customDomainVerifiedAt.toISOString() : null,
+        customDomainDnsType: s.customDomainDnsType || "CNAME",
+        tier: s.tier,
+        whatsapp: s.whatsapp,
+        createdAt: s.createdAt.toISOString(),
+      });
+    } else {
+      storesWithoutDomain.push({
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        tier: s.tier,
+        whatsapp: s.whatsapp,
+      });
+    }
+  }
+
+  const totalRegistered = registeredStores.length;
+  const verifiedCount = registeredStores.filter((s) => s.customDomainStatus === "ACTIVE").length;
+  const pendingSetupCount = storesWithoutDomain.length;
+
+  const serverIp = process.env.NEXT_PUBLIC_SERVER_IP || process.env.SERVER_IPV4 || "72.62.75.149";
+  const mainDomain = (process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com").toLowerCase();
+  const cnameTarget = `cname.${mainDomain}`;
+
+  return {
+    totalRegistered,
+    verifiedCount,
+    pendingSetupCount,
+    registeredStores,
+    storesWithoutDomain,
+    serverIp,
+    cnameTarget,
+  };
+}
+
+/**
+ * 2. Verify Custom Domain DNS Lookup for a specific store (Real DNS via Node.js dns.promises)
+ * Updates database customDomainStatus ('ACTIVE' or 'FAILED'/'PENDING') and customDomainVerifiedAt.
+ */
+export async function verifyCustomDomainDnsAction(storeId: string): Promise<{
+  success: boolean;
+  status: "ACTIVE" | "FAILED" | "PENDING";
+  verifiedAt: string | null;
+  result: VerifyDnsResult;
+}> {
+  await requireSaasAdmin();
+
+  const store = await prisma.store.findUnique({
+    where: { id: storeId },
+    select: { id: true, name: true, customDomain: true, tier: true },
+  });
+
+  if (!store || !store.customDomain) {
+    throw new Error("Toko atau custom domain tidak ditemukan.");
+  }
+
+  const serverIp = process.env.NEXT_PUBLIC_SERVER_IP || process.env.SERVER_IPV4 || "72.62.75.149";
+  const dnsResult = await verifyDomainDns(store.customDomain, serverIp);
+
+  let newStatus: "ACTIVE" | "FAILED" | "PENDING" = "PENDING";
+  let verifiedAt: Date | null = null;
+  const dnsType = dnsResult.matchType || "CNAME";
+
+  if (dnsResult.isMatched) {
+    newStatus = "ACTIVE";
+    verifiedAt = new Date();
+  } else if (dnsResult.resolvedIps.length > 0) {
+    newStatus = "FAILED";
+  } else {
+    newStatus = "PENDING";
+  }
+
+  await prisma.store.update({
+    where: { id: storeId },
+    data: {
+      customDomainStatus: newStatus,
+      customDomainVerifiedAt: verifiedAt,
+      customDomainDnsType: dnsType,
+    },
+  });
+
+  revalidatePath("/super-admin/domains");
+  revalidatePath("/admin/settings");
+
+  return {
+    success: dnsResult.isMatched,
+    status: newStatus,
+    verifiedAt: verifiedAt ? verifiedAt.toISOString() : null,
+    result: dnsResult,
+  };
+}
+
+/**
+ * 3. Merchant: Check Domain DNS
  */
 export async function checkDomainDnsAction(domainInput: string): Promise<VerifyDnsResult> {
   const ctx = await requireStoreOwnerOrStaff();
@@ -23,12 +184,12 @@ export async function checkDomainDnsAction(domainInput: string): Promise<VerifyD
     };
   }
 
-  const targetIp = process.env.SERVER_IPV4 || "72.62.75.149";
+  const targetIp = process.env.NEXT_PUBLIC_SERVER_IP || process.env.SERVER_IPV4 || "72.62.75.149";
   return await verifyDomainDns(domainInput, targetIp);
 }
 
 /**
- * 2. Save Custom Domain to Store
+ * 4. Merchant: Save Custom Domain to Store
  */
 export async function saveCustomDomainAction(customDomainInput: string) {
   try {
@@ -53,7 +214,11 @@ export async function saveCustomDomainAction(customDomainInput: string) {
       // Hapus custom domain jika input dikosongkan
       await prisma.store.update({
         where: { id: store.id },
-        data: { customDomain: null },
+        data: {
+          customDomain: null,
+          customDomainStatus: "PENDING",
+          customDomainVerifiedAt: null,
+        },
       });
 
       revalidatePath("/admin/settings");
@@ -95,10 +260,14 @@ export async function saveCustomDomainAction(customDomainInput: string) {
       };
     }
 
-    // Simpan ke database
+    // Simpan ke database dengan status awal PENDING
     const updated = await prisma.store.update({
       where: { id: store.id },
-      data: { customDomain: cleanDomain },
+      data: {
+        customDomain: cleanDomain,
+        customDomainStatus: "PENDING",
+        customDomainVerifiedAt: null,
+      },
     });
 
     revalidatePath("/admin/settings");
@@ -120,10 +289,10 @@ export async function saveCustomDomainAction(customDomainInput: string) {
 }
 
 /**
- * 3. Super Admin Check Domain DNS for any Store
+ * 5. Backward-compatibility helper for raw DNS check
  */
 export async function superAdminCheckDomainDnsAction(domainInput: string): Promise<VerifyDnsResult> {
   await requireSaasAdmin();
-  const targetIp = process.env.SERVER_IPV4 || "72.62.75.149";
+  const targetIp = process.env.NEXT_PUBLIC_SERVER_IP || process.env.SERVER_IPV4 || "72.62.75.149";
   return await verifyDomainDns(domainInput, targetIp);
 }

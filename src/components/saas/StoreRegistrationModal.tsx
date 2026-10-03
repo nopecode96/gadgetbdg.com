@@ -391,6 +391,22 @@ export function StoreRegistrationModal({
                     </div>
 
                     <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">{config.description}</p>
+
+                    <div className="mt-2 grid grid-cols-2 gap-1.5 text-[10px] text-slate-700 font-semibold">
+                      <div className="flex items-center gap-1">
+                        <span className="text-blue-600">✓</span> {config.availableTemplatesCount} Template Storefront
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-blue-600">✓</span> {config.templateChangeRule}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-blue-600">✓</span> {config.hasQrGoogleReview ? "QR Meja + Google Review" : "QR Display Meja Toko"}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-blue-600">✓</span> {config.reports}
+                      </div>
+                    </div>
+
                     <div className="mt-2 text-[10px] text-slate-600 font-medium bg-white/80 rounded-lg p-1.5 border border-slate-100">
                       ✨ {config.tagline}
                     </div>

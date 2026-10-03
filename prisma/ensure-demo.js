@@ -315,6 +315,104 @@ async function ensureDemoData() {
     });
   }
 
+  // 4. Cyber Telemetry Cell (cyber-hud theme, Advance Tier)
+  const cyberStore = await prisma.store.upsert({
+    where: { slug: "cybercell" },
+    update: {
+      name: "Cyber Telemetry Cell",
+      tier: "ADVANCE",
+      templateId: "cyber-hud",
+      whatsapp: "6281234567890",
+      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-10, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      primaryColor: "#06b6d4",
+      logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: true,
+      isActive: true,
+    },
+    create: {
+      name: "Cyber Telemetry Cell",
+      slug: "cybercell",
+      customDomain: null,
+      whatsapp: "6281234567890",
+      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-10, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      tier: "ADVANCE",
+      templateId: "cyber-hud",
+      primaryColor: "#06b6d4",
+      logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: true,
+      lastTemplateChangeAt: new Date(Date.now() - 10 * 24 * 3600 * 1000),
+      isActive: true,
+    },
+  });
+
+  const cyberCount = await prisma.product.count({ where: { storeId: cyberStore.id } });
+  if (cyberCount === 0) {
+    await prisma.product.createMany({
+      data: [
+        {
+          storeId: cyberStore.id,
+          name: "ASUS ROG Phone 8 Pro 24GB/1TB Phantom Black",
+          brand: "ASUS",
+          price: 18900000,
+          ramRom: "24GB / 1TB",
+          batteryHealth: 99,
+          imeiStatus: "Resmi ASUS Indonesia (Kemenperin Aktif)",
+          completeness: "Fullset Box + AeroActive Cooler X + Case",
+          condition: "99% Mulus Like New",
+          minusNotes: "Benchmark AnTuTu 2.2M, AirTrigger & AniMe Vision aktif 100%",
+          status: "AVAILABLE",
+          images: ["/images/items/rog-phone-8.png"],
+        },
+        {
+          storeId: cyberStore.id,
+          name: "iPhone 15 Pro Max 256GB Black Titanium",
+          brand: "Apple",
+          price: 18500000,
+          ramRom: "8GB / 256GB",
+          batteryHealth: 95,
+          imeiStatus: "Resmi iBox Indonesia",
+          completeness: "Fullset Original Box & Braided Cable",
+          condition: "98% Mulus",
+          minusNotes: "Telemetri 3uTools skor 100 hijau semua, tanpa dent",
+          status: "AVAILABLE",
+          images: ["/images/items/iphone-15-pro.png"],
+        },
+        {
+          storeId: cyberStore.id,
+          name: "Samsung Galaxy S24 Ultra 12/512GB Titanium Black",
+          brand: "Samsung",
+          price: 16900000,
+          ramRom: "12GB / 512GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi SEIN Indonesia",
+          completeness: "Fullset Box Original + Stylus Pen",
+          condition: "98% Mulus",
+          minusNotes: "Snapdragon 8 Gen 3 for Galaxy, telemetri kamera 200MP jernih",
+          status: "AVAILABLE",
+          images: ["/images/items/samsung-s24-ultra.png"],
+        },
+        {
+          storeId: cyberStore.id,
+          name: "Xiaomi 14T Pro 12/512GB Titan Black",
+          brand: "Xiaomi",
+          price: 8400000,
+          ramRom: "12GB / 512GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi Xiaomi Indonesia",
+          completeness: "Fullset Box + HyperCharge 120W",
+          condition: "99% Seperti Baru",
+          minusNotes: "Dimensity 9300+ Gaming Monster, sensor kamera Leica Summilux",
+          status: "AVAILABLE",
+          images: ["/images/items/xiaomi-14t-pro.png"],
+        },
+      ],
+    });
+  }
+
   console.log("✅ Demo stores and products are guaranteed to exist!");
 }
 

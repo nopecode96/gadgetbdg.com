@@ -7,8 +7,8 @@ import { MinimalCleanLayout } from "./minimal-clean/MinimalCleanLayout";
 import { DarkGamingLayout } from "./dark-gaming/DarkGamingLayout";
 import { KeynoteObsidianLayout as KeynoteObsidianLayoutNew } from "./keynote-obsidian/KeynoteObsidianLayout";
 import { TokyoStreetLayout } from "./tokyo-street/TokyoStreetLayout";
+import { CyberHudLayout } from "./cyber-hud/CyberHudLayout";
 import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
-import { CyberHudLayout } from "./archetypes/CyberHudLayout";
 import { TokyoEditorialLayout } from "./archetypes/TokyoEditorialLayout";
 import { LiveDropLayout } from "./archetypes/LiveDropLayout";
 import { MidnightGoldLayout } from "./archetypes/MidnightGoldLayout";
@@ -37,7 +37,7 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
       return <TokyoStreetLayout store={store} products={products} isMockup={false} />;
 
     case "cyber-hud":
-      return <CyberHudLayout store={store} products={products} />;
+      return <CyberHudLayout store={store} products={products} isMockup={false} />;
 
     case "live-drop":
       return <LiveDropLayout store={store} products={products} />;

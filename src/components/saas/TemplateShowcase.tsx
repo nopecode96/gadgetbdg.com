@@ -20,6 +20,7 @@ import { MinimalCleanLayout } from "@/components/templates/minimal-clean/Minimal
 import { DarkGamingLayout } from "@/components/templates/dark-gaming/DarkGamingLayout";
 import { KeynoteObsidianLayout } from "@/components/templates/keynote-obsidian/KeynoteObsidianLayout";
 import { TokyoStreetLayout } from "@/components/templates/tokyo-street/TokyoStreetLayout";
+import { CyberHudLayout } from "@/components/templates/cyber-hud/CyberHudLayout";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
 import { StoreData, ProductData } from "@/components/templates/shared/types";
 
@@ -90,6 +91,7 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
   const isGaming = activeTemplate.id === "dark-gaming";
   const isKeynote = activeTemplate.id === "keynote-obsidian";
   const isTokyo = activeTemplate.id === "tokyo-editorial" || activeTemplate.id === "tokyo-street";
+  const isCyber = activeTemplate.id === "cyber-hud";
   return {
     id: "mock-preview-store",
     name: isGaming
@@ -98,6 +100,8 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
       ? "Obsidian Premier"
       : isTokyo
       ? "Tokyo Street Cell"
+      : isCyber
+      ? "Cyber Telemetry Cell"
       : "Berkah Cell Gadget",
     slug: isGaming
       ? "gamersgadget"
@@ -105,6 +109,8 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
       ? "obsidianpremier"
       : isTokyo
       ? "tokyostreet"
+      : isCyber
+      ? "cybercell"
       : "berkahcell",
     address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-05",
     whatsapp: "628123456789",
@@ -173,7 +179,19 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
     );
   }
 
-  // Other archetypes (Cyber, Midnight) rendered directly
+  // If cyber-hud, render the dedicated CyberHudLayout (dock at phone frame level)
+  if (activeTheme.id === "cyber-hud") {
+    return (
+      <CyberHudLayout
+        store={currentMockStore}
+        products={MOCK_PRODUCTS}
+        isMockup={true}
+        hideDock={true}
+      />
+    );
+  }
+
+  // Other archetypes (Midnight) rendered directly
   return (
     <div className="h-full overflow-y-auto no-scrollbar pointer-events-auto text-left select-none">
       <TemplateRenderer store={currentMockStore} products={MOCK_PRODUCTS} />

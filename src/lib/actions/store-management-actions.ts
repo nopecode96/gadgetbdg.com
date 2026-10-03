@@ -239,7 +239,10 @@ export async function extendStoreSubscriptionAction(storeId: string, days: numbe
         ? new Date(store.subscriptionExpiresAt)
         : now;
 
-    const newExpiresAt = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+    const isLifetime = days >= 10000;
+    const newExpiresAt = isLifetime
+      ? new Date("2099-12-31T23:59:59.999Z")
+      : new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
 
     const updated = await prisma.store.update({
       where: { id: storeId },
@@ -254,9 +257,13 @@ export async function extendStoreSubscriptionAction(storeId: string, days: numbe
     revalidatePath("/super-admin/leads");
     revalidatePath(`/${store.id}`);
 
+    const durationLabel = isLifetime
+      ? "Selamanya (Tahun 2099)"
+      : `+${days} hari s/d ${newExpiresAt.toLocaleDateString("id-ID")}`;
+
     return {
       success: true,
-      message: `Langganan ${store.name} berhasil diperpanjang +${days} hari s/d ${newExpiresAt.toLocaleDateString("id-ID")}`,
+      message: `Langganan ${store.name} berhasil diatur: ${durationLabel}`,
       subscriptionExpiresAt: newExpiresAt.toISOString(),
       isActive: updated.isActive,
     };

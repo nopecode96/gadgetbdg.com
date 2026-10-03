@@ -131,6 +131,7 @@ export async function updateStoreSettings(formData: FormData) {
 
     revalidatePath("/admin/settings");
     revalidatePath("/admin/qr-kit");
+    revalidatePath("/admin/marketing/qr-stands");
     revalidatePath("/admin");
     revalidatePath(`/${updated.slug}`);
     if (updated.customDomain) {
@@ -141,5 +142,33 @@ export async function updateStoreSettings(formData: FormData) {
   } catch (error: any) {
     console.error("Error updating store settings:", error);
     return { success: false, error: error?.message || "Gagal menyimpan pengaturan toko." };
+  }
+}
+
+export async function updateGoogleReviewUrlAction(storeId: string, googleReviewUrl: string) {
+  try {
+    const { assertCanAccessQrGoogleReview } = await import("@/lib/guards/plan-guard");
+    const guardCheck = await assertCanAccessQrGoogleReview(storeId);
+    if (!guardCheck.allowed) {
+      return {
+        success: false,
+        error: guardCheck.error || "Fitur ulasan Google Review tidak tersedia untuk paket Anda.",
+      };
+    }
+
+    const updated = await prisma.store.update({
+      where: { id: storeId },
+      data: {
+        googleReviewUrl: googleReviewUrl.trim() || null,
+      },
+    });
+
+    revalidatePath("/admin/marketing/qr-stands");
+    revalidatePath("/admin/settings");
+
+    return { success: true, store: updated };
+  } catch (error: any) {
+    console.error("Error updating google review URL:", error);
+    return { success: false, error: error?.message || "Gagal menyimpan link review Google Maps." };
   }
 }

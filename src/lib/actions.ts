@@ -88,6 +88,7 @@ import {
 import {
   changeStoreTemplate as guardedChangeStoreTemplate,
   updateStoreSettings as guardedUpdateStoreSettings,
+  updateGoogleReviewUrlAction as guardedUpdateGoogleReviewUrlAction,
 } from "./actions/store-actions";
 
 import { trackWhatsAppClickAction as baseTrackWhatsAppClickAction } from "./actions/analytics-actions";
@@ -105,6 +106,10 @@ import { getSubscriptionPlansAction as baseGetSubscriptionPlansAction } from "./
 
 export async function getSubscriptionPlansAction() {
   return baseGetSubscriptionPlansAction();
+}
+
+export async function updateGoogleReviewUrlAction(storeId: string, googleReviewUrl: string) {
+  return guardedUpdateGoogleReviewUrlAction(storeId, googleReviewUrl);
 }
 
 export async function submitStoreReviewAction(input: {

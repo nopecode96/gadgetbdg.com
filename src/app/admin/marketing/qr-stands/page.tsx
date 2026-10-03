@@ -1,4 +1,5 @@
 import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
+import { assertCanAccessQrGoogleReview } from "@/lib/guards/plan-guard";
 import { QrStandsClient } from "./QrStandsClient";
 
 export const revalidate = 0;
@@ -6,6 +7,8 @@ export const revalidate = 0;
 export default async function QrStandsPage() {
   const ctx = await requireStoreOwnerOrStaff();
   const { store } = ctx;
+
+  const qrReviewGuard = await assertCanAccessQrGoogleReview(store.id);
 
   const serializedStore = {
     id: store.id,
@@ -15,8 +18,10 @@ export default async function QrStandsPage() {
     whatsapp: store.whatsapp,
     address: store.address,
     mapsUrl: store.mapsUrl,
+    googleReviewUrl: store.googleReviewUrl,
     tier: store.tier as "STARTER" | "PRO" | "ADVANCE",
-    hasQrGoogleReview: Boolean(store.plan?.hasQrGoogleReview ?? (store.tier !== "STARTER")),
+    planName: store.plan?.name || store.tier,
+    hasQrGoogleReview: qrReviewGuard.allowed,
     logoUrl: store.logoUrl,
     primaryColor: store.primaryColor,
   };

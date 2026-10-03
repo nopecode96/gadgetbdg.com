@@ -80,6 +80,85 @@ async function resetPasswords() {
   await syncStoreOwner("cybercell", "demo@cybercell.com", "Owner Cyber Telemetry Cell", "6281234567893");
   await syncStoreOwner("goldcell", "demo@goldcell.com", "Owner Midnight Gold Concierge", "6281234567894");
 
+  // 5. Sales Partner Demo Account: sales@gadgetbdg.com
+  const salesUser = await prisma.user.upsert({
+    where: { email: "sales@gadgetbdg.com" },
+    update: {
+      passwordHash,
+      role: "SALES",
+      name: "Andi Permana (Sales BEC)",
+      referralCode: "ANDI-BEC",
+      bankName: "BCA",
+      bankNumber: "1234567890",
+      bankHolder: "Andi Permana",
+      storeId: null,
+    },
+    create: {
+      email: "sales@gadgetbdg.com",
+      passwordHash,
+      name: "Andi Permana (Sales BEC)",
+      phone: "6281223344556",
+      role: "SALES",
+      referralCode: "ANDI-BEC",
+      bankName: "BCA",
+      bankNumber: "1234567890",
+      bankHolder: "Andi Permana",
+      storeId: null,
+    },
+  });
+
+  const salesPartner = await prisma.salesPartner.upsert({
+    where: { userId: salesUser.id },
+    update: {
+      code: "ANDI-BEC",
+      name: "Andi Permana (Sales BEC)",
+      phone: "6281223344556",
+      bankName: "BCA",
+      bankAccount: "1234567890",
+      bankHolder: "Andi Permana",
+      isActive: true,
+    },
+    create: {
+      userId: salesUser.id,
+      code: "ANDI-BEC",
+      name: "Andi Permana (Sales BEC)",
+      phone: "6281223344556",
+      bankName: "BCA",
+      bankAccount: "1234567890",
+      bankHolder: "Andi Permana",
+      isActive: true,
+    },
+  });
+
+  // Link berkahcell to this sales partner and generate sample commission if none
+  const berkahStore = await prisma.store.findUnique({ where: { slug: "berkahcell" } });
+  if (berkahStore) {
+    await prisma.store.update({
+      where: { id: berkahStore.id },
+      data: {
+        referredBySalesId: salesPartner.id,
+        salesUserId: salesUser.id,
+      },
+    });
+
+    const existingComm = await prisma.salesCommission.findFirst({
+      where: { salesPartnerId: salesPartner.id, storeId: berkahStore.id },
+    });
+
+    if (!existingComm) {
+      await prisma.salesCommission.create({
+        data: {
+          salesPartnerId: salesPartner.id,
+          storeId: berkahStore.id,
+          amount: 100000, // Pro tier
+          status: "PENDING",
+          period: "2026-10",
+        },
+      });
+    }
+  }
+  console.log(`✅ Sales Partner synced: ${salesUser.email} (Code: ${salesPartner.code})`);
+
   // 5. Update ALL existing users to have the uniform password hash
   const updateAllResult = await prisma.user.updateMany({
     data: {

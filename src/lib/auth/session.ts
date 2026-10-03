@@ -134,7 +134,19 @@ export async function requireAuth(allowedRoles?: Role[]): Promise<SessionUser> {
  * Redirects to /billing-suspended if store is inactive or expired.
  */
 export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
-  const user = await requireAuth(["STORE_OWNER", "STORE_STAFF"]);
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Strictly redirect SALES users to /sales portal
+  if (user.role === "SALES" || user.role === "SALES_AGENT") {
+    redirect("/sales");
+  }
+
+  if (user.role !== "STORE_OWNER" && user.role !== "STORE_STAFF") {
+    throw new Error("403: Akses ditolak. Hanya Store Owner dan Staff yang dapat mengakses merchant panel.");
+  }
 
   if (!user.storeId || !user.store) {
     redirect("/login?error=no_store");
@@ -208,17 +220,76 @@ export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
 // ─── 4. requireSaasAdmin ──────────────────────────────────────────
 /**
  * Guard for Super Admin panel (/super-admin).
- * Allows SUPER_ADMIN and ADMIN_SAAS roles.
+ * Allows SUPER_ADMIN and ADMIN_SAAS roles only.
+ * Rejects SALES and merchant roles with 403.
  */
 export async function requireSaasAdmin(): Promise<SessionUser> {
-  return requireAuth(["SUPER_ADMIN", "ADMIN_SAAS"]);
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (user.role === "SALES" || user.role === "SALES_AGENT") {
+    redirect("/sales");
+  }
+
+  if (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN_SAAS") {
+    throw new Error("403: Akses ditolak. Hanya Super Admin SaaS yang diizinkan.");
+  }
+
+  return user;
 }
 
-// ─── 5. requireSalesAgent ─────────────────────────────────────────
-/**
- * Guard for Sales Portal.
- * Allows SUPER_ADMIN, ADMIN_SAAS, and SALES_AGENT roles.
- */
+// ─── 5. requireSalesAgent (Backward Compat) ──────────────────────
 export async function requireSalesAgent(): Promise<SessionUser> {
-  return requireAuth(["SUPER_ADMIN", "ADMIN_SAAS", "SALES_AGENT"]);
+  return requireAuth(["SUPER_ADMIN", "ADMIN_SAAS", "SALES", "SALES_AGENT"]);
+}
+
+// ─── 6. requireSalesPartner ───────────────────────────────────────
+/**
+ * Guard for Sales Portal (/sales).
+ * Strictly authenticates user, ensures role is SALES or SALES_AGENT,
+ * and fetches or ensures their SalesPartner profile.
+ */
+export async function requireSalesPartner() {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (user.role === "STORE_OWNER" || user.role === "STORE_STAFF") {
+    redirect("/admin");
+  }
+
+  // Super admins can also view or we check if user is SALES / SALES_AGENT
+  if (user.role !== "SALES" && user.role !== "SALES_AGENT" && user.role !== "SUPER_ADMIN" && user.role !== "ADMIN_SAAS") {
+    throw new Error("403: Akses ditolak. Anda bukan Sales Partner.");
+  }
+
+  // Look up SalesPartner record for this user
+  let partner = await prisma.salesPartner.findUnique({
+    where: { userId: user.id },
+  });
+
+  // If partner doesn't exist yet, auto-create one from user data
+  if (!partner) {
+    const rawUser = await prisma.user.findUnique({ where: { id: user.id } });
+    const code = rawUser?.referralCode || `SALES-${user.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) || "AGENT"}`;
+    partner = await prisma.salesPartner.create({
+      data: {
+        userId: user.id,
+        code,
+        name: user.name,
+        phone: user.phone || "6281234567890",
+        bankName: rawUser?.bankName || null,
+        bankAccount: rawUser?.bankNumber || null,
+        bankHolder: rawUser?.bankHolder || user.name,
+      },
+    });
+  }
+
+  return {
+    user,
+    partner,
+  };
 }

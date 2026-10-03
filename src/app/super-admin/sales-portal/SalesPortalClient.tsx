@@ -35,7 +35,7 @@ interface CommissionItem {
   id: string;
   amount: number;
   tier: "STARTER" | "PRO" | "ADVANCE";
-  status: "PENDING" | "PAID";
+  status: "PENDING" | "PAID" | "CANCELLED";
   paidAt: string | null;
   createdAt: string;
   storeName: string;

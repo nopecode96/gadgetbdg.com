@@ -31,6 +31,7 @@ const RESERVED_APP_PATHS = [
   "/register",
   "/admin",
   "/super-admin",
+  "/sales",
   "/billing-suspended",
   "/api",
   "/_next",

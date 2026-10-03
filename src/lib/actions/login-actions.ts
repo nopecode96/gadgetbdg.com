@@ -43,8 +43,10 @@ export async function loginAction(formData: FormData) {
     });
 
     // Redirect based on role
-    const saasRoles = ["SUPER_ADMIN", "ADMIN_SAAS", "SALES_AGENT"];
-    if (saasRoles.includes(user.role)) {
+    if (user.role === "SALES" || user.role === "SALES_AGENT") {
+      return { success: true, redirect: "/sales" };
+    }
+    if (user.role === "SUPER_ADMIN" || user.role === "ADMIN_SAAS") {
       return { success: true, redirect: "/super-admin" };
     }
     return { success: true, redirect: "/admin" };

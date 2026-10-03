@@ -1,12 +1,12 @@
-import { requireSalesAgent } from "@/lib/auth/session";
+import { requireSaasAdmin } from "@/lib/auth/session";
 
 export default async function SuperAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Allows SUPER_ADMIN, ADMIN_SAAS, and SALES_AGENT to access Super Admin section (with page-level specific views)
-  await requireSalesAgent();
+  // Only SUPER_ADMIN and ADMIN_SAAS can access the Super Admin section
+  await requireSaasAdmin();
 
   return <>{children}</>;
 }

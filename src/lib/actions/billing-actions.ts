@@ -129,6 +129,7 @@ export async function approveSubscriptionPaymentAction(paymentId: string) {
               customDomain: true,
               whatsapp: true,
               salesUserId: true,
+              referredBySalesId: true,
               subscriptionExpiresAt: true,
             },
           },
@@ -171,6 +172,34 @@ export async function approveSubscriptionPaymentAction(paymentId: string) {
         },
       });
 
+      const commAmount = SALES_COMMISSION[payment.tier] || 50_000;
+      const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+      // 1. Catat ke SalesPartner jika toko terhubung ke sales partner via referral
+      let partnerId = payment.store.referredBySalesId;
+      if (!partnerId && payment.store.salesUserId) {
+        // Fallback: cari partner dari salesUserId jika ada
+        const existingPartner = await tx.salesPartner.findUnique({
+          where: { userId: payment.store.salesUserId },
+        });
+        if (existingPartner) {
+          partnerId = existingPartner.id;
+        }
+      }
+
+      if (partnerId) {
+        await tx.salesCommission.create({
+          data: {
+            salesPartnerId: partnerId,
+            storeId: payment.storeId,
+            amount: commAmount,
+            status: "PENDING",
+            period: currentPeriod,
+          },
+        });
+      }
+
+      // 2. Catat ke SalesCommissionLog (legacy/backward compatibility)
       if (payment.store.salesUserId) {
         await tx.salesCommissionLog.create({
           data: {
@@ -178,7 +207,7 @@ export async function approveSubscriptionPaymentAction(paymentId: string) {
             storeId: payment.storeId,
             paymentId: payment.id,
             tier: payment.tier,
-            amount: SALES_COMMISSION[payment.tier] || 50_000,
+            amount: commAmount,
             status: "PENDING",
           },
         });

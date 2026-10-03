@@ -306,10 +306,12 @@ model PlatformSetting {
   supportEmail      String   @default("support@gadgetbdg.com")
 
   // Finansial
-  bankName          String   @default("BCA")
-  bankAccountNumber String   @default("1234567890")
-  bankAccountHolder String   @default("PT Gadget Bandung Solusindo")
-  qrisImageUrl      String?
+  enableBankTransfer Boolean  @default(false)
+  bankName           String?  @default("BCA")
+  bankAccountNumber  String?  @default("1234567890")
+  bankAccountHolder  String?  @default("PT Gadget Bandung Solusindo")
+  qrisImageUrl       String?  @default("/uploads/platform/qris-official.png")
+  qrisNmid           String?  @default("ID1026592057644")
 
   // Teknis
   serverIp          String   @default("72.62.75.149")

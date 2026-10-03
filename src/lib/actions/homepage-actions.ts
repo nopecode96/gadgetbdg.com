@@ -11,10 +11,12 @@ export interface LandingPageData {
     heroSubtitle: string;
     supportWhatsapp: string;
     supportEmail: string;
+    enableBankTransfer: boolean;
     bankName: string;
     bankAccountNumber: string;
     bankAccountHolder: string;
     qrisImageUrl: string | null;
+    qrisNmid: string;
     serverIp: string;
     cnameTarget: string;
   };
@@ -49,10 +51,12 @@ const DEFAULT_SETTINGS = {
   heroSubtitle: "Tingkatkan penjualan unit second & baru, kelola tukar tambah, dan miliki katalog modern tanpa repot koding.",
   supportWhatsapp: "62895389974414",
   supportEmail: "support@gadgetbdg.com",
+  enableBankTransfer: false,
   bankName: "BCA",
   bankAccountNumber: "1234567890",
   bankAccountHolder: "PT Gadget Bandung Solusindo",
-  qrisImageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600",
+  qrisImageUrl: "/uploads/platform/qris-official.png",
+  qrisNmid: "ID1026592057644",
   serverIp: "72.62.75.149",
   cnameTarget: "cname.gadgetbdg.com",
 };
@@ -97,10 +101,12 @@ export async function getLandingPageDataAction(): Promise<LandingPageData> {
     heroSubtitle: settingRecord?.heroSubtitle || DEFAULT_SETTINGS.heroSubtitle,
     supportWhatsapp: settingRecord?.supportWhatsapp || DEFAULT_SETTINGS.supportWhatsapp,
     supportEmail: settingRecord?.supportEmail || DEFAULT_SETTINGS.supportEmail,
+    enableBankTransfer: Boolean(settingRecord?.enableBankTransfer),
     bankName: settingRecord?.bankName || DEFAULT_SETTINGS.bankName,
     bankAccountNumber: settingRecord?.bankAccountNumber || DEFAULT_SETTINGS.bankAccountNumber,
     bankAccountHolder: settingRecord?.bankAccountHolder || DEFAULT_SETTINGS.bankAccountHolder,
     qrisImageUrl: settingRecord?.qrisImageUrl || DEFAULT_SETTINGS.qrisImageUrl,
+    qrisNmid: settingRecord?.qrisNmid || DEFAULT_SETTINGS.qrisNmid,
     serverIp: settingRecord?.serverIp || DEFAULT_SETTINGS.serverIp,
     cnameTarget: settingRecord?.cnameTarget || DEFAULT_SETTINGS.cnameTarget,
   };

@@ -18,6 +18,9 @@ import {
   Upload,
   Clock,
   Tag,
+  CreditCard,
+  Building2,
+  Check,
 } from "lucide-react";
 import { checkSlugAvailabilityAction, registerStoreWithPaymentAction, getSubscriptionPlansAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier } from "@/lib/constants/templates";
@@ -37,10 +40,12 @@ function formatRupiah(n: number) {
 }
 
 export interface ModalPaymentSetting {
+  enableBankTransfer?: boolean;
   bankName: string;
   bankAccountNumber: string;
   bankAccountHolder: string;
   qrisImageUrl: string | null;
+  qrisNmid?: string;
   supportWhatsapp?: string;
 }
 
@@ -58,6 +63,7 @@ export function StoreRegistrationModal({
   paymentSetting?: ModalPaymentSetting;
 }) {
   const [step, setStep] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState<"QRIS" | "BANK">("QRIS");
   const [dbPlans, setDbPlans] = useState<SerializedSubscriptionPlan[]>(propPlans || []);
 
   // Step 1: Info Toko
@@ -577,58 +583,101 @@ export function StoreRegistrationModal({
                 <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl text-center space-y-1">
                   <p className="text-xs text-indigo-600 font-semibold">Nominal Transfer Paket {currentPlan?.name || tier}</p>
                   <p className="text-3xl font-black text-indigo-700">{formatRupiah(activePrice)}</p>
-                  <p className="text-[11px] text-indigo-500">Berlaku 30 hari · NMID: ID1026592057644</p>
+                  <p className="text-[11px] text-indigo-500">
+                    Berlaku 30 hari · NMID: {paymentSetting?.qrisNmid || "ID1026592057644"}
+                  </p>
                 </div>
 
-              {/* QRIS & Bank Info */}
-              <div className="flex flex-col items-center space-y-3">
-                <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <QrCode className="w-4 h-4 text-indigo-500" /> Scan QRIS / Transfer Bank Resmi
-                </p>
-
-                {paymentSetting?.qrisImageUrl ? (
-                  <div className="relative w-52 h-52 rounded-2xl overflow-hidden border-2 border-indigo-300 shadow-md bg-white">
-                    <Image
-                      src={paymentSetting.qrisImageUrl}
-                      alt="QRIS GadgetBDG"
-                      fill
-                      className="object-contain p-2"
-                      unoptimized
-                    />
-                  </div>
-                ) : (
-                  <div className="relative w-52 h-52 rounded-2xl overflow-hidden border-2 border-indigo-300 shadow-md bg-white">
-                    <Image
-                      src="/images/qris-gadgetbdg.png"
-                      alt="QRIS GadgetBDG"
-                      fill
-                      className="object-contain p-2"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Info Rekening Bank */}
-                {paymentSetting && (
-                  <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1 text-center font-mono">
-                    <div className="font-bold text-slate-800">
-                      Transfer Bank: {paymentSetting.bankName}
-                    </div>
-                    <div className="text-indigo-600 font-extrabold text-sm tracking-wider">
-                      {paymentSetting.bankAccountNumber}
-                    </div>
-                    <div className="text-slate-500 font-sans text-[11px]">
-                      a.n. {paymentSetting.bankAccountHolder}
-                    </div>
+                {/* Metode Pembayaran Tabs (jika enableBankTransfer aktif) */}
+                {paymentSetting?.enableBankTransfer && (
+                  <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("QRIS")}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                        paymentMethod === "QRIS"
+                          ? "bg-white text-indigo-600 shadow-sm"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      <QrCode className="w-3.5 h-3.5" />
+                      Scan QRIS (Rekomendasi)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("BANK")}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                        paymentMethod === "BANK"
+                          ? "bg-white text-indigo-600 shadow-sm"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      <Building2 className="w-3.5 h-3.5" />
+                      Transfer Rekening Bank
+                    </button>
                   </div>
                 )}
 
-                <p className="text-[10px] text-slate-400 text-center">
-                  Bayar via GoPay, OVO, DANA, BCA Mobile, atau aplikasi bank manapun yang mendukung QRIS / Transfer.
-                </p>
-              </div>
+                {/* Tampilan QRIS Resmi */}
+                {(!paymentSetting?.enableBankTransfer || paymentMethod === "QRIS") && (
+                  <div className="flex flex-col items-center space-y-3">
+                    <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <QrCode className="w-4 h-4 text-indigo-500" /> Lembar QRIS Standar Nasional Resmi
+                    </p>
+
+                    <div className="relative w-60 h-60 rounded-2xl overflow-hidden border-2 border-indigo-300 shadow-md bg-white">
+                      <Image
+                        src={paymentSetting?.qrisImageUrl || "/uploads/platform/qris-official.png"}
+                        alt="QRIS GadgetBDG"
+                        fill
+                        className="object-contain p-2"
+                        unoptimized
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/images/qris-gadgetbdg.png";
+                        }}
+                      />
+                    </div>
+
+                    <div className="text-center space-y-0.5">
+                      <p className="text-xs font-bold text-slate-800">
+                        NMID: {paymentSetting?.qrisNmid || "ID1026592057644"}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Dapat di-scan lewat GoPay, OVO, DANA, BCA, Mandiri, BRI, &amp; seluruh aplikasi mobile banking.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tampilan Transfer Bank Manual */}
+                {paymentSetting?.enableBankTransfer && paymentMethod === "BANK" && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
+                    <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Building2 className="w-4 h-4 text-indigo-500" /> Rekening Resmi GadgetBdg
+                    </p>
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500">Nama Bank</span>
+                        <span className="font-bold text-slate-800">{paymentSetting.bankName || "BCA"}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500">Nomor Rekening</span>
+                        <span className="font-mono font-black text-indigo-600 text-sm tracking-wider">
+                          {paymentSetting.bankAccountNumber || "1234567890"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500">Atas Nama</span>
+                        <span className="font-bold text-slate-800">
+                          {paymentSetting.bankAccountHolder || "PT Gadget Bandung Solusindo"}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Silakan transfer tepat senilai <strong className="text-slate-800 font-mono">{formatRupiah(activePrice)}</strong> ke rekening di atas dan lampirkan bukti transfer di bawah ini.
+                    </p>
+                  </div>
+                )}
 
               {/* Upload Bukti */}
               <div>

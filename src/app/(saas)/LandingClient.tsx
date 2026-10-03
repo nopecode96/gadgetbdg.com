@@ -697,10 +697,12 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
         initialTier={selectedTier}
         plans={plans as any}
         paymentSetting={{
+          enableBankTransfer: settings.enableBankTransfer,
           bankName: settings.bankName,
           bankAccountNumber: settings.bankAccountNumber,
           bankAccountHolder: settings.bankAccountHolder,
           qrisImageUrl: settings.qrisImageUrl,
+          qrisNmid: settings.qrisNmid,
           supportWhatsapp: settings.supportWhatsapp,
         }}
       />

@@ -29,10 +29,12 @@ export interface SerializedPlatformSetting {
   supportEmail: string;
   serverIp: string;
   cnameTarget: string;
+  enableBankTransfer: boolean;
   bankName: string;
   bankAccountNumber: string;
   bankAccountHolder: string;
   qrisImageUrl: string | null;
+  qrisNmid: string;
   updatedAt: string;
 }
 
@@ -52,10 +54,12 @@ const DEFAULT_PLATFORM_SETTINGS = {
   supportEmail: "support@gadgetbdg.com",
   serverIp: "72.62.75.149",
   cnameTarget: "cname.gadgetbdg.com",
+  enableBankTransfer: false,
   bankName: "BCA",
   bankAccountNumber: "1234567890",
   bankAccountHolder: "PT Gadget Bandung Solusindo",
-  qrisImageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600",
+  qrisImageUrl: "/uploads/platform/qris-official.png",
+  qrisNmid: "ID1026592057644",
 };
 
 /**
@@ -130,10 +134,12 @@ export async function getSystemSettingsAction(): Promise<SystemSettingsOverview>
       supportEmail: setting.supportEmail || DEFAULT_PLATFORM_SETTINGS.supportEmail,
       serverIp: setting.serverIp,
       cnameTarget: setting.cnameTarget,
-      bankName: setting.bankName,
-      bankAccountNumber: setting.bankAccountNumber,
-      bankAccountHolder: setting.bankAccountHolder,
-      qrisImageUrl: setting.qrisImageUrl,
+      enableBankTransfer: Boolean(setting.enableBankTransfer),
+      bankName: setting.bankName || DEFAULT_PLATFORM_SETTINGS.bankName,
+      bankAccountNumber: setting.bankAccountNumber || DEFAULT_PLATFORM_SETTINGS.bankAccountNumber,
+      bankAccountHolder: setting.bankAccountHolder || DEFAULT_PLATFORM_SETTINGS.bankAccountHolder,
+      qrisImageUrl: setting.qrisImageUrl || DEFAULT_PLATFORM_SETTINGS.qrisImageUrl,
+      qrisNmid: setting.qrisNmid || DEFAULT_PLATFORM_SETTINGS.qrisNmid,
       updatedAt: setting.updatedAt.toISOString(),
     },
   };
@@ -220,10 +226,12 @@ export async function updatePlatformSettingsAction(data: {
   supportEmail?: string;
   serverIp: string;
   cnameTarget: string;
-  bankName: string;
-  bankAccountNumber: string;
-  bankAccountHolder: string;
+  enableBankTransfer?: boolean;
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankAccountHolder?: string;
   qrisImageUrl?: string;
+  qrisNmid?: string;
 }) {
   try {
     const admin = await requireSaasAdmin();
@@ -243,6 +251,8 @@ export async function updatePlatformSettingsAction(data: {
     const heroTitle = data.heroTitle?.trim() || "Buka Web Toko HP Konter Anda Sendiri Dalam 5 Menit";
     const heroSubtitle = data.heroSubtitle?.trim() || "Tingkatkan penjualan unit second & baru, kelola tukar tambah, dan miliki katalog modern tanpa repot koding.";
     const supportEmail = data.supportEmail?.trim() || "support@gadgetbdg.com";
+    const qrisNmid = data.qrisNmid?.trim() || "ID1026592057644";
+    const enableBankTransfer = Boolean(data.enableBankTransfer);
 
     const updated = await prisma.platformSetting.upsert({
       where: { id: "GLOBAL" },
@@ -256,10 +266,12 @@ export async function updatePlatformSettingsAction(data: {
         supportEmail,
         serverIp: cleanServerIp,
         cnameTarget: cleanCname,
+        enableBankTransfer,
         bankName,
         bankAccountNumber,
         bankAccountHolder,
-        qrisImageUrl: data.qrisImageUrl?.trim() || null,
+        qrisImageUrl: data.qrisImageUrl?.trim() || "/uploads/platform/qris-official.png",
+        qrisNmid,
       },
       create: {
         id: "GLOBAL",
@@ -272,10 +284,12 @@ export async function updatePlatformSettingsAction(data: {
         supportEmail,
         serverIp: cleanServerIp,
         cnameTarget: cleanCname,
+        enableBankTransfer,
         bankName,
         bankAccountNumber,
         bankAccountHolder,
-        qrisImageUrl: data.qrisImageUrl?.trim() || null,
+        qrisImageUrl: data.qrisImageUrl?.trim() || "/uploads/platform/qris-official.png",
+        qrisNmid,
       },
     });
 

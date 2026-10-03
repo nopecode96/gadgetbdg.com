@@ -41,10 +41,12 @@ export interface BillingOverview {
   pending: BillingPaymentRow[];
   history: BillingPaymentRow[];
   paymentSetting?: {
-    bankName: string;
-    bankAccountNumber: string;
-    bankAccountHolder: string;
+    enableBankTransfer?: boolean;
+    bankName: string | null;
+    bankAccountNumber: string | null;
+    bankAccountHolder: string | null;
     qrisImageUrl: string | null;
+    qrisNmid?: string | null;
   };
 }
 
@@ -118,10 +120,12 @@ export async function getBillingOverviewAction(): Promise<BillingOverview> {
     history: historyRaw.map(serialize),
     paymentSetting: setting
       ? {
+          enableBankTransfer: Boolean(setting.enableBankTransfer),
           bankName: setting.bankName,
           bankAccountNumber: setting.bankAccountNumber,
           bankAccountHolder: setting.bankAccountHolder,
           qrisImageUrl: setting.qrisImageUrl,
+          qrisNmid: setting.qrisNmid,
         }
       : undefined,
   };

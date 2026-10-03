@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Layers,
   Sparkles,
@@ -14,6 +14,10 @@ import {
   Sliders,
   DollarSign,
   Package,
+  Upload,
+  QrCode,
+  Building2,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   updateSubscriptionPlanAction,
@@ -22,6 +26,7 @@ import {
   type SerializedSubscriptionPlan,
   type SerializedPlatformSetting,
 } from "@/lib/actions/system-settings-actions";
+import { uploadQrisImageAction } from "@/lib/actions/upload-qris-action";
 
 function formatRupiah(n: number) {
   return "Rp " + n.toLocaleString("id-ID");
@@ -37,6 +42,8 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
   // Platform settings state
   const [settings, setSettings] = useState<SerializedPlatformSetting>(initialData.settings);
   const [savingPlatform, setSavingPlatform] = useState(false);
+  const [uploadingQris, setUploadingQris] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Status banners / toast
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -76,6 +83,37 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
     }
   };
 
+  const handleQrisFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingQris(true);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("qrisFile", file);
+
+      const res = await uploadQrisImageAction(formData);
+      if (res.success && res.qrisImageUrl) {
+        setSettings((prev) => ({
+          ...prev,
+          qrisImageUrl: res.qrisImageUrl!,
+        }));
+        showToast("success", res.message || "Gambar QRIS berhasil diunggah!");
+      } else {
+        showToast("error", res.error || "Gagal mengunggah gambar QRIS.");
+      }
+    } catch (err: any) {
+      showToast("error", err?.message || "Terjadi kesalahan saat unggah QRIS.");
+    } finally {
+      setUploadingQris(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   const handleSavePlatform = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingPlatform(true);
@@ -91,10 +129,12 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
       supportEmail: settings.supportEmail,
       serverIp: settings.serverIp,
       cnameTarget: settings.cnameTarget,
+      enableBankTransfer: settings.enableBankTransfer,
       bankName: settings.bankName,
       bankAccountNumber: settings.bankAccountNumber,
       bankAccountHolder: settings.bankAccountHolder,
       qrisImageUrl: settings.qrisImageUrl || undefined,
+      qrisNmid: settings.qrisNmid || undefined,
     });
 
     setSavingPlatform(false);
@@ -361,92 +401,213 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
       {activeTab === "platform" && (
         <form onSubmit={handleSavePlatform} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Box 1: Rekening Tagihan & QRIS */}
-            <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-4">
+            {/* Box 1: Metode Pembayaran Tagihan SaaS (QRIS Utama + Transfer Bank Opsional) */}
+            <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
               <div className="flex items-center gap-2.5 pb-3 border-b border-slate-800/80">
-                <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  <CreditCard className="w-4 h-4" />
+                <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <QrCode className="w-4 h-4" />
                 </span>
-                <h3 className="font-bold text-white text-base">
-                  Rekening Penerima Tagihan SaaS
-                </h3>
-              </div>
-              <p className="text-xs text-slate-400">
-                Data ini akan tampil saat merchant mengonfirmasi pembayaran paket langganan dan di verifikasi billing.
-              </p>
-
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                  Nama Bank / Provider
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="BCA, Mandiri, BNI, dll"
-                  value={settings.bankName}
-                  onChange={(e) =>
-                    setSettings({ ...settings, bankName: e.target.value })
-                  }
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                />
+                <div>
+                  <h3 className="font-bold text-white text-base">
+                    Metode Pembayaran Tagihan SaaS
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Konfigurasi kanal pembayaran pendaftaran paket langganan bagi calon merchant konter HP.
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                  Nomor Rekening
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="1234567890"
-                  value={settings.bankAccountNumber}
-                  onChange={(e) =>
-                    setSettings({ ...settings, bankAccountNumber: e.target.value })
-                  }
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                  Atas Nama Pemilik Rekening
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="PT Gadget Bandung Solusindo"
-                  value={settings.bankAccountHolder}
-                  onChange={(e) =>
-                    setSettings({ ...settings, bankAccountHolder: e.target.value })
-                  }
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                  URL Gambar QRIS (Opsional)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={settings.qrisImageUrl || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, qrisImageUrl: e.target.value })
-                  }
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                />
-                {settings.qrisImageUrl && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <a
-                      href={settings.qrisImageUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-indigo-400 hover:underline flex items-center gap-1"
-                    >
-                      <ExternalLink className="w-3 h-3" /> Pratinjau Gambar QRIS
-                    </a>
+              {/* SEKSI A: QRIS Standar Nasional (Metode Utama) */}
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/10 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded bg-emerald-500/20 text-emerald-400">
+                      <QrCode className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-bold text-emerald-400">
+                        QRIS Standar Pembayaran Nasional
+                      </h4>
+                      <p className="text-[11px] text-slate-400">
+                        Metode pembayaran utama (Default). Merchant memindai barcode QRIS & mengunggah bukti transfer.
+                      </p>
+                    </div>
                   </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Aktif (Utama)
+                  </span>
+                </div>
+
+                {/* Preview & File Uploader */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                    {settings.qrisImageUrl ? (
+                      <div className="space-y-2 flex flex-col items-center">
+                        <div className="w-32 h-44 bg-white rounded-lg p-2 flex items-center justify-center shadow-inner overflow-hidden border border-slate-700">
+                          <img
+                            src={settings.qrisImageUrl}
+                            alt="QRIS Merchant Resmi"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <a
+                          href={settings.qrisImageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[11px] text-emerald-400 hover:underline flex items-center gap-1 font-medium"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Lihat Gambar Penuh
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="w-32 h-44 bg-slate-900 rounded-lg flex flex-col items-center justify-center text-slate-500 p-2 border border-dashed border-slate-800">
+                        <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+                        <span className="text-[10px] leading-tight">Belum ada gambar QRIS</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-300 block mb-1">
+                        Unggah File Gambar QRIS Resmi
+                      </label>
+                      <p className="text-[11px] text-slate-400 mb-2.5">
+                        Format PNG, JPG, atau WebP (maks. 5MB). Gambar akan disimpan otomatis ke sistem.
+                      </p>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleQrisFileChange}
+                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        disabled={uploadingQris}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition disabled:opacity-50"
+                      >
+                        {uploadingQris ? (
+                          <>
+                            <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Mengunggah QRIS...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3.5 h-3.5 text-emerald-400" />
+                            Pilih File Gambar Baru
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-slate-300 block mb-1">
+                        NMID / Kode Merchant QRIS
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="ID1026592057644"
+                        value={settings.qrisNmid || ""}
+                        onChange={(e) =>
+                          setSettings({ ...settings, qrisNmid: e.target.value })
+                        }
+                        className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white font-mono placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                      />
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Dicetak di bawah barcode QRIS untuk referensi merchant.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SEKSI B: Transfer Bank Manual (Opsional dengan Toggle) */}
+              <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded bg-amber-500/10 text-amber-400">
+                      <Building2 className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">
+                        Transfer Rekening Bank Manual (Opsional)
+                      </h4>
+                      <p className="text-[11px] text-slate-400">
+                        Aktifkan jika ingin memberikan pilihan alternatif selain QRIS di halaman checkout.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Toggle Switch */}
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(settings.enableBankTransfer)}
+                      onChange={(e) =>
+                        setSettings({ ...settings, enableBankTransfer: e.target.checked })
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {settings.enableBankTransfer ? (
+                  <div className="space-y-3 pt-2 border-t border-slate-800/80">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">
+                        Nama Bank / Provider
+                      </label>
+                      <input
+                        type="text"
+                        required={settings.enableBankTransfer}
+                        placeholder="BCA, Mandiri, BNI, dll"
+                        value={settings.bankName || ""}
+                        onChange={(e) =>
+                          setSettings({ ...settings, bankName: e.target.value })
+                        }
+                        className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">
+                        Nomor Rekening
+                      </label>
+                      <input
+                        type="text"
+                        required={settings.enableBankTransfer}
+                        placeholder="1234567890"
+                        value={settings.bankAccountNumber || ""}
+                        onChange={(e) =>
+                          setSettings({ ...settings, bankAccountNumber: e.target.value })
+                        }
+                        className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white font-mono placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">
+                        Atas Nama Pemilik Rekening
+                      </label>
+                      <input
+                        type="text"
+                        required={settings.enableBankTransfer}
+                        placeholder="PT Gadget Bandung Solusindo"
+                        value={settings.bankAccountHolder || ""}
+                        onChange={(e) =>
+                          setSettings({ ...settings, bankAccountHolder: e.target.value })
+                        }
+                        className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-500 italic bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                    Pilihan transfer rekening bank manual saat ini dinonaktifkan. Calon merchant hanya akan melihat instruksi pembayaran resmi melalui scan QRIS.
+                  </p>
                 )}
               </div>
             </div>

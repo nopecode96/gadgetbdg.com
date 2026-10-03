@@ -3,7 +3,7 @@
 import React from "react";
 import { StoreData, ProductData } from "./shared/types";
 import { getTemplateConfig } from "@/lib/constants/templates";
-import { MinimalCleanStorefront } from "./minimal-clean/Storefront";
+import { MinimalCleanLayout } from "./minimal-clean/MinimalCleanLayout";
 import { DarkGamingStorefront } from "./dark-gaming/Storefront";
 import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
 import { CyberHudLayout } from "./archetypes/CyberHudLayout";
@@ -22,7 +22,7 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
 
   switch (archetype) {
     case "minimal-clean":
-      return <MinimalCleanStorefront store={store} products={products} />;
+      return <MinimalCleanLayout store={store} products={products} isMockup={false} />;
 
     case "dark-gaming":
       return <DarkGamingStorefront store={store} products={products} />;
@@ -44,6 +44,6 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
 
     case "clean-ledger":
     default:
-      return <MinimalCleanStorefront store={store} products={products} />;
+      return <MinimalCleanLayout store={store} products={products} isMockup={false} />;
   }
 }

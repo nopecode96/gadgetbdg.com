@@ -14,6 +14,7 @@ import {
 } from "@/lib/constants/templates";
 import { StoreShell } from "@/components/templates/shared/StoreShell";
 import { StoreHomeView } from "@/components/templates/shared/StoreHomeView";
+import { MinimalCleanLayout } from "@/components/templates/minimal-clean/MinimalCleanLayout";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
 import { StoreData, ProductData, StoreTabType } from "@/components/templates/shared/types";
 
@@ -104,8 +105,13 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const currentMockStore = createMockStore(activeTheme);
 
-  // If minimal-clean or dark-gaming, render StoreShell with StoreHomeView
-  if (activeTheme.id === "minimal-clean" || activeTheme.id === "dark-gaming") {
+  // If minimal-clean, render the dedicated MinimalCleanLayout
+  if (activeTheme.id === "minimal-clean") {
+    return <MinimalCleanLayout store={currentMockStore} products={MOCK_PRODUCTS} isMockup={true} />;
+  }
+
+  // If dark-gaming, render StoreShell with StoreHomeView
+  if (activeTheme.id === "dark-gaming") {
     return (
       <div className="h-full overflow-y-auto no-scrollbar pointer-events-auto text-left select-none">
         <StoreShell
@@ -225,15 +231,15 @@ export function TemplateShowcase() {
           <div className="lg:col-span-5 flex flex-col items-center">
             <div className="sticky top-24 flex flex-col items-center">
               {/* Smartphone Frame Outer Bezel */}
-              <div className="relative w-full max-w-[320px] sm:max-w-[340px] h-[620px] overflow-hidden rounded-[36px] border-[6px] border-slate-900 bg-slate-50 shadow-2xl">
+              <div className="relative w-full max-w-[350px] mx-auto h-[620px] rounded-[44px] border-[8px] border-slate-900 bg-slate-50 overflow-hidden flex flex-col shadow-2xl">
                 {/* Dynamic Island / Notch */}
-                <div className="w-[120px] h-[18px] bg-slate-950 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-[1rem] z-30 flex items-center justify-center gap-2">
+                <div className="w-[120px] h-[18px] bg-slate-950 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-[1rem] z-30 flex items-center justify-center gap-2 pointer-events-none">
                   <div className="w-8 h-1 bg-slate-800 rounded-full" />
                   <div className="w-2 h-2 rounded-full bg-slate-800" />
                 </div>
 
                 {/* Inner Screen Canvas */}
-                <div className="w-full h-full relative">
+                <div className="w-full h-full relative overflow-hidden flex flex-col">
                   <PhoneMockupScreen key={activeTheme.id} activeTheme={activeTheme} />
                 </div>
               </div>

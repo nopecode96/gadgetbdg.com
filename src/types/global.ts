@@ -18,8 +18,12 @@ export interface SerializedStore {
   customDomain: string | null;
   whatsapp: string;
   address: string | null;
+  storeImage: string | null;
   mapsUrl: string | null;
   googleReviewUrl: string | null;
+  operationalHours: string | null;
+  warrantyPolicy: string | null;
+  verifiedBadge: boolean;
   tier: StoreTier;
   templateId: string;
   primaryColor: string;

@@ -112,6 +112,11 @@ export default async function StorePage({ params }: StorePageProps) {
       branches: {
         orderBy: [{ isMain: "desc" }, { createdAt: "asc" }],
       },
+      reviews: {
+        where: { isApproved: true },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      },
       products: {
         where: {
           status: { in: ["AVAILABLE", "BOOKED"] },
@@ -146,7 +151,11 @@ export default async function StorePage({ params }: StorePageProps) {
     slug: String(rawStore.slug),
     whatsapp: String(rawStore.whatsapp || ""),
     address: rawStore.address ? String(rawStore.address) : null,
+    storeImage: rawStore.storeImage ? String(rawStore.storeImage) : null,
     mapsUrl: rawStore.mapsUrl ? String(rawStore.mapsUrl) : null,
+    operationalHours: rawStore.operationalHours ? String(rawStore.operationalHours) : "Setiap Hari: 10:00 - 20:30 WIB",
+    warrantyPolicy: rawStore.warrantyPolicy ? String(rawStore.warrantyPolicy) : "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.",
+    verifiedBadge: Boolean(rawStore.verifiedBadge),
     primaryColor: String(rawStore.primaryColor || "#2563eb"),
     bannerUrl: rawStore.bannerUrl ? String(rawStore.bannerUrl) : null,
     logoUrl: rawStore.logoUrl ? String(rawStore.logoUrl) : null,
@@ -160,6 +169,14 @@ export default async function StorePage({ params }: StorePageProps) {
       phone: b.phone ? String(b.phone) : null,
       mapsUrl: b.mapsUrl ? String(b.mapsUrl) : null,
       isMain: Boolean(b.isMain),
+    })),
+    reviews: (rawStore.reviews || []).map((r) => ({
+      id: String(r.id),
+      customerName: String(r.customerName),
+      rating: Number(r.rating || 5),
+      comment: String(r.comment),
+      purchasedUnit: r.purchasedUnit ? String(r.purchasedUnit) : null,
+      createdAt: r.createdAt.toISOString(),
     })),
   };
 

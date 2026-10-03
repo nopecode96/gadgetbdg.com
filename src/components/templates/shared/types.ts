@@ -7,13 +7,26 @@ export interface BranchData {
   isMain?: boolean;
 }
 
+export interface ReviewData {
+  id: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  purchasedUnit?: string | null;
+  createdAt: string;
+}
+
 export interface StoreData {
   id: string;
   name: string;
   slug: string;
   whatsapp: string;
   address: string | null;
+  storeImage?: string | null;
   mapsUrl: string | null;
+  operationalHours?: string | null;
+  warrantyPolicy?: string | null;
+  verifiedBadge?: boolean;
   primaryColor: string;
   bannerUrl: string | null;
   logoUrl: string | null;
@@ -21,6 +34,7 @@ export interface StoreData {
   templateId: string;
   hasWatermark?: boolean;
   branches?: BranchData[];
+  reviews?: ReviewData[];
 }
 
 export interface ProductData {

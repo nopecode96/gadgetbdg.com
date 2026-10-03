@@ -93,6 +93,18 @@ import {
   deleteStaffUserAction as baseDeleteStaffUser,
 } from "./actions/auth-actions";
 
+import { submitStoreReviewAction as baseSubmitStoreReviewAction } from "./actions/review-actions";
+
+export async function submitStoreReviewAction(input: {
+  storeId: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  purchasedUnit?: string;
+}) {
+  return baseSubmitStoreReviewAction(input);
+}
+
 export async function trackWhatsAppClickAction(productId: string, storeId: string) {
   return baseTrackWhatsAppClickAction(productId, storeId);
 }

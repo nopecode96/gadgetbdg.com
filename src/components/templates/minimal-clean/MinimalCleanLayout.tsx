@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
+import { StoreAboutView } from "../shared/StoreAboutView";
 
 interface MinimalCleanLayoutProps {
   store: StoreData;
@@ -679,34 +680,7 @@ export function MinimalCleanLayout({
 
           {/* TAB 4: TOKO */}
           {activeTab === "about" && (
-            <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm text-left space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-full bg-slate-950 text-white flex items-center justify-center font-black">
-                  {store.name.slice(0, 2)}
-                </div>
-                <div>
-                  <h3 className="font-black text-sm text-slate-950">{store.name}</h3>
-                  <p className="text-[10px] text-slate-500 font-semibold">Store Resmi Bandung • Siap COD</p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Alamat Konter Fisik:</div>
-                <div className="text-xs font-bold text-slate-800 leading-relaxed">
-                  {locationLabel}
-                </div>
-              </div>
-
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-2.5 rounded-2xl bg-emerald-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20"
-              >
-                <MessageCircle className="w-4 h-4 fill-current" />
-                <span>Hubungi Admin Toko</span>
-              </a>
-            </div>
+            <StoreAboutView store={store} theme="minimal-clean" isMockup={isMockup} />
           )}
         </main>
 

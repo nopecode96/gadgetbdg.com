@@ -9,6 +9,9 @@ export const TIER_LIMITS = {
     templateChangeCooldownDays: 0, // Bebas
     hasWatermark: false,
     customDomain: false,
+    canCustomProfile: false,
+    allowCustomerReviews: false,
+    maxReviews: 0,
     description: "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
     qrKit: {
       allowGoogleReview: false,
@@ -27,6 +30,9 @@ export const TIER_LIMITS = {
     templateChangeCooldownDays: 30, // 1x per 30 hari
     hasWatermark: true,
     customDomain: true,
+    canCustomProfile: true,
+    allowCustomerReviews: true,
+    maxReviews: 25,
     description: "Untuk konter HP aktif BEC / Bandung yang ingin scale-up penjualan & branding profesional.",
     qrKit: {
       allowGoogleReview: true,
@@ -45,6 +51,9 @@ export const TIER_LIMITS = {
     templateChangeCooldownDays: 0, // Bebas ganti kapan saja
     hasWatermark: true,
     customDomain: true,
+    canCustomProfile: true,
+    allowCustomerReviews: true,
+    maxReviews: Infinity,
     description: "Kapasitas tanpa batas untuk juragan HP second dengan perputaran stok masif & multi-cabang.",
     qrKit: {
       allowGoogleReview: true,

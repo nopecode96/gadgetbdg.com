@@ -12,6 +12,7 @@ import {
   Sparkles,
   ExternalLink,
   ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { updateStoreSettingsAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier, TEMPLATE_REGISTRY } from "@/lib/constants/templates";
@@ -141,8 +142,44 @@ export function SettingsClient({ store }: SettingsClientProps) {
               />
             </div>
 
+            {/* Foto Toko Fisik Konter (Terkunci untuk STARTER) */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="block font-medium text-slate-700">
+                  Foto Fisik Konter / Storefront (Rasio 16:9)
+                </label>
+                {!isProOrAdvance && (
+                  <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-amber-600" />
+                    <span>Fitur Paket Pro / Advance</span>
+                  </span>
+                )}
+              </div>
+              <input
+                type="url"
+                name="storeImage"
+                defaultValue={store.storeImage || ""}
+                disabled={!isProOrAdvance}
+                placeholder={
+                  isProOrAdvance
+                    ? "https://... (URL foto konter toko di BEC/ITC)"
+                    : "Upgrade ke Pro untuk upload foto toko fisik dan aktifkan ulasan pembeli."
+                }
+                className={`w-full px-3 py-2 rounded-xl focus:outline-none text-xs border ${
+                  isProOrAdvance
+                    ? "bg-slate-50 border-slate-200 focus:ring-2 focus:ring-blue-500"
+                    : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                }`}
+              />
+              {!isProOrAdvance && (
+                <p className="text-[10.5px] text-amber-700 font-medium">
+                  Upgrade ke Pro untuk upload foto toko fisik dan aktifkan ulasan pembeli.
+                </p>
+              )}
+            </div>
+
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Link Google Maps Toko</label>
+              <label className="block font-medium text-slate-700 mb-1">Link Google Maps Petunjuk Arah</label>
               <input
                 type="url"
                 name="mapsUrl"
@@ -150,6 +187,30 @@ export function SettingsClient({ store }: SettingsClientProps) {
                 placeholder="https://maps.google.com/?q=..."
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Jam Operasional Toko</label>
+                <input
+                  type="text"
+                  name="operationalHours"
+                  defaultValue={store.operationalHours || "Setiap Hari: 10:00 - 20:30 WIB"}
+                  placeholder="Setiap Hari: 10:00 - 20:30 WIB"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Ketentuan & Garansi Toko</label>
+                <input
+                  type="text"
+                  name="warrantyPolicy"
+                  defaultValue={store.warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup."}
+                  placeholder="Garansi Toko 30 Hari Replace Unit..."
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
 
             <div>

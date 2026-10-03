@@ -205,6 +205,15 @@ export default function SaaSlandingPage() {
 
           <div className="flex items-center gap-2.5">
             <a
+              href="/berkahcell"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition"
+            >
+              <span>Live Demo</span>
+              <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+            </a>
+            <a
               href="https://toko.gadgetbdg.com"
               className="hidden sm:inline-flex px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-blue-600 transition"
             >
@@ -243,21 +252,32 @@ export default function SaaSlandingPage() {
               </p>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <button
                   onClick={() => setIsRegisterOpen(true)}
-                  className="px-6 sm:px-8 py-4 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2 transition text-sm sm:text-base"
+                  className="px-6 sm:px-7 py-4 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2 transition text-sm sm:text-base shrink-0"
                 >
                   <Sparkles className="w-5 h-5 text-amber-300" />
-                  <span>🚀 Buat Web Toko Sekarang (Cuma 5 Menit)</span>
+                  <span>🚀 Buat Web Toko Sekarang</span>
                 </button>
-                <a
-                  href="#showcase"
-                  className="px-5 py-4 rounded-2xl font-bold text-slate-800 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition text-sm shadow-xs"
-                >
-                  <span>Lihat Contoh Web Toko Demo</span>
-                  <ArrowRight className="w-4 h-4 text-slate-500" />
-                </a>
+                <div className="flex items-center gap-2.5">
+                  <a
+                    href="#showcase"
+                    className="px-4 py-4 rounded-2xl font-bold text-slate-800 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition text-sm shadow-xs"
+                  >
+                    <span>Pilihan Template</span>
+                    <ArrowRight className="w-4 h-4 text-slate-500" />
+                  </a>
+                  <a
+                    href="/berkahcell"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-4 rounded-2xl font-bold text-blue-700 bg-blue-50 border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-100/70 flex items-center justify-center gap-1.5 transition text-sm shadow-xs"
+                  >
+                    <span>Coba Toko Live</span>
+                    <ExternalLink className="w-4 h-4 text-blue-600" />
+                  </a>
+                </div>
               </div>
 
               {/* Micro Trust Badges */}

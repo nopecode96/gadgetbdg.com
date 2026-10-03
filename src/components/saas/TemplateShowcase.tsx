@@ -21,6 +21,7 @@ import { DarkGamingLayout } from "@/components/templates/dark-gaming/DarkGamingL
 import { KeynoteObsidianLayout } from "@/components/templates/keynote-obsidian/KeynoteObsidianLayout";
 import { TokyoStreetLayout } from "@/components/templates/tokyo-street/TokyoStreetLayout";
 import { CyberHudLayout } from "@/components/templates/cyber-hud/CyberHudLayout";
+import { MidnightGoldLayout } from "@/components/templates/midnight-gold/MidnightGoldLayout";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
 import { StoreData, ProductData } from "@/components/templates/shared/types";
 
@@ -92,6 +93,7 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
   const isKeynote = activeTemplate.id === "keynote-obsidian";
   const isTokyo = activeTemplate.id === "tokyo-editorial" || activeTemplate.id === "tokyo-street";
   const isCyber = activeTemplate.id === "cyber-hud";
+  const isGold = activeTemplate.id === "midnight-gold";
   return {
     id: "mock-preview-store",
     name: isGaming
@@ -102,6 +104,8 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
       ? "Tokyo Street Cell"
       : isCyber
       ? "Cyber Telemetry Cell"
+      : isGold
+      ? "Midnight Gold Concierge"
       : "Berkah Cell Gadget",
     slug: isGaming
       ? "gamersgadget"
@@ -111,8 +115,12 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
       ? "tokyostreet"
       : isCyber
       ? "cybercell"
+      : isGold
+      ? "goldcell"
       : "berkahcell",
-    address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-05",
+    address: isGold
+      ? "Bandung Electronic Center (BEC) Lantai LG Blok Z-08"
+      : "Bandung Electronic Center (BEC) Lantai 1 Blok C-05",
     whatsapp: "628123456789",
     templateId: activeTemplate.id,
     tier: "ADVANCE",
@@ -191,7 +199,19 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
     );
   }
 
-  // Other archetypes (Midnight) rendered directly
+  // If midnight-gold, render the dedicated MidnightGoldLayout (dock at phone frame level)
+  if (activeTheme.id === "midnight-gold") {
+    return (
+      <MidnightGoldLayout
+        store={currentMockStore}
+        products={MOCK_PRODUCTS}
+        isMockup={true}
+        hideDock={true}
+      />
+    );
+  }
+
+  // Fallback for any other archetypes
   return (
     <div className="h-full overflow-y-auto no-scrollbar pointer-events-auto text-left select-none">
       <TemplateRenderer store={currentMockStore} products={MOCK_PRODUCTS} />

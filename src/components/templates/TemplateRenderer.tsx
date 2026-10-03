@@ -8,6 +8,7 @@ import { DarkGamingLayout } from "./dark-gaming/DarkGamingLayout";
 import { KeynoteObsidianLayout as KeynoteObsidianLayoutNew } from "./keynote-obsidian/KeynoteObsidianLayout";
 import { TokyoStreetLayout } from "./tokyo-street/TokyoStreetLayout";
 import { CyberHudLayout } from "./cyber-hud/CyberHudLayout";
+import { MidnightGoldLayout as MidnightGoldLayoutNew } from "./midnight-gold/MidnightGoldLayout";
 import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
 import { TokyoEditorialLayout } from "./archetypes/TokyoEditorialLayout";
 import { LiveDropLayout } from "./archetypes/LiveDropLayout";
@@ -43,7 +44,7 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
       return <LiveDropLayout store={store} products={products} />;
 
     case "midnight-gold":
-      return <MidnightGoldLayout store={store} products={products} />;
+      return <MidnightGoldLayoutNew store={store} products={products} isMockup={false} />;
 
     case "clean-ledger":
     default:

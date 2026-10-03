@@ -413,6 +413,134 @@ async function ensureDemoData() {
     });
   }
 
+  // --- STORE 6: MIDNIGHT GOLD LUXURY (goldcell) ---
+  const goldStore = await prisma.store.upsert({
+    where: { slug: "goldcell" },
+    update: {
+      name: "Midnight Gold Concierge",
+      tier: "ADVANCE",
+      templateId: "midnight-gold",
+      whatsapp: "628123456789",
+      address: "Bandung Electronic Center (BEC) Lantai LG Blok Z-08, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      primaryColor: "#d4af37",
+      logoUrl: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: false,
+      operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
+      warrantyPolicy: "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.",
+      verifiedBadge: true,
+      isActive: true,
+    },
+    create: {
+      name: "Midnight Gold Concierge",
+      slug: "goldcell",
+      customDomain: null,
+      whatsapp: "628123456789",
+      address: "Bandung Electronic Center (BEC) Lantai LG Blok Z-08, Jl. Purnawarman No. 13-15, Bandung",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
+      tier: "ADVANCE",
+      templateId: "midnight-gold",
+      primaryColor: "#d4af37",
+      logoUrl: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200&auto=format&fit=crop&q=80",
+      bannerUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80",
+      hasWatermark: false,
+      operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
+      warrantyPolicy: "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.",
+      verifiedBadge: true,
+      isActive: true,
+    },
+  });
+
+  const goldCount = await prisma.product.count({ where: { storeId: goldStore.id } });
+  if (goldCount === 0) {
+    await prisma.product.createMany({
+      data: [
+        {
+          storeId: goldStore.id,
+          name: "iPhone 15 Pro Max 256GB Natural Titanium",
+          brand: "Apple",
+          price: 18900000,
+          ramRom: "8GB / 256GB",
+          batteryHealth: 96,
+          imeiStatus: "Resmi iBox Kemenperin",
+          completeness: "Fullset Original Box & Cable Type-C Braided",
+          condition: "99% Mint Condition Like New",
+          minusNotes: "Unit mulus tanpa dent, garansi resmi iBox aktif hingga akhir tahun",
+          status: "AVAILABLE",
+          images: ["/images/items/iphone-15-pro.png"],
+        },
+        {
+          storeId: goldStore.id,
+          name: "Samsung Galaxy S24 Ultra 12/512GB Titanium Gray",
+          brand: "Samsung",
+          price: 17200000,
+          ramRom: "12GB / 512GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi SEIN Indonesia",
+          completeness: "Fullset Box Original + S-Pen + Fast Charger",
+          condition: "99% Seperti Baru",
+          minusNotes: "Titanium frame bersih mengkilap, layar anti-reflective tanpa gores",
+          status: "AVAILABLE",
+          images: ["/images/items/samsung-s24-ultra.png"],
+        },
+        {
+          storeId: goldStore.id,
+          name: "iPhone 14 Pro 128GB Space Black",
+          brand: "Apple",
+          price: 13500000,
+          ramRom: "6GB / 128GB",
+          batteryHealth: 91,
+          imeiStatus: "Resmi Digimap Kemenperin",
+          completeness: "Fullset Box Original + Cable Lightning",
+          condition: "98% Mulus",
+          minusNotes: "Stainless steel bezel kinclong, kamera dan True Tone 100% normal",
+          status: "AVAILABLE",
+          images: ["/images/items/iphone-15-pro.png"],
+        },
+        {
+          storeId: goldStore.id,
+          name: "Samsung Galaxy Z Fold 5 12/512GB Phantom Black",
+          brand: "Samsung",
+          price: 15800000,
+          ramRom: "12GB / 512GB",
+          batteryHealth: null,
+          imeiStatus: "Resmi SEIN Indonesia",
+          completeness: "Fullset Box Original",
+          condition: "98% Mulus Terawat",
+          minusNotes: "Lipatan layar dalam mulus kencang, engsel zero-gap presisi",
+          status: "AVAILABLE",
+          images: ["/images/items/samsung-s24-ultra.png"],
+        },
+      ],
+    });
+  }
+
+  // Seed sample verified reviews for goldStore if empty
+  const reviewCount = await prisma.storeReview.count({ where: { storeId: goldStore.id } });
+  if (reviewCount === 0) {
+    await prisma.storeReview.createMany({
+      data: [
+        {
+          storeId: goldStore.id,
+          reviewerName: "Calvin Hartono",
+          rating: 5,
+          comment: "Pelayanan butik sangat eksklusif. Unit iPhone 15 Pro Max kondisi 99% seperti baru, baterai awet dan IMEI resmi terdaftar aktif di iBox.",
+          devicePurchased: "iPhone 15 Pro Max 256GB Natural Titanium",
+          isVerified: true,
+        },
+        {
+          storeId: goldStore.id,
+          reviewerName: "Dr. Hendra Wijaya",
+          rating: 5,
+          comment: "Transaksi COD langsung di BEC sangat memuaskan. Toko menyediakan free migrasi data dan pasang temper glass kualitas premium.",
+          devicePurchased: "Samsung Galaxy S24 Ultra 512GB",
+          isVerified: true,
+        },
+      ],
+    });
+  }
+
   console.log("✅ Demo stores and products are guaranteed to exist!");
 }
 

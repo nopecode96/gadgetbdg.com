@@ -569,6 +569,18 @@ export function MinimalCleanLayout({
 
               <div className="grid grid-cols-2 gap-3">
                 {smartFilteredProducts.map((p) => {
+                  const isCustomDomain =
+                    typeof window !== "undefined" &&
+                    !window.location.pathname.startsWith(`/${store.slug}`) &&
+                    !window.location.hostname.includes("localhost") &&
+                    !window.location.hostname.includes("gadgetbdg.com");
+
+                  const detailUrl = isMockup
+                    ? "#"
+                    : isCustomDomain
+                    ? `/product/${p.id}`
+                    : `/${store.slug}/product/${p.id}`;
+
                   const buyWaUrl = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                     store.name
                   )},%20saya%20tertarik%20dengan%20unit%20*${encodeURIComponent(
@@ -578,45 +590,58 @@ export function MinimalCleanLayout({
                   return (
                     <div
                       key={p.id}
-                      className="rounded-3xl p-3 bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between space-y-2 text-left"
+                      className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition-all hover:shadow-md text-left"
                     >
-                      <div className="w-full aspect-square rounded-2xl bg-slate-50 p-2 flex items-center justify-center overflow-hidden border border-slate-100">
-                        {p.images?.[0] ? (
-                          <img
-                            src={p.images[0]}
-                            alt={p.name}
-                            className="w-full h-full object-contain"
-                          />
-                        ) : (
-                          <Smartphone className="w-8 h-8 text-slate-300" />
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-[7.5px] font-black uppercase px-1.5 py-0.5 rounded-full bg-slate-950 text-white">
+                      <Link
+                        href={detailUrl}
+                        onClick={(e) => {
+                          if (isMockup) e.preventDefault();
+                        }}
+                        className="block cursor-pointer"
+                      >
+                        {/* Gambar Unit HP */}
+                        <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100">
+                          {p.images?.[0] ? (
+                            <img
+                              src={p.images[0]}
+                              alt={p.name}
+                              className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                            />
+                          ) : (
+                            <Smartphone className="w-8 h-8 text-slate-300" />
+                          )}
+                        </div>
+
+                        {/* Brand & Nama Unit */}
+                        <span className="mt-2.5 inline-block text-[10px] font-black uppercase tracking-wider text-slate-500">
                           {p.brand}
                         </span>
-                        <h4 className="font-black text-xs text-slate-950 mt-1 truncate">
+                        <h3 className="line-clamp-1 text-sm font-bold text-slate-950 group-hover:text-blue-700 transition-colors">
                           {p.name}
-                        </h4>
-                        <p className="text-[10px] text-slate-500 font-medium truncate">
-                          {p.ramRom}
+                        </h3>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {p.ramRom} • {p.condition}
                         </p>
-                      </div>
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-xs font-black text-slate-950">
+                      </Link>
+
+                      {/* Baris Bawah: Harga & Tombol Beli WA Cepat */}
+                      <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
+                        <span className="text-sm font-black text-slate-950">
                           {formatRupiah(p.price)}
                         </span>
-                        <a
-                          href={buyWaUrl}
-                          target="_blank"
-                          rel="noreferrer"
+                        <button
+                          type="button"
                           onClick={(e) => {
-                            if (isMockup) e.preventDefault();
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!isMockup) {
+                              window.open(buyWaUrl, "_blank");
+                            }
                           }}
-                          className="px-2 py-1 rounded-xl text-[10px] font-black bg-emerald-600 text-white"
+                          className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-emerald-700"
                         >
                           Beli
-                        </a>
+                        </button>
                       </div>
                     </div>
                   );

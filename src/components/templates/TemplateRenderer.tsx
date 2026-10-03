@@ -5,6 +5,7 @@ import { StoreData, ProductData } from "./shared/types";
 import { getTemplateConfig } from "@/lib/constants/templates";
 import { MinimalCleanLayout } from "./minimal-clean/MinimalCleanLayout";
 import { DarkGamingLayout } from "./dark-gaming/DarkGamingLayout";
+import { KeynoteObsidianLayout as KeynoteObsidianLayoutNew } from "./keynote-obsidian/KeynoteObsidianLayout";
 import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
 import { CyberHudLayout } from "./archetypes/CyberHudLayout";
 import { TokyoEditorialLayout } from "./archetypes/TokyoEditorialLayout";
@@ -28,7 +29,7 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
       return <DarkGamingLayout store={store} products={products} isMockup={false} />;
 
     case "keynote-obsidian":
-      return <KeynoteObsidianLayout store={store} products={products} />;
+      return <KeynoteObsidianLayoutNew store={store} products={products} isMockup={false} />;
 
     case "cyber-hud":
       return <CyberHudLayout store={store} products={products} />;

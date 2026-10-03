@@ -18,6 +18,7 @@ import {
 } from "@/lib/constants/templates";
 import { MinimalCleanLayout } from "@/components/templates/minimal-clean/MinimalCleanLayout";
 import { DarkGamingLayout } from "@/components/templates/dark-gaming/DarkGamingLayout";
+import { KeynoteObsidianLayout } from "@/components/templates/keynote-obsidian/KeynoteObsidianLayout";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
 import { StoreData, ProductData } from "@/components/templates/shared/types";
 
@@ -85,10 +86,12 @@ const MOCK_PRODUCTS: ProductData[] = [
 
 // Helper generator mockStore taking activeTemplate
 function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
+  const isGaming = activeTemplate.id === "dark-gaming";
+  const isKeynote = activeTemplate.id === "keynote-obsidian";
   return {
     id: "mock-preview-store",
-    name: activeTemplate.id === "dark-gaming" ? "Gamers Gadget Bandung" : "Berkah Cell Gadget",
-    slug: activeTemplate.id === "dark-gaming" ? "gamersgadget" : "berkahcell",
+    name: isGaming ? "Gamers Gadget Bandung" : isKeynote ? "Obsidian Premier" : "Berkah Cell Gadget",
+    slug: isGaming ? "gamersgadget" : isKeynote ? "obsidianpremier" : "berkahcell",
     address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-05",
     whatsapp: "628123456789",
     templateId: activeTemplate.id,
@@ -132,7 +135,19 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
     );
   }
 
-  // Other archetypes (Keynote, Tokyo, Cyber, Midnight) rendered directly
+  // If keynote-obsidian, render the dedicated KeynoteObsidianLayout (dock at phone frame level)
+  if (activeTheme.id === "keynote-obsidian") {
+    return (
+      <KeynoteObsidianLayout
+        store={currentMockStore}
+        products={MOCK_PRODUCTS}
+        isMockup={true}
+        hideDock={true}
+      />
+    );
+  }
+
+  // Other archetypes (Tokyo, Cyber, Midnight) rendered directly
   return (
     <div className="h-full overflow-y-auto no-scrollbar pointer-events-auto text-left select-none">
       <TemplateRenderer store={currentMockStore} products={MOCK_PRODUCTS} />

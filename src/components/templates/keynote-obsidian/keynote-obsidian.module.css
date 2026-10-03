@@ -1,0 +1,275 @@
+/* ============================================================
+   Keynote Obsidian — Isolated CSS Module
+   Template 3: "Keynote Obsidian" for GadgetBDG SaaS
+   Palette: Obsidian #09090b / Titanium #27272a / Champagne Gold #d4af37
+   ============================================================ */
+
+/* === BASE CONTAINER === */
+.obsidianContainer {
+  background: #09090b;
+  color: #fafafa;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* === SMOKED GLASS MATTE === */
+.smokedGlass {
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* === HEADER BOUTIQUE CENTERED === */
+.obsidianHeader {
+  background: rgba(9, 9, 11, 0.96);
+  border-bottom: 1px solid rgba(39, 39, 42, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* === CHAMPAGNE GOLD / AMBER ACCENTS === */
+.goldAccent {
+  color: #d4af37;
+}
+
+.goldGlow {
+  box-shadow:
+    0 0 10px rgba(212, 175, 55, 0.35),
+    0 0 24px rgba(212, 175, 55, 0.15);
+}
+
+.goldBorder {
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.goldTextGradient {
+  background: linear-gradient(135deg, #d4af37 0%, #f59e0b 40%, #fbbf24 70%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === TITANIUM CARD === */
+.titaniumCard {
+  background: rgba(14, 14, 18, 0.9);
+  border: 1px solid rgba(39, 39, 42, 0.9);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.titaniumCard:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow:
+    0 0 16px rgba(212, 175, 55, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* === CINEMATIC HERO SPOTLIGHT === */
+.cinematicHero {
+  background: linear-gradient(
+    160deg,
+    #09090b 0%,
+    #0f0f13 40%,
+    #12121a 70%,
+    #09090b 100%
+  );
+  border: 1px solid rgba(39, 39, 42, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.cinematicHero::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 300px;
+  background: radial-gradient(ellipse, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* === FLOATING DOCK (OBSIDIAN LUXURY) === */
+.obsidianDock {
+  background: rgba(5, 5, 7, 0.96);
+  border: 1px solid rgba(39, 39, 42, 0.9);
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.6),
+    0 0 0 0.5px rgba(212, 175, 55, 0.1) inset;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Gold underline indicator for active dock tab */
+.dockTabActive {
+  color: #d4af37;
+  position: relative;
+}
+
+.dockTabActive::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 2px;
+  background: linear-gradient(90deg, #d4af37, #f59e0b);
+  border-radius: 999px;
+}
+
+/* === UNDERLINE FILTER TABS (EDITORIAL GALLERY STYLE) === */
+.filterTabBar {
+  border-bottom: 1px solid rgba(39, 39, 42, 0.8);
+}
+
+.filterTab {
+  color: #71717a;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  padding-bottom: 8px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.filterTabActive {
+  color: #d4af37;
+  border-bottom: 2px solid #d4af37;
+}
+
+/* === SPOTLIGHT PRODUCT CARD (VERTICAL TALL) === */
+.spotlightCard {
+  background: rgba(12, 12, 16, 0.95);
+  border: 1px solid rgba(39, 39, 42, 0.9);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.spotlightCard:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
+}
+
+/* === PRODUCT IMAGE FRAME (OBSIDIAN) === */
+.productImageFrame {
+  background: rgba(5, 5, 7, 0.8);
+  border: 1px solid rgba(39, 39, 42, 0.7);
+}
+
+/* === FULL-WIDTH SHOWCASE CARD (CATALOG) === */
+.showcaseCard {
+  background: rgba(10, 10, 14, 0.9);
+  border: 1px solid rgba(39, 39, 42, 0.8);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.showcaseCard:hover {
+  border-color: rgba(212, 175, 55, 0.35);
+  box-shadow: 0 4px 24px rgba(212, 175, 55, 0.06), 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* === ACQUIRE BUTTON (CHAMPAGNE GOLD CTA) === */
+.acquireButton {
+  background: linear-gradient(135deg, #b8962e, #d4af37, #f0c040);
+  color: #09090b;
+  font-weight: 800;
+  border: 1px solid rgba(212, 175, 55, 0.6);
+  transition: all 0.2s ease;
+}
+
+.acquireButton:hover {
+  background: linear-gradient(135deg, #d4af37, #f59e0b, #fbbf24);
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
+  transform: translateY(-1px);
+}
+
+/* === SEARCH INPUT (OBSIDIAN) === */
+.obsidianSearch {
+  background: rgba(14, 14, 18, 0.9);
+  border: 1px solid rgba(39, 39, 42, 0.8);
+  color: #fafafa;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.obsidianSearch:focus-within {
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+}
+
+/* === GRADE BADGE (ELITE / PRISTINE) === */
+.gradeBadge {
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #d4af37;
+  font-size: 0.5625rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* === TRUST PILLAR CARD === */
+.trustPillar {
+  background: rgba(12, 12, 16, 0.8);
+  border: 1px solid rgba(39, 39, 42, 0.7);
+}
+
+/* === FORM INPUT (OBSIDIAN DARK) === */
+.obsidianInput {
+  background: rgba(14, 14, 18, 0.95);
+  border: 1px solid rgba(39, 39, 42, 0.8);
+  color: #fafafa;
+  transition: border-color 0.15s ease;
+}
+
+.obsidianInput:focus {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+}
+
+/* === SELECT DROPDOWN === */
+.obsidianSelect {
+  background: rgba(14, 14, 18, 0.95);
+  border: 1px solid rgba(39, 39, 42, 0.8);
+  color: #fafafa;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L2 5h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.obsidianSelect:focus {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+/* === DIVIDER GOLD THIN === */
+.goldDivider {
+  border-color: rgba(39, 39, 42, 0.7);
+}
+
+/* === REVIEW CARD (OBSIDIAN DARK) === */
+.reviewCard {
+  background: rgba(14, 14, 18, 0.8);
+  border: 1px solid rgba(39, 39, 42, 0.7);
+}
+
+/* === WA BUTTON (GOLD AMBER) === */
+.obsidianWaButton {
+  background: linear-gradient(135deg, #b8962e, #d4af37);
+  color: #09090b;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.obsidianWaButton:hover {
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* === NO SCROLLBAR === */
+.noScrollbar::-webkit-scrollbar { display: none; }
+.noScrollbar { -ms-overflow-style: none; scrollbar-width: none; }

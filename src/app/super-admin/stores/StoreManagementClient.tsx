@@ -16,19 +16,78 @@ import {
   TrendingUp,
   Inbox,
   Filter,
+  Calendar,
+  BellRing,
 } from "lucide-react";
 import { StoreAdminListItem } from "@/lib/actions/store-management-actions";
 import { StoreDetailDrawer } from "./StoreDetailDrawer";
 
-function formatExpirySummary(iso: string | null) {
-  if (!iso) return { text: "Tidak Aktif", isExpired: true };
-  const date = new Date(iso);
-  const now = new Date();
-  const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+function formatDate(iso: string | null) {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
-  if (diffDays <= 0) return { text: "Kedaluwarsa", isExpired: true };
-  if (diffDays > 25000) return { text: "Selamanya", isExpired: false };
-  return { text: `${diffDays} hari lagi`, isExpired: false };
+function getSubscriptionCycleSummary(startedAt: string | null, expiresAt: string | null) {
+  if (!expiresAt) {
+    return {
+      startedText: formatDate(startedAt),
+      expiresText: "Belum Aktif",
+      diffDays: 0,
+      badgeText: "Belum Aktif",
+      badgeClass: "bg-slate-800 text-slate-400 border-slate-700",
+      status: "INACTIVE" as const,
+    };
+  }
+
+  const expDate = new Date(expiresAt);
+  const now = new Date();
+  const diffDays = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 25000) {
+    return {
+      startedText: formatDate(startedAt),
+      expiresText: "Selamanya",
+      diffDays,
+      badgeText: "Selamanya",
+      badgeClass: "bg-emerald-950/70 text-emerald-300 border-emerald-500/40",
+      status: "LIFETIME" as const,
+    };
+  }
+
+  if (diffDays <= 0) {
+    return {
+      startedText: formatDate(startedAt),
+      expiresText: formatDate(expiresAt),
+      diffDays,
+      badgeText: `Kedaluwarsa (${Math.abs(diffDays)}h lalu)`,
+      badgeClass: "bg-red-950/70 text-red-300 border-red-500/40",
+      status: "EXPIRED" as const,
+    };
+  }
+
+  if (diffDays <= 7) {
+    return {
+      startedText: formatDate(startedAt),
+      expiresText: formatDate(expiresAt),
+      diffDays,
+      badgeText: `Sisa ${diffDays} hari lagi`,
+      badgeClass: "bg-amber-950/70 text-amber-300 border-amber-500/40 animate-pulse",
+      status: "WARNING" as const,
+    };
+  }
+
+  return {
+    startedText: formatDate(startedAt),
+    expiresText: formatDate(expiresAt),
+    diffDays,
+    badgeText: `Sisa ${diffDays} hari lagi`,
+    badgeClass: "bg-blue-950/70 text-blue-300 border-blue-500/40",
+    status: "ACTIVE" as const,
+  };
 }
 
 const tierBadgeStyles: Record<string, string> = {
@@ -101,7 +160,7 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
             <Store className="w-6 h-6 text-indigo-400" /> Manajemen Toko Merchant
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Kelola status aktif/beku, tier paket, atribusi sales, dan masa aktif seluruh toko terdaftar.
+            Kelola status aktif/beku, tier paket, siklus langganan, dan pengingat tagihan WhatsApp.
           </p>
         </div>
 
@@ -140,10 +199,10 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
           <table className="w-full text-left border-collapse table-auto">
             <thead>
               <tr className="bg-slate-950/80 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-extrabold">
-                <th className="py-3.5 px-4 sm:px-6 w-[36%]">Toko & Pemilik</th>
-                <th className="py-3.5 px-4 w-[14%]">Paket Tier</th>
-                <th className="py-3.5 px-4 w-[18%]">Masa Aktif</th>
-                <th className="py-3.5 px-4 w-[12%]">Katalog</th>
+                <th className="py-3.5 px-4 sm:px-6 w-[34%]">Toko & Pemilik</th>
+                <th className="py-3.5 px-4 w-[12%]">Paket Tier</th>
+                <th className="py-3.5 px-4 w-[24%]">Siklus Masa Aktif</th>
+                <th className="py-3.5 px-4 w-[10%]">Katalog</th>
                 <th className="py-3.5 px-4 w-[10%]">Status</th>
                 <th className="py-3.5 px-4 sm:px-6 w-[10%] text-right">Aksi</th>
               </tr>
@@ -158,7 +217,7 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
                 </tr>
               ) : (
                 paginatedStores.map((store) => {
-                  const expiry = formatExpirySummary(store.subscriptionExpiresAt);
+                  const cycle = getSubscriptionCycleSummary(store.subscriptionStartedAt, store.subscriptionExpiresAt);
                   const tierStyle = tierBadgeStyles[store.tier] || tierBadgeStyles.STARTER;
 
                   return (
@@ -207,21 +266,24 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
                         </span>
                       </td>
 
-                      {/* 3. Masa Aktif */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <Clock
-                            className={`w-3.5 h-3.5 shrink-0 ${
-                              expiry.isExpired ? "text-red-400" : "text-amber-400"
-                            }`}
-                          />
-                          <span
-                            className={`text-xs font-semibold ${
-                              expiry.isExpired ? "text-red-400" : "text-slate-300"
-                            }`}
-                          >
-                            {expiry.text}
-                          </span>
+                      {/* 3. Siklus Masa Aktif (Tgl Aktif — Tgl Berakhir & Indikator Sisa Hari) */}
+                      <td className="py-3.5 px-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-300">
+                            <span className="text-slate-400">{cycle.startedText}</span>
+                            <span className="text-slate-500">—</span>
+                            <span className={cycle.status === "EXPIRED" ? "text-red-400 font-bold" : "text-emerald-400 font-bold"}>
+                              {cycle.expiresText}
+                            </span>
+                          </div>
+                          <div>
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${cycle.badgeClass}`}
+                            >
+                              <Clock className="w-3 h-3 shrink-0" />
+                              {cycle.badgeText}
+                            </span>
+                          </div>
                         </div>
                       </td>
 

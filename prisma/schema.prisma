@@ -81,6 +81,7 @@ model Store {
   hasWatermark    Boolean       @default(false)
   lastTemplateChangeAt DateTime?
   isActive        Boolean       @default(false)
+  subscriptionStartedAt DateTime? @default(now())
   subscriptionExpiresAt DateTime?
   salesUserId     String?
   referredBySalesId String?

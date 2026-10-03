@@ -185,6 +185,7 @@ export async function approveSubscriptionPaymentAction(paymentId: string) {
           planId: plan.id,
           tier: payment.tier,
           hasWatermark: plan.hasWatermark,
+          subscriptionStartedAt: now,
           subscriptionExpiresAt: newEnd,
         },
       });

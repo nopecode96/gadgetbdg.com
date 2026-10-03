@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   LogOut,
   Sparkles,
+  BellRing,
+  AlertTriangle,
 } from "lucide-react";
 import { updateSalesBankDetailsAction } from "@/lib/actions/sales-actions";
 import { logoutAction } from "@/lib/actions/login-actions";
@@ -28,6 +30,8 @@ export interface RecruitedStore {
   tier: string;
   isActive: boolean;
   whatsapp: string;
+  subscriptionStartedAt?: string | null;
+  subscriptionExpiresAt?: string | null;
   createdAt: string;
   monthlyCommission: number;
 }
@@ -103,6 +107,16 @@ export function SalesDashboardClient({
 
   // Estimasi komisi bulan depan dari active stores
   const nextMonthEstimate = activeStores.reduce((sum, s) => sum + s.monthlyCommission, 0);
+
+  // Toko yang perlu diperpanjang (< 7 Hari atau sudah expired)
+  const now = new Date();
+  const renewingStores = stores.filter((s) => {
+    if (!s.subscriptionExpiresAt) return false;
+    const exp = new Date(s.subscriptionExpiresAt);
+    const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays <= 7 && diffDays > -30; // 7 hari sebelum expired atau baru expired < 30 hari
+  });
+  const renewingCommissionTotal = renewingStores.reduce((sum, s) => sum + s.monthlyCommission, 0);
 
   const handleSaveBank = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -345,6 +359,132 @@ export function SalesDashboardClient({
           <div className="mt-2 text-[11px] text-indigo-300/70">
             Starter Rp 50rb • Pro Rp 100rb • Adv Rp 150rb
           </div>
+        </div>
+      </div>
+
+      {/* ── Section Khusus: Klien Perlu Diperpanjang (< 7 Hari) ────── */}
+      <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl shadow-xl overflow-hidden relative">
+        <div className="px-6 py-5 border-b border-slate-800 bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30">
+              <BellRing className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-white">
+                  Klien Perlu Diperpanjang (&le; 7 Hari)
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  {renewingStores.length} Klien
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Toko binaan Anda yang akan habis masa berlakunya. Follow-up segera agar komisi perpanjangan bulanan tetap mengalir!
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right sm:border-l sm:border-slate-800 sm:pl-6">
+            <span className="text-[11px] uppercase font-mono text-slate-400 font-semibold block">
+              Potensi Komisi Cair:
+            </span>
+            <span className="text-lg font-black text-emerald-400 font-mono">
+              {formatRupiah(renewingCommissionTotal)}
+            </span>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {renewingStores.length === 0 ? (
+            <div className="text-center py-6 text-slate-400 text-xs">
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-500/80" />
+              Semua toko binaan Anda memiliki masa aktif aman (&gt; 7 hari). Tidak ada tagihan mendesak saat ini.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renewingStores.map((s) => {
+                const expDate = new Date(s.subscriptionExpiresAt!);
+                const diffDays = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                const cleanPhone = s.whatsapp.replace(/\D/g, "");
+                const expFormatted = expDate.toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                });
+
+                const followUpMsg = encodeURIComponent(
+                  `Halo Bos/Kakak dari *${s.name}*! 👋\n\n` +
+                    `Saya *${profile.name}* (Sales Partner resmi GadgetBdg).\n\n` +
+                    `Mau infoin nih, paket langganan SaaS toko *${s.name}* (${s.tier}) ` +
+                    (diffDays <= 0
+                      ? `sudah kedaluwarsa sejak *${expFormatted}*.`
+                      : `akan segera berakhir dalam *${diffDays} hari lagi* (jatuh tempo *${expFormatted}*).`) +
+                    `\n\nAgar website katalog & etalase online tetap aktif melayani pembeli di WhatsApp tanpa gangguan, yuk segera perpanjang langganannya ya Bos!\n\n` +
+                    `Kalau ada kendala atau butuh bantuan pembayaran, bisa langsung balas pesan ini ya. Salam sukses selalu! 🚀`
+                );
+
+                return (
+                  <div
+                    key={s.id}
+                    className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700 transition"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-bold text-white text-sm leading-tight">{s.name}</div>
+                          <div className="text-[11px] font-mono text-slate-400">{s.slug}.gadgetbdg.com</div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full font-mono font-bold text-[10px] bg-slate-800 text-slate-200 border border-slate-700">
+                          {s.tier}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 space-y-1.5 text-xs">
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span>Jatuh Tempo:</span>
+                          <span className="font-mono text-slate-200">{expFormatted}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Sisa Waktu:</span>
+                          <span
+                            className={`font-bold font-mono ${
+                              diffDays <= 0 ? "text-red-400" : "text-amber-400"
+                            }`}
+                          >
+                            {diffDays <= 0 ? `Lewat ${Math.abs(diffDays)} hari` : `${diffDays} hari lagi`}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-800/80">
+                          <span className="text-slate-400">Komisi Sales:</span>
+                          <span className="font-mono font-bold text-emerald-400">
+                            {formatRupiah(s.monthlyCommission)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-800/80">
+                      {cleanPhone ? (
+                        <a
+                          href={`https://wa.me/${cleanPhone}?text=${followUpMsg}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-full bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition"
+                        >
+                          <BellRing className="w-3.5 h-3.5 text-emerald-400" />
+                          Follow-up Klien (WA)
+                        </a>
+                      ) : (
+                        <span className="text-[11px] text-slate-500 text-center block">
+                          No WhatsApp belum terdaftar
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

@@ -34,6 +34,8 @@ export default async function SalesPortalPage() {
         tier: true,
         isActive: true,
         whatsapp: true,
+        subscriptionStartedAt: true,
+        subscriptionExpiresAt: true,
         createdAt: true,
       },
     }),
@@ -75,6 +77,8 @@ export default async function SalesPortalPage() {
     tier: s.tier,
     isActive: s.isActive,
     whatsapp: s.whatsapp,
+    subscriptionStartedAt: s.subscriptionStartedAt ? s.subscriptionStartedAt.toISOString() : null,
+    subscriptionExpiresAt: s.subscriptionExpiresAt ? s.subscriptionExpiresAt.toISOString() : null,
     createdAt: s.createdAt.toISOString(),
     monthlyCommission: COMMISSION_RATE[s.tier] || 50_000,
   }));

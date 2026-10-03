@@ -16,6 +16,7 @@ export interface StoreAdminListItem {
   templateId: string;
   hasWatermark: boolean;
   lastTemplateChangeAt: string | null;
+  subscriptionStartedAt: string | null;
   subscriptionExpiresAt: string | null;
   isActive: boolean;
   address: string | null;
@@ -126,6 +127,7 @@ export async function getAllStoresAction(filters?: {
       templateId: s.templateId,
       hasWatermark: s.hasWatermark,
       lastTemplateChangeAt: s.lastTemplateChangeAt ? s.lastTemplateChangeAt.toISOString() : null,
+      subscriptionStartedAt: s.subscriptionStartedAt ? s.subscriptionStartedAt.toISOString() : null,
       subscriptionExpiresAt: s.subscriptionExpiresAt ? s.subscriptionExpiresAt.toISOString() : null,
       isActive: s.isActive,
       address: s.address,

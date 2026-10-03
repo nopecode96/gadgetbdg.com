@@ -27,6 +27,12 @@ import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { StoreAboutView } from "../shared/StoreAboutView";
+import {
+  ProductFilterBar,
+  ProductEmptyState,
+  ProductFilterState,
+  filterAndSortProducts,
+} from "@/components/storefront/ProductFilterBar";
 import styles from "./dark-gaming.module.css";
 
 interface DarkGamingLayoutProps {
@@ -43,57 +49,32 @@ export function DarkGamingLayout({
   hideDock = false,
 }: DarkGamingLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<
-    "ALL" | "IPHONE" | "ANDROID" | "GAMING" | "BUDGET" | "FLAGSHIP"
-  >("ALL");
+  const [filterState, setFilterState] = useState<ProductFilterState>({
+    searchQuery: "",
+    category: "ALL",
+    brand: "ALL",
+    grade: "ALL",
+    sort: "DEFAULT",
+  });
+
+  const handleResetFilters = () => {
+    setFilterState({
+      searchQuery: "",
+      category: "ALL",
+      brand: "ALL",
+      grade: "ALL",
+      sort: "DEFAULT",
+    });
+  };
 
   const displayProducts = Array.isArray(products) ? products : [];
   const heroHighlight = displayProducts[0];
   const snapSliderProducts = displayProducts.slice(0, 5);
 
   const gamingFilteredProducts = useMemo(() => {
-    return displayProducts.filter((p) => {
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = (p.name || "").toLowerCase().includes(query);
-        const matchesBrand = (p.brand || "").toLowerCase().includes(query);
-        const matchesSpec = (p.ramRom || "").toLowerCase().includes(query);
-        const matchesImei = (p.imeiStatus || "").toLowerCase().includes(query);
-        if (!matchesName && !matchesBrand && !matchesSpec && !matchesImei) {
-          return false;
-        }
-      }
-
-      if (activeFilter === "ALL") return true;
-      const brandLower = (p.brand || "").toLowerCase();
-      const nameLower = (p.name || "").toLowerCase();
-
-      if (activeFilter === "IPHONE") {
-        return brandLower === "apple" || nameLower.includes("iphone");
-      }
-      if (activeFilter === "ANDROID") {
-        return brandLower !== "apple" && !nameLower.includes("iphone");
-      }
-      if (activeFilter === "GAMING") {
-        return (
-          brandLower.includes("rog") ||
-          brandLower.includes("poco") ||
-          brandLower.includes("iqoo") ||
-          nameLower.includes("gaming") ||
-          nameLower.includes("rog")
-        );
-      }
-      if (activeFilter === "BUDGET") {
-        return Number(p.price) < 3000000;
-      }
-      if (activeFilter === "FLAGSHIP") {
-        return Number(p.price) >= 8000000;
-      }
-      return true;
-    });
-  }, [displayProducts, activeFilter, searchQuery]);
+    return filterAndSortProducts(displayProducts, filterState);
+  }, [displayProducts, filterState]);
 
   const gamingPills = [
     { id: "ALL" as const, label: "SEMUA UNIT", icon: "⚡" },
@@ -171,7 +152,7 @@ export function DarkGamingLayout({
                 type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  isSearchOpen || searchQuery
+                  isSearchOpen || filterState.searchQuery
                     ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50"
                     : "bg-slate-800/70 hover:bg-slate-700/80 text-slate-400 border border-slate-700/60"
                 }`}
@@ -202,9 +183,9 @@ export function DarkGamingLayout({
                 <input
                   type="text"
                   autoFocus
-                  value={searchQuery}
+                  value={filterState.searchQuery}
                   onChange={(e) => {
-                    setSearchQuery(e.target.value);
+                    setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }));
                     if (activeTab !== "list" && activeTab !== "home") {
                       setActiveTab("list");
                     }
@@ -212,10 +193,10 @@ export function DarkGamingLayout({
                   placeholder="Cari ROG, Xiaomi, iPhone, RAM..."
                   className="w-full bg-transparent text-xs font-semibold text-slate-100 placeholder:text-slate-500 focus:outline-none"
                 />
-                {searchQuery && (
+                {filterState.searchQuery && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => setFilterState((prev) => ({ ...prev, searchQuery: "" }))}
                     className="w-5 h-5 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-400 flex items-center justify-center text-[10px] font-bold"
                   >
                     ✕
@@ -322,20 +303,27 @@ export function DarkGamingLayout({
                   className={`flex items-center gap-2 overflow-x-auto pb-1 ${styles.customScrollbar}`}
                 >
                   {gamingPills.map((pill) => {
-                    const isSelected = activeFilter === pill.id;
                     return (
                       <button
                         key={pill.id}
                         type="button"
                         onClick={() => {
-                          setActiveFilter(pill.id);
+                          if (pill.id === "ALL") {
+                            setFilterState((prev) => ({ ...prev, category: "ALL", brand: "ALL", grade: "ALL" }));
+                          } else if (pill.id === "FLAGSHIP") {
+                            setFilterState((prev) => ({ ...prev, sort: "PRICE_DESC" }));
+                          } else if (pill.id === "GAMING") {
+                            setFilterState((prev) => ({ ...prev, searchQuery: "gaming" }));
+                          } else if (pill.id === "IPHONE") {
+                            setFilterState((prev) => ({ ...prev, brand: "Apple", category: "SMARTPHONE" }));
+                          } else if (pill.id === "ANDROID") {
+                            setFilterState((prev) => ({ ...prev, category: "SMARTPHONE", brand: "ALL" }));
+                          } else if (pill.id === "BUDGET") {
+                            setFilterState((prev) => ({ ...prev, sort: "PRICE_ASC" }));
+                          }
                           setActiveTab("list");
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0 transition-all duration-200 select-none text-xs font-bold ${
-                          isSelected
-                            ? styles.gamingPillActive
-                            : styles.gamingPill
-                        }`}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0 transition-all duration-200 select-none text-xs font-bold ${styles.gamingPill} hover:scale-102`}
                       >
                         <span>{pill.icon}</span>
                         <span className="whitespace-nowrap">{pill.label}</span>
@@ -635,42 +623,15 @@ export function DarkGamingLayout({
               <div
                 className={`sticky top-[61px] z-30 px-4 py-3 ${styles.gamingHeader}`}
               >
-                <div
-                  className={`flex items-center gap-2 overflow-x-auto pb-1 ${styles.customScrollbar}`}
-                >
-                  {gamingPills.map((pill) => {
-                    const isSelected = activeFilter === pill.id;
-                    return (
-                      <button
-                        key={pill.id}
-                        type="button"
-                        onClick={() => setActiveFilter(pill.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all select-none ${
-                          isSelected
-                            ? styles.gamingPillActive
-                            : styles.gamingPill
-                        }`}
-                      >
-                        {pill.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div
-                  className={`flex items-center justify-between mt-2 pt-2 border-t text-[11px] text-slate-500 ${styles.neonDivider}`}
-                >
-                  <span>Menampilkan {gamingFilteredProducts.length} unit</span>
-                  {activeFilter !== "ALL" && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter("ALL")}
-                      className="text-emerald-400 font-semibold hover:text-emerald-300"
-                    >
-                      Reset Filter
-                    </button>
-                  )}
-                </div>
+                <ProductFilterBar
+                  products={displayProducts}
+                  filterState={filterState}
+                  onFilterChange={setFilterState}
+                  onReset={handleResetFilters}
+                  theme="dark-gaming"
+                  isDark={true}
+                  totalFilteredCount={gamingFilteredProducts.length}
+                />
               </div>
 
               <div className="px-4 space-y-4">
@@ -687,7 +648,15 @@ export function DarkGamingLayout({
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {gamingFilteredProducts.length === 0 ? (
+                  <ProductEmptyState
+                    storeName={store.name}
+                    storeWhatsapp={store.whatsapp}
+                    onReset={handleResetFilters}
+                    isDark={true}
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
                   {gamingFilteredProducts.map((p) => {
                     const isCustomDomain =
                       typeof window !== "undefined" &&
@@ -765,7 +734,8 @@ export function DarkGamingLayout({
                       </div>
                     );
                   })}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

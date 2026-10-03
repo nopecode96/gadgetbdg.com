@@ -24,6 +24,12 @@ import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
 import { StoreAboutView } from "../shared/StoreAboutView";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
+import {
+  ProductFilterBar,
+  ProductEmptyState,
+  ProductFilterState,
+  filterAndSortProducts,
+} from "@/components/storefront/ProductFilterBar";
 
 interface MinimalCleanLayoutProps {
   store: StoreData;
@@ -39,64 +45,32 @@ export function MinimalCleanLayout({
   hideDock = false,
 }: MinimalCleanLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<
-    "ALL" | "IPHONE" | "ANDROID" | "GAMING" | "BUDGET" | "LIKENEW"
-  >("ALL");
+  const [filterState, setFilterState] = useState<ProductFilterState>({
+    searchQuery: "",
+    category: "ALL",
+    brand: "ALL",
+    grade: "ALL",
+    sort: "DEFAULT",
+  });
+
+  const handleResetFilters = () => {
+    setFilterState({
+      searchQuery: "",
+      category: "ALL",
+      brand: "ALL",
+      grade: "ALL",
+      sort: "DEFAULT",
+    });
+  };
 
   const displayProducts = Array.isArray(products) ? products : [];
   const heroHighlight = displayProducts[0];
   const snapSliderProducts = displayProducts.slice(0, 5);
 
   const smartFilteredProducts = useMemo(() => {
-    return displayProducts.filter((p) => {
-      // Search match
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = (p.name || "").toLowerCase().includes(query);
-        const matchesBrand = (p.brand || "").toLowerCase().includes(query);
-        const matchesSpec = (p.ramRom || "").toLowerCase().includes(query);
-        const matchesImei = (p.imeiStatus || "").toLowerCase().includes(query);
-        if (!matchesName && !matchesBrand && !matchesSpec && !matchesImei) {
-          return false;
-        }
-      }
-
-      // Filter category
-      if (activeFilter === "ALL") return true;
-      const brandLower = (p.brand || "").toLowerCase();
-      const nameLower = (p.name || "").toLowerCase();
-
-      if (activeFilter === "IPHONE") {
-        return brandLower === "apple" || nameLower.includes("iphone");
-      }
-      if (activeFilter === "ANDROID") {
-        return brandLower !== "apple" && !nameLower.includes("iphone");
-      }
-      if (activeFilter === "GAMING") {
-        return (
-          brandLower.includes("rog") ||
-          brandLower.includes("poco") ||
-          brandLower.includes("iqoo") ||
-          nameLower.includes("gaming") ||
-          nameLower.includes("rog")
-        );
-      }
-      if (activeFilter === "BUDGET") {
-        return Number(p.price) < 3000000;
-      }
-      if (activeFilter === "LIKENEW") {
-        const cond = (p.condition || "").toUpperCase();
-        return (
-          cond.includes("LIKE_NEW") ||
-          cond.includes("99%") ||
-          cond.includes("MULUS")
-        );
-      }
-      return true;
-    });
-  }, [displayProducts, activeFilter, searchQuery]);
+    return filterAndSortProducts(displayProducts, filterState);
+  }, [displayProducts, filterState]);
 
   const smartPills = [
     { id: "ALL" as const, label: "Semua Unit", icon: "📱" },
@@ -179,7 +153,7 @@ export function MinimalCleanLayout({
                   setIsSearchOpen(!isSearchOpen);
                 }}
                 className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  isSearchOpen || searchQuery
+                  isSearchOpen || filterState.searchQuery
                     ? "bg-slate-900 text-white shadow-xs"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-800"
                 }`}
@@ -209,9 +183,9 @@ export function MinimalCleanLayout({
                 <input
                   type="text"
                   autoFocus
-                  value={searchQuery}
+                  value={filterState.searchQuery}
                   onChange={(e) => {
-                    setSearchQuery(e.target.value);
+                    setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }));
                     if (activeTab !== "list" && activeTab !== "home") {
                       setActiveTab("list");
                     }
@@ -219,10 +193,10 @@ export function MinimalCleanLayout({
                   placeholder="Cari iPhone, Samsung, RAM, IMEI..."
                   className="w-full bg-transparent text-xs font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none"
                 />
-                {searchQuery && (
+                {filterState.searchQuery && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => setFilterState((prev) => ({ ...prev, searchQuery: "" }))}
                     className="w-5 h-5 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-[10px] font-bold"
                   >
                     ✕
@@ -311,20 +285,27 @@ export function MinimalCleanLayout({
 
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
                   {smartPills.map((pill) => {
-                    const isSelected = activeFilter === pill.id;
                     return (
                       <button
                         key={pill.id}
                         type="button"
                         onClick={() => {
-                          setActiveFilter(pill.id);
+                          if (pill.id === "ALL") {
+                            setFilterState((prev) => ({ ...prev, category: "ALL", brand: "ALL", grade: "ALL" }));
+                          } else if (pill.id === "IPHONE") {
+                            setFilterState((prev) => ({ ...prev, brand: "Apple", category: "SMARTPHONE" }));
+                          } else if (pill.id === "ANDROID") {
+                            setFilterState((prev) => ({ ...prev, category: "SMARTPHONE", brand: "ALL" }));
+                          } else if (pill.id === "GAMING") {
+                            setFilterState((prev) => ({ ...prev, searchQuery: "gaming" }));
+                          } else if (pill.id === "BUDGET") {
+                            setFilterState((prev) => ({ ...prev, sort: "PRICE_ASC" }));
+                          } else if (pill.id === "LIKENEW") {
+                            setFilterState((prev) => ({ ...prev, grade: "A+" }));
+                          }
                           setActiveTab("list");
                         }}
-                        className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl shrink-0 transition-all duration-200 select-none ${
-                          isSelected
-                            ? "bg-slate-950 text-white font-black border-2 border-slate-950 shadow-md scale-105"
-                            : "bg-white text-slate-700 border-2 border-slate-200/90 hover:border-slate-300 shadow-2xs"
-                        }`}
+                        className="flex items-center gap-2 px-3.5 py-2 rounded-2xl shrink-0 transition-all duration-200 select-none bg-white text-slate-700 border-2 border-slate-200/90 hover:border-slate-300 shadow-2xs hover:scale-102"
                       >
                         <span className="text-sm">{pill.icon}</span>
                         <div className="text-left">
@@ -588,40 +569,14 @@ export function MinimalCleanLayout({
             <div className="space-y-4 text-left -mx-4 -mt-4">
               {/* Sticky Top Bilah Filter Lengkap */}
               <div className="sticky top-[61px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3">
-                {/* Scrollable Horizontal Pill Filter */}
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                  {smartPills.map((pill) => {
-                    const isSelected = activeFilter === pill.id;
-                    return (
-                      <button
-                        key={pill.id}
-                        type="button"
-                        onClick={() => setActiveFilter(pill.id)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none ${
-                          isSelected
-                            ? "bg-slate-950 text-white shadow-xs scale-102"
-                            : "bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200"
-                        }`}
-                      >
-                        {pill.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Counter & Status Filter */}
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                  <span>Menampilkan {smartFilteredProducts.length} unit HP</span>
-                  {activeFilter !== "ALL" && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter("ALL")}
-                      className="text-blue-600 font-semibold hover:underline"
-                    >
-                      Reset Filter
-                    </button>
-                  )}
-                </div>
+                <ProductFilterBar
+                  products={displayProducts}
+                  filterState={filterState}
+                  onFilterChange={setFilterState}
+                  onReset={handleResetFilters}
+                  theme="minimal-clean"
+                  totalFilteredCount={smartFilteredProducts.length}
+                />
               </div>
 
               <div className="px-4 space-y-4">
@@ -638,7 +593,15 @@ export function MinimalCleanLayout({
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {smartFilteredProducts.length === 0 ? (
+                  <ProductEmptyState
+                    storeName={store.name}
+                    storeWhatsapp={store.whatsapp}
+                    onReset={handleResetFilters}
+                    isDark={false}
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
                 {smartFilteredProducts.map((p) => {
                   const isCustomDomain =
                     typeof window !== "undefined" &&
@@ -718,6 +681,7 @@ export function MinimalCleanLayout({
                   );
                 })}
                 </div>
+              )}
               </div>
             </div>
           )}

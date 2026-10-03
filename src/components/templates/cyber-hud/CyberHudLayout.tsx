@@ -31,6 +31,12 @@ import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
 import { submitTradeInOfferAction } from "@/lib/actions/tradein-actions";
 import { submitStoreReviewAction } from "@/lib/actions/review-actions";
+import {
+  ProductFilterBar,
+  ProductEmptyState,
+  ProductFilterState,
+  filterAndSortProducts,
+} from "@/components/storefront/ProductFilterBar";
 import styles from "./cyber-hud.module.css";
 
 interface CyberHudLayoutProps {
@@ -47,11 +53,24 @@ export function CyberHudLayout({
   hideDock = false,
 }: CyberHudLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<
-    "ALL" | "APPLE" | "ANDROID" | "GAMING"
-  >("ALL");
+  const [filterState, setFilterState] = useState<ProductFilterState>({
+    searchQuery: "",
+    category: "ALL",
+    brand: "ALL",
+    grade: "ALL",
+    sort: "DEFAULT",
+  });
+
+  const handleResetFilters = () => {
+    setFilterState({
+      searchQuery: "",
+      category: "ALL",
+      brand: "ALL",
+      grade: "ALL",
+      sort: "DEFAULT",
+    });
+  };
 
   // --- Trade-In State ---
   const [tiCustomerName, setTiCustomerName] = useState("");
@@ -83,33 +102,8 @@ export function CyberHudLayout({
   const spotlightProducts = displayProducts.slice(0, 4);
 
   const filteredProducts = useMemo(() => {
-    return displayProducts.filter((p) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        if (
-          !(p.name || "").toLowerCase().includes(q) &&
-          !(p.brand || "").toLowerCase().includes(q) &&
-          !(p.ramRom || "").toLowerCase().includes(q)
-        )
-          return false;
-      }
-      if (activeFilter === "ALL") return true;
-      const brand = (p.brand || "").toLowerCase();
-      const name = (p.name || "").toLowerCase();
-      if (activeFilter === "APPLE")
-        return brand === "apple" || name.includes("iphone");
-      if (activeFilter === "ANDROID")
-        return brand !== "apple" && !name.includes("iphone");
-      if (activeFilter === "GAMING")
-        return (
-          brand === "asus" ||
-          name.includes("rog") ||
-          name.includes("ultra") ||
-          Number(p.price) >= 9000000
-        );
-      return true;
-    });
-  }, [displayProducts, activeFilter, searchQuery]);
+    return filterAndSortProducts(displayProducts, filterState);
+  }, [displayProducts, filterState]);
 
   const freqTabs = [
     { id: "ALL" as const, label: "[FREQ-ALL]" },
@@ -282,7 +276,7 @@ export function CyberHudLayout({
                 type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className={`w-9 h-9 rounded-xl font-mono flex items-center justify-center transition border ${
-                  isSearchOpen || searchQuery
+                  isSearchOpen || filterState.searchQuery
                     ? "bg-cyan-500 text-slate-950 border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                     : "bg-slate-900 text-cyan-300 border-cyan-500/30 hover:border-cyan-400"
                 }`}
@@ -315,19 +309,19 @@ export function CyberHudLayout({
                 <input
                   type="text"
                   autoFocus
-                  value={searchQuery}
+                  value={filterState.searchQuery}
                   onChange={(e) => {
-                    setSearchQuery(e.target.value);
+                    setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }));
                     if (activeTab !== "list" && activeTab !== "home")
                       setActiveTab("list");
                   }}
                   placeholder="QUERY SPECS / IPHONE / RAM / CHIPSET..."
                   className="w-full bg-transparent text-xs font-mono font-bold text-white placeholder-slate-500 focus:outline-none"
                 />
-                {searchQuery && (
+                {filterState.searchQuery && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => setFilterState((prev) => ({ ...prev, searchQuery: "" }))}
                     className="w-5 h-5 rounded-full bg-slate-800 text-cyan-400 flex items-center justify-center text-[10px] font-bold"
                   >
                     ✕
@@ -404,14 +398,18 @@ export function CyberHudLayout({
                       key={tab.id}
                       type="button"
                       onClick={() => {
-                        setActiveFilter(tab.id);
+                        if (tab.id === "ALL") {
+                          setFilterState((prev) => ({ ...prev, category: "ALL", brand: "ALL" }));
+                        } else if (tab.id === "APPLE") {
+                          setFilterState((prev) => ({ ...prev, brand: "Apple", category: "SMARTPHONE" }));
+                        } else if (tab.id === "ANDROID") {
+                          setFilterState((prev) => ({ ...prev, category: "SMARTPHONE", brand: "ALL" }));
+                        } else if (tab.id === "GAMING") {
+                          setFilterState((prev) => ({ ...prev, searchQuery: "gaming" }));
+                        }
                         setActiveTab("list");
                       }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition ${
-                        activeFilter === tab.id
-                          ? styles.freqTabActive
-                          : styles.freqTabInactive
-                      }`}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition ${styles.freqTabInactive} hover:scale-102`}
                     >
                       {tab.label}
                     </button>
@@ -532,38 +530,16 @@ export function CyberHudLayout({
           {activeTab === "list" && (
             <div className="space-y-3 text-left">
               {/* Bilah Filter Frekuensi Sticky */}
-              <div className="sticky top-[61px] z-30 bg-slate-950/95 backdrop-blur-md border-b border-cyan-500/25 px-4 py-3">
-                <div className={`flex items-center gap-2 overflow-x-auto ${styles.noScrollbar} pb-1`}>
-                  {freqTabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveFilter(tab.id)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition ${
-                        activeFilter === tab.id
-                          ? styles.freqTabActive
-                          : styles.freqTabInactive
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-cyan-900/40 text-[11px] font-mono text-cyan-300/80">
-                  <span>
-                    SYSTEM LOG: <b>{filteredProducts.length}</b> UNIT TELEMETRY ACTIVE
-                  </span>
-                  {activeFilter !== "ALL" && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter("ALL")}
-                      className="text-cyan-400 font-bold hover:underline"
-                    >
-                      [RESET FILTER]
-                    </button>
-                  )}
-                </div>
+              <div className="sticky top-[61px] z-30 bg-[#050b14]/95 backdrop-blur-md border-b border-cyan-950/80 px-4 py-3">
+                <ProductFilterBar
+                  products={displayProducts}
+                  filterState={filterState}
+                  onFilterChange={setFilterState}
+                  onReset={handleResetFilters}
+                  theme="cyber-hud"
+                  isDark={true}
+                  totalFilteredCount={filteredProducts.length}
+                />
               </div>
 
               {/* Grid Produk Cyber HUD */}
@@ -671,17 +647,13 @@ export function CyberHudLayout({
                 })}
 
                 {filteredProducts.length === 0 && (
-                  <div className={`col-span-2 rounded-2xl p-8 text-center ${styles.hudCard}`}>
-                    <p className="text-xs font-mono text-cyan-300">
-                      NO ACTIVE HARDWARE ON THIS FREQUENCY LOG.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter("ALL")}
-                      className="mt-2 text-xs font-mono font-bold text-cyan-400 hover:underline"
-                    >
-                      [SHOW ALL HARDWARE LOGS]
-                    </button>
+                  <div className="col-span-2">
+                    <ProductEmptyState
+                      storeName={store.name}
+                      storeWhatsapp={store.whatsapp}
+                      onReset={handleResetFilters}
+                      isDark={true}
+                    />
                   </div>
                 )}
               </div>

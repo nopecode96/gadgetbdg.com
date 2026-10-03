@@ -30,6 +30,12 @@ import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
 import { submitTradeInOfferAction } from "@/lib/actions/tradein-actions";
 import { submitStoreReviewAction } from "@/lib/actions/review-actions";
+import {
+  ProductFilterBar,
+  ProductEmptyState,
+  ProductFilterState,
+  filterAndSortProducts,
+} from "@/components/storefront/ProductFilterBar";
 import styles from "./tokyo-street.module.css";
 
 interface TokyoStreetLayoutProps {
@@ -46,11 +52,24 @@ export function TokyoStreetLayout({
   hideDock = false,
 }: TokyoStreetLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<
-    "ALL" | "APPLE" | "ANDROID" | "FLAGSHIP"
-  >("ALL");
+  const [filterState, setFilterState] = useState<ProductFilterState>({
+    searchQuery: "",
+    category: "ALL",
+    brand: "ALL",
+    grade: "ALL",
+    sort: "DEFAULT",
+  });
+
+  const handleResetFilters = () => {
+    setFilterState({
+      searchQuery: "",
+      category: "ALL",
+      brand: "ALL",
+      grade: "ALL",
+      sort: "DEFAULT",
+    });
+  };
 
   // --- Trade-In State ---
   const [tiCustomerName, setTiCustomerName] = useState("");
@@ -82,28 +101,8 @@ export function TokyoStreetLayout({
   const spotlightProducts = displayProducts.slice(0, 4);
 
   const filteredProducts = useMemo(() => {
-    return displayProducts.filter((p) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        if (
-          !(p.name || "").toLowerCase().includes(q) &&
-          !(p.brand || "").toLowerCase().includes(q) &&
-          !(p.ramRom || "").toLowerCase().includes(q)
-        )
-          return false;
-      }
-      if (activeFilter === "ALL") return true;
-      const brand = (p.brand || "").toLowerCase();
-      const name = (p.name || "").toLowerCase();
-      if (activeFilter === "APPLE")
-        return brand === "apple" || name.includes("iphone");
-      if (activeFilter === "ANDROID")
-        return brand !== "apple" && !name.includes("iphone");
-      if (activeFilter === "FLAGSHIP")
-        return Number(p.price) >= 8000000;
-      return true;
-    });
-  }, [displayProducts, activeFilter, searchQuery]);
+    return filterAndSortProducts(displayProducts, filterState);
+  }, [displayProducts, filterState]);
 
   const filterTabs = [
     { id: "ALL" as const, label: "Semua Unit" },
@@ -278,7 +277,7 @@ export function TokyoStreetLayout({
                 type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className={`w-9 h-9 rounded-xl flex items-center justify-center transition border ${
-                  isSearchOpen || searchQuery
+                  isSearchOpen || filterState.searchQuery
                     ? "bg-neutral-950 text-white border-neutral-950"
                     : "bg-white text-neutral-950 border-neutral-300 hover:border-neutral-950"
                 }`}
@@ -311,19 +310,19 @@ export function TokyoStreetLayout({
                 <input
                   type="text"
                   autoFocus
-                  value={searchQuery}
+                  value={filterState.searchQuery}
                   onChange={(e) => {
-                    setSearchQuery(e.target.value);
+                    setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }));
                     if (activeTab !== "list" && activeTab !== "home")
                       setActiveTab("list");
                   }}
                   placeholder="Cari iPhone, spesifikasi, atau RAM..."
                   className="w-full bg-transparent text-xs font-semibold text-neutral-950 placeholder-neutral-400 focus:outline-none"
                 />
-                {searchQuery && (
+                {filterState.searchQuery && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => setFilterState((prev) => ({ ...prev, searchQuery: "" }))}
                     className="w-5 h-5 rounded-full bg-neutral-200 text-neutral-700 flex items-center justify-center text-[10px] font-bold"
                   >
                     ✕
@@ -400,12 +399,18 @@ export function TokyoStreetLayout({
                       key={tab.id}
                       type="button"
                       onClick={() => {
-                        setActiveFilter(tab.id);
+                        if (tab.id === "ALL") {
+                          setFilterState((prev) => ({ ...prev, category: "ALL", brand: "ALL" }));
+                        } else if (tab.id === "APPLE") {
+                          setFilterState((prev) => ({ ...prev, brand: "Apple", category: "SMARTPHONE" }));
+                        } else if (tab.id === "ANDROID") {
+                          setFilterState((prev) => ({ ...prev, category: "SMARTPHONE", brand: "ALL" }));
+                        } else if (tab.id === "FLAGSHIP") {
+                          setFilterState((prev) => ({ ...prev, sort: "PRICE_DESC" }));
+                        }
                         setActiveTab("list");
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs whitespace-nowrap transition ${
-                        activeFilter === tab.id ? styles.pillActive : styles.pillInactive
-                      }`}
+                      className={`px-4 py-2 rounded-xl text-xs whitespace-nowrap transition ${styles.pillInactive} hover:scale-102`}
                     >
                       {tab.label}
                     </button>
@@ -523,37 +528,14 @@ export function TokyoStreetLayout({
             <div className="space-y-3 text-left">
               {/* Sticky Top Filter Bar */}
               <div className="sticky top-[61px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-200 px-4 py-3">
-                <div className={`flex items-center gap-2 overflow-x-auto ${styles.noScrollbar} pb-1`}>
-                  {filterTabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveFilter(tab.id)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                        activeFilter === tab.id
-                          ? styles.pillActive
-                          : styles.pillInactive
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-neutral-100 text-[11px] text-neutral-600 font-medium">
-                  <span>
-                    Menampilkan <b>{filteredProducts.length}</b> unit smartphone siap COD di toko
-                  </span>
-                  {activeFilter !== "ALL" && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter("ALL")}
-                      className="text-rose-700 font-bold hover:underline"
-                    >
-                      Reset Filter
-                    </button>
-                  )}
-                </div>
+                <ProductFilterBar
+                  products={displayProducts}
+                  filterState={filterState}
+                  onFilterChange={setFilterState}
+                  onReset={handleResetFilters}
+                  theme="tokyo-street"
+                  totalFilteredCount={filteredProducts.length}
+                />
               </div>
 
               {/* Grid Produk */}
@@ -657,17 +639,13 @@ export function TokyoStreetLayout({
                 })}
 
                 {filteredProducts.length === 0 && (
-                  <div className={`col-span-2 rounded-2xl p-8 text-center ${styles.boxCard}`}>
-                    <p className="text-xs font-semibold text-neutral-700">
-                      Tidak ada unit untuk kategori filter ini.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter("ALL")}
-                      className="mt-2 text-xs font-bold text-rose-700 hover:underline"
-                    >
-                      Tampilkan Semua Unit →
-                    </button>
+                  <div className="col-span-2">
+                    <ProductEmptyState
+                      storeName={store.name}
+                      storeWhatsapp={store.whatsapp}
+                      onReset={handleResetFilters}
+                      isDark={false}
+                    />
                   </div>
                 )}
               </div>

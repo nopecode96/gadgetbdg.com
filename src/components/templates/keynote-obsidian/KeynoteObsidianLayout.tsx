@@ -29,6 +29,12 @@ import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
 import { submitTradeInOfferAction } from "@/lib/actions/tradein-actions";
 import { submitStoreReviewAction } from "@/lib/actions/review-actions";
+import {
+  ProductFilterBar,
+  ProductEmptyState,
+  ProductFilterState,
+  filterAndSortProducts,
+} from "@/components/storefront/ProductFilterBar";
 import styles from "./keynote-obsidian.module.css";
 
 interface KeynoteObsidianLayoutProps {
@@ -45,11 +51,24 @@ export function KeynoteObsidianLayout({
   hideDock = false,
 }: KeynoteObsidianLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<
-    "ALL" | "IPHONE" | "ANDROID" | "FLAGSHIP" | "LIKENEW"
-  >("ALL");
+  const [filterState, setFilterState] = useState<ProductFilterState>({
+    searchQuery: "",
+    category: "ALL",
+    brand: "ALL",
+    grade: "ALL",
+    sort: "DEFAULT",
+  });
+
+  const handleResetFilters = () => {
+    setFilterState({
+      searchQuery: "",
+      category: "ALL",
+      brand: "ALL",
+      grade: "ALL",
+      sort: "DEFAULT",
+    });
+  };
 
   // --- Trade-In State ---
   const [tiCustomerName, setTiCustomerName] = useState("");
@@ -82,28 +101,8 @@ export function KeynoteObsidianLayout({
   const spotlightProducts = displayProducts.slice(0, 4);
 
   const filteredProducts = useMemo(() => {
-    return displayProducts.filter((p) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        if (
-          !(p.name || "").toLowerCase().includes(q) &&
-          !(p.brand || "").toLowerCase().includes(q) &&
-          !(p.ramRom || "").toLowerCase().includes(q)
-        ) return false;
-      }
-      if (activeFilter === "ALL") return true;
-      const brand = (p.brand || "").toLowerCase();
-      const name = (p.name || "").toLowerCase();
-      if (activeFilter === "IPHONE") return brand === "apple" || name.includes("iphone");
-      if (activeFilter === "ANDROID") return brand !== "apple" && !name.includes("iphone");
-      if (activeFilter === "FLAGSHIP") return Number(p.price) >= 8000000;
-      if (activeFilter === "LIKENEW") {
-        const c = (p.condition || "").toUpperCase();
-        return c.includes("LIKE_NEW") || c.includes("99") || c.includes("MULUS");
-      }
-      return true;
-    });
-  }, [displayProducts, activeFilter, searchQuery]);
+    return filterAndSortProducts(displayProducts, filterState);
+  }, [displayProducts, filterState]);
 
   const filterTabs = [
     { id: "ALL" as const, label: "Semua Koleksi" },
@@ -207,7 +206,7 @@ export function KeynoteObsidianLayout({
               type="button"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 ${
-                isSearchOpen || searchQuery
+                isSearchOpen || filterState.searchQuery
                   ? `border text-amber-400 bg-amber-400/10 ${styles.goldBorder}`
                   : "text-zinc-400 hover:text-zinc-200 bg-zinc-900/70 border border-zinc-800"
               }`}
@@ -261,16 +260,16 @@ export function KeynoteObsidianLayout({
                 <input
                   type="text"
                   autoFocus
-                  value={searchQuery}
+                  value={filterState.searchQuery}
                   onChange={(e) => {
-                    setSearchQuery(e.target.value);
+                    setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }));
                     if (activeTab !== "list" && activeTab !== "home") setActiveTab("list");
                   }}
                   placeholder="Cari iPhone, Samsung, RAM..."
                   className="w-full bg-transparent text-xs font-semibold text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
                 />
-                {searchQuery && (
-                  <button type="button" onClick={() => setSearchQuery("")}
+                {filterState.searchQuery && (
+                  <button type="button" onClick={() => setFilterState((prev) => ({ ...prev, searchQuery: "" }))}
                     className="w-5 h-5 rounded-full bg-zinc-700 text-zinc-400 flex items-center justify-center text-[10px] font-bold">
                     ✕
                   </button>
@@ -345,13 +344,25 @@ export function KeynoteObsidianLayout({
               <div>
                 <div className={`flex items-center gap-0 overflow-x-auto pb-0 ${styles.filterTabBar} ${styles.noScrollbar}`}>
                   {filterTabs.map((tab) => {
-                    const isActive = activeFilter === tab.id;
                     return (
                       <button
                         key={tab.id}
                         type="button"
-                        onClick={() => { setActiveFilter(tab.id); setActiveTab("list"); }}
-                        className={`px-3.5 pb-2 shrink-0 transition-all ${styles.filterTab} ${isActive ? styles.filterTabActive : ""}`}
+                        onClick={() => {
+                          if (tab.id === "ALL") {
+                            setFilterState((prev) => ({ ...prev, category: "ALL", brand: "ALL", grade: "ALL" }));
+                          } else if (tab.id === "FLAGSHIP") {
+                            setFilterState((prev) => ({ ...prev, sort: "PRICE_DESC" }));
+                          } else if (tab.id === "IPHONE") {
+                            setFilterState((prev) => ({ ...prev, brand: "Apple", category: "SMARTPHONE" }));
+                          } else if (tab.id === "ANDROID") {
+                            setFilterState((prev) => ({ ...prev, category: "SMARTPHONE", brand: "ALL" }));
+                          } else if (tab.id === "LIKENEW") {
+                            setFilterState((prev) => ({ ...prev, grade: "A+" }));
+                          }
+                          setActiveTab("list");
+                        }}
+                        className={`px-3.5 pb-2 shrink-0 transition-all ${styles.filterTab}`}
                       >
                         {tab.label}
                       </button>
@@ -454,30 +465,15 @@ export function KeynoteObsidianLayout({
             <div className="space-y-0 text-left">
               {/* Sticky Filter */}
               <div className={`sticky top-[61px] z-30 px-4 pt-3 pb-2 ${styles.obsidianHeader}`}>
-                <div className={`flex items-center gap-0 overflow-x-auto ${styles.filterTabBar} ${styles.noScrollbar}`}>
-                  {filterTabs.map((tab) => {
-                    const isActive = activeFilter === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setActiveFilter(tab.id)}
-                        className={`px-3 pb-2 shrink-0 transition-all ${styles.filterTab} ${isActive ? styles.filterTabActive : ""}`}
-                      >
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="flex items-center justify-between mt-2 text-[11px] text-zinc-600">
-                  <span>{filteredProducts.length} unit koleksi</span>
-                  {activeFilter !== "ALL" && (
-                    <button type="button" onClick={() => setActiveFilter("ALL")}
-                      className={`${styles.goldAccent} font-semibold hover:opacity-80`}>
-                      Reset
-                    </button>
-                  )}
-                </div>
+                <ProductFilterBar
+                  products={displayProducts}
+                  filterState={filterState}
+                  onFilterChange={setFilterState}
+                  onReset={handleResetFilters}
+                  theme="keynote-obsidian"
+                  isDark={true}
+                  totalFilteredCount={filteredProducts.length}
+                />
               </div>
 
               {/* Catalog Header */}
@@ -561,13 +557,12 @@ export function KeynoteObsidianLayout({
                 })}
 
                 {filteredProducts.length === 0 && (
-                  <div className={`rounded-3xl p-8 text-center ${styles.titaniumCard}`}>
-                    <p className="text-zinc-500 text-xs">Tidak ada unit untuk filter ini.</p>
-                    <button type="button" onClick={() => setActiveFilter("ALL")}
-                      className={`mt-3 text-xs font-bold ${styles.goldAccent}`}>
-                      Tampilkan Semua →
-                    </button>
-                  </div>
+                  <ProductEmptyState
+                    storeName={store.name}
+                    storeWhatsapp={store.whatsapp}
+                    onReset={handleResetFilters}
+                    isDark={true}
+                  />
                 )}
               </div>
             </div>

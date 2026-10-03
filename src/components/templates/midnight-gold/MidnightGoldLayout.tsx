@@ -33,6 +33,12 @@ import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
 import { submitTradeInOfferAction } from "@/lib/actions/tradein-actions";
 import { submitStoreReviewAction } from "@/lib/actions/review-actions";
+import {
+  ProductFilterBar,
+  ProductEmptyState,
+  ProductFilterState,
+  filterAndSortProducts,
+} from "@/components/storefront/ProductFilterBar";
 import styles from "./midnight-gold.module.css";
 
 interface MidnightGoldLayoutProps {
@@ -49,11 +55,24 @@ export function MidnightGoldLayout({
   hideDock = false,
 }: MidnightGoldLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<
-    "ALL" | "APPLE" | "ANDROID" | "SPECIALIST"
-  >("ALL");
+  const [filterState, setFilterState] = useState<ProductFilterState>({
+    searchQuery: "",
+    category: "ALL",
+    brand: "ALL",
+    grade: "ALL",
+    sort: "DEFAULT",
+  });
+
+  const handleResetFilters = () => {
+    setFilterState({
+      searchQuery: "",
+      category: "ALL",
+      brand: "ALL",
+      grade: "ALL",
+      sort: "DEFAULT",
+    });
+  };
 
   // --- Trade-In State ---
   const [tiCustomerName, setTiCustomerName] = useState("");
@@ -85,33 +104,8 @@ export function MidnightGoldLayout({
   const spotlightProducts = displayProducts.slice(0, 4);
 
   const filteredProducts = useMemo(() => {
-    return displayProducts.filter((p) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        if (
-          !(p.name || "").toLowerCase().includes(q) &&
-          !(p.brand || "").toLowerCase().includes(q) &&
-          !(p.ramRom || "").toLowerCase().includes(q)
-        )
-          return false;
-      }
-      if (activeFilter === "ALL") return true;
-      const brand = (p.brand || "").toLowerCase();
-      const name = (p.name || "").toLowerCase();
-      if (activeFilter === "APPLE")
-        return brand === "apple" || name.includes("iphone");
-      if (activeFilter === "ANDROID")
-        return brand !== "apple" && !name.includes("iphone");
-      if (activeFilter === "SPECIALIST")
-        return (
-          name.includes("pro max") ||
-          name.includes("ultra") ||
-          name.includes("fold") ||
-          Number(p.price) >= 12000000
-        );
-      return true;
-    });
-  }, [displayProducts, activeFilter, searchQuery]);
+    return filterAndSortProducts(displayProducts, filterState);
+  }, [displayProducts, filterState]);
 
   const goldPills = [
     { id: "ALL" as const, label: "Semua Koleksi" },
@@ -313,16 +307,19 @@ export function MidnightGoldLayout({
             <div className="relative">
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={filterState.searchQuery}
+                onChange={(e) => {
+                  setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }));
+                  if (activeTab !== "list" && activeTab !== "home") setActiveTab("list");
+                }}
                 placeholder="Cari tipe iPhone, Galaxy Ultra, atau spesifikasi..."
                 className="w-full bg-slate-900 border border-amber-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 font-medium"
                 autoFocus
               />
-              {searchQuery && (
+              {filterState.searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => setFilterState((prev) => ({ ...prev, searchQuery: "" }))}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -360,7 +357,7 @@ export function MidnightGoldLayout({
                 <button
                   type="button"
                   onClick={() => {
-                    setActiveFilter("ALL");
+                    handleResetFilters();
                     setActiveTab("list");
                   }}
                   className={`${styles.goldGlowBtn} px-4 py-2 rounded-xl text-xs flex items-center gap-2`}
@@ -401,14 +398,18 @@ export function MidnightGoldLayout({
                     key={pill.id}
                     type="button"
                     onClick={() => {
-                      setActiveFilter(pill.id);
+                      if (pill.id === "ALL") {
+                        setFilterState((prev) => ({ ...prev, category: "ALL", brand: "ALL" }));
+                      } else if (pill.id === "APPLE") {
+                        setFilterState((prev) => ({ ...prev, brand: "Apple", category: "SMARTPHONE" }));
+                      } else if (pill.id === "ANDROID") {
+                        setFilterState((prev) => ({ ...prev, category: "SMARTPHONE", brand: "ALL" }));
+                      } else if (pill.id === "SPECIALIST") {
+                        setFilterState((prev) => ({ ...prev, searchQuery: "Pro Max" }));
+                      }
                       setActiveTab("list");
                     }}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-black shrink-0 transition flex items-center gap-1.5 ${
-                      activeFilter === pill.id
-                        ? styles.goldRibbonActive
-                        : styles.goldRibbonInactive
-                    }`}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-black shrink-0 transition flex items-center gap-1.5 ${styles.goldRibbonInactive} hover:scale-102`}
                   >
                     <span>{pill.label}</span>
                   </button>
@@ -534,62 +535,26 @@ export function MidnightGoldLayout({
         {activeTab === "list" && (
           <div className="p-3.5 sm:p-5 space-y-4 max-w-4xl mx-auto w-full">
             {/* BILAH FILTER STICKY */}
-            <div className="sticky top-[53px] z-20 bg-slate-950/95 backdrop-blur-md p-2.5 rounded-xl border border-amber-500/25 shadow-lg space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-                  {goldPills.map((pill) => (
-                    <button
-                      key={pill.id}
-                      type="button"
-                      onClick={() => setActiveFilter(pill.id)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-black shrink-0 transition ${
-                        activeFilter === pill.id
-                          ? styles.goldRibbonActive
-                          : styles.goldRibbonInactive
-                      }`}
-                    >
-                      {pill.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-[11px] text-amber-400/90 font-medium px-1">
-                <span>
-                  Koleksi Aktif: <strong className="text-amber-300 font-black">{filteredProducts.length}</strong> unit smartphone premium siap COD
-                </span>
-                {activeFilter !== "ALL" && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveFilter("ALL")}
-                    className="text-amber-400 hover:text-amber-300 underline font-bold"
-                  >
-                    Reset Filter
-                  </button>
-                )}
-              </div>
+            <div className="sticky top-[53px] z-20 bg-slate-950/95 backdrop-blur-md p-3 rounded-2xl border border-amber-500/25 shadow-lg">
+              <ProductFilterBar
+                products={displayProducts}
+                filterState={filterState}
+                onFilterChange={setFilterState}
+                onReset={handleResetFilters}
+                theme="midnight-gold"
+                isDark={true}
+                totalFilteredCount={filteredProducts.length}
+              />
             </div>
 
             {/* PRODUCT GRID */}
             {filteredProducts.length === 0 ? (
-              <div className={`${styles.goldCard} rounded-2xl p-8 text-center space-y-3`}>
-                <Layers className="w-8 h-8 text-amber-400/50 mx-auto" />
-                <h3 className="text-amber-50 font-black text-sm">
-                  Tidak Ada Unit yang Cocok
-                </h3>
-                <p className="text-slate-300 font-medium text-xs max-w-xs mx-auto">
-                  Coba ubah kata kunci pencarian atau ganti filter kategori ke "Semua Koleksi".
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveFilter("ALL");
-                    setSearchQuery("");
-                  }}
-                  className={`${styles.goldGlowBtn} px-4 py-1.5 rounded-xl text-xs`}
-                >
-                  Tampilkan Semua Unit
-                </button>
-              </div>
+              <ProductEmptyState
+                storeName={store.name}
+                storeWhatsapp={store.whatsapp}
+                onReset={handleResetFilters}
+                isDark={true}
+              />
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {filteredProducts.map((p) => {

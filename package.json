@@ -11,7 +11,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "node prisma/seed-production.js"
+    "db:seed": "node prisma/seed-production.js",
+    "db:clean-reset": "node prisma/clean-production-reset.js"
   },
   "prisma": {
     "seed": "node prisma/seed-production.js"

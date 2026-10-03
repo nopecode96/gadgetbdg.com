@@ -225,7 +225,7 @@ export function TemplateShowcase() {
           <div className="lg:col-span-5 flex flex-col items-center">
             <div className="sticky top-24 flex flex-col items-center">
               {/* Smartphone Frame Outer Bezel */}
-              <div className="relative overflow-hidden w-full max-w-[320px] sm:max-w-[340px] h-[580px] sm:h-[640px] bg-slate-50 dark:bg-slate-950 rounded-[40px] border-[8px] border-slate-900 shadow-2xl">
+              <div className="relative w-full max-w-[320px] sm:max-w-[340px] h-[620px] overflow-hidden rounded-[36px] border-[6px] border-slate-900 bg-slate-50 shadow-2xl">
                 {/* Dynamic Island / Notch */}
                 <div className="w-[120px] h-[18px] bg-slate-950 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-[1rem] z-30 flex items-center justify-center gap-2">
                   <div className="w-8 h-1 bg-slate-800 rounded-full" />

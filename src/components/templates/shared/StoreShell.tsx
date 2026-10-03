@@ -188,120 +188,100 @@ export function StoreShell({
         <div
           className={`${
             isMockup
-              ? "absolute bottom-3 left-3 right-3 z-30 pointer-events-none"
-              : "fixed bottom-4 left-4 right-4 max-w-md mx-auto z-50 pointer-events-none flex justify-center"
-          }`}
+              ? "absolute bottom-3 left-3 right-3"
+              : "fixed bottom-4 left-4 right-4 max-w-md mx-auto"
+          } z-30 pointer-events-none flex justify-center`}
         >
           <nav
-            className={`w-full ${
-              isMockup
-                ? "rounded-full backdrop-blur-xl bg-slate-900/90 dark:bg-slate-900/95 border border-slate-800 shadow-xl px-4 py-2 flex items-center justify-between text-white pointer-events-none"
-                : `max-w-sm p-1.5 shadow-2xl rounded-full backdrop-blur-2xl border grid grid-cols-4 select-none transition-all duration-300 pointer-events-auto ${
-                    isDark
-                      ? "bg-slate-950/90 border-slate-800 shadow-black/80"
-                      : "bg-white/95 border-slate-200/90 shadow-slate-900/15"
-                  }`
+            className={`w-full max-w-sm rounded-full px-4 py-2 flex items-center justify-between border backdrop-blur-xl transition-all duration-300 pointer-events-auto ${
+              isDark
+                ? "bg-slate-900/95 border-slate-800 text-white shadow-2xl"
+                : "bg-white/95 border-slate-200 text-slate-900 shadow-xl"
             }`}
           >
             {/* Tab 1: Home */}
-            <div
-              className={`flex flex-col items-center gap-0.5 ${
-                isMockup
-                  ? activeTab === "home"
-                    ? "text-blue-400 font-bold"
-                    : "text-slate-400 font-medium"
-                  : `cursor-pointer py-1.5 px-1 rounded-full transition-all duration-200 ${
-                      activeTab === "home"
-                        ? isDark
-                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                          : "bg-slate-950 text-white shadow-md shadow-slate-950/20 font-bold"
-                        : isDark
-                        ? "text-slate-400 hover:text-white"
-                        : "text-slate-500 hover:text-slate-900"
-                    }`
-              }`}
+            <button
+              type="button"
               onClick={() => onTabChange("home")}
+              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                activeTab === "home"
+                  ? isDark
+                    ? "text-[#00e5b3] font-bold"
+                    : "text-blue-600 font-bold"
+                  : isDark
+                  ? "text-slate-400 hover:text-white font-medium"
+                  : "text-slate-500 hover:text-slate-900 font-medium"
+              }`}
             >
-              <Home className={isMockup ? "w-4 h-4" : `w-4 h-4 ${activeTab === "home" ? "scale-110" : ""}`} />
-              <span className={isMockup ? "text-[9px]" : "text-[10px] tracking-tight mt-0.5 font-bold"}>
+              <Home className={`w-4 h-4 ${activeTab === "home" ? "scale-110" : ""}`} />
+              <span className="text-[9px] tracking-tight leading-none font-bold">
                 Home
               </span>
-            </div>
+            </button>
 
             {/* Tab 2: Katalog */}
-            <div
-              className={`flex flex-col items-center gap-0.5 ${
-                isMockup
-                  ? activeTab === "list"
-                    ? "text-blue-400 font-bold"
-                    : "text-slate-400 font-medium"
-                  : `cursor-pointer py-1.5 px-1 rounded-full transition-all duration-200 ${
-                      activeTab === "list"
-                        ? isDark
-                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                          : "bg-slate-950 text-white shadow-md shadow-slate-950/20 font-bold"
-                        : isDark
-                        ? "text-slate-400 hover:text-white"
-                        : "text-slate-500 hover:text-slate-900"
-                    }`
-              }`}
+            <button
+              type="button"
               onClick={() => onTabChange("list")}
+              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                activeTab === "list"
+                  ? isDark
+                    ? "text-[#00e5b3] font-bold"
+                    : "text-blue-600 font-bold"
+                  : isDark
+                  ? "text-slate-400 hover:text-white font-medium"
+                  : "text-slate-500 hover:text-slate-900 font-medium"
+              }`}
             >
-              <Smartphone className={isMockup ? "w-4 h-4" : `w-4 h-4 ${activeTab === "list" ? "scale-110" : ""}`} />
-              <span className={isMockup ? "text-[9px]" : "text-[10px] tracking-tight mt-0.5 font-bold"}>
+              <Smartphone className={`w-4 h-4 ${activeTab === "list" ? "scale-110" : ""}`} />
+              <span className="text-[9px] tracking-tight leading-none font-bold">
                 Katalog
               </span>
-            </div>
+            </button>
 
             {/* Tab 3: Trade-In */}
-            <div
-              className={`flex flex-col items-center gap-0.5 ${
-                isMockup
-                  ? activeTab === "trade-in"
-                    ? "text-blue-400 font-bold"
-                    : "text-slate-400 font-medium"
-                  : `cursor-pointer py-1.5 px-1 rounded-full transition-all duration-200 ${
-                      activeTab === "trade-in"
-                        ? isDark
-                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                          : "bg-slate-950 text-white shadow-md shadow-slate-950/20 font-bold"
-                        : isDark
-                        ? "text-slate-400 hover:text-white"
-                        : "text-slate-500 hover:text-slate-900"
-                    }`
-              }`}
+            <button
+              type="button"
               onClick={() => onTabChange("trade-in")}
+              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                activeTab === "trade-in"
+                  ? isDark
+                    ? "text-[#00e5b3] font-bold"
+                    : "text-blue-600 font-bold"
+                  : isDark
+                  ? "text-slate-400 hover:text-white font-medium"
+                  : "text-slate-500 hover:text-slate-900 font-medium"
+              }`}
             >
-              <RefreshCw className={isMockup ? "w-4 h-4" : `w-4 h-4 ${activeTab === "trade-in" ? "scale-110 rotate-180 transition-transform duration-500" : ""}`} />
-              <span className={isMockup ? "text-[9px]" : "text-[10px] tracking-tight mt-0.5 font-bold"}>
+              <RefreshCw
+                className={`w-4 h-4 ${
+                  activeTab === "trade-in" ? "scale-110 rotate-180 transition-transform duration-500" : ""
+                }`}
+              />
+              <span className="text-[9px] tracking-tight leading-none font-bold">
                 Trade-In
               </span>
-            </div>
+            </button>
 
             {/* Tab 4: Toko */}
-            <div
-              className={`flex flex-col items-center gap-0.5 ${
-                isMockup
-                  ? activeTab === "about"
-                    ? "text-blue-400 font-bold"
-                    : "text-slate-400 font-medium"
-                  : `cursor-pointer py-1.5 px-1 rounded-full transition-all duration-200 ${
-                      activeTab === "about"
-                        ? isDark
-                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                          : "bg-slate-950 text-white shadow-md shadow-slate-950/20 font-bold"
-                        : isDark
-                        ? "text-slate-400 hover:text-white"
-                        : "text-slate-500 hover:text-slate-900"
-                    }`
-              }`}
+            <button
+              type="button"
               onClick={() => onTabChange("about")}
+              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                activeTab === "about"
+                  ? isDark
+                    ? "text-[#00e5b3] font-bold"
+                    : "text-blue-600 font-bold"
+                  : isDark
+                  ? "text-slate-400 hover:text-white font-medium"
+                  : "text-slate-500 hover:text-slate-900 font-medium"
+              }`}
             >
-              <StoreIcon className={isMockup ? "w-4 h-4" : `w-4 h-4 ${activeTab === "about" ? "scale-110" : ""}`} />
-              <span className={isMockup ? "text-[9px]" : "text-[10px] tracking-tight mt-0.5 font-bold"}>
+              <StoreIcon className={`w-4 h-4 ${activeTab === "about" ? "scale-110" : ""}`} />
+              <span className="text-[9px] tracking-tight leading-none font-bold">
                 Toko
               </span>
-            </div>
+            </button>
           </nav>
         </div>
       </div>

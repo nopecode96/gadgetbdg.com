@@ -1,7 +1,11 @@
 export const TIER_LIMITS = {
   STARTER: {
     name: "Starter",
+    labelBadge: "STARTER • PERINTIS",
+    originalPrice: 350000,
     price: 250000,
+    discountBadge: "HEMAT 28%",
+    tagline: "Langkah Awal Konter Manual Jadi Katalog Online",
     period: "/ bulan",
     maxActiveProducts: 15,
     maxAdmins: 1,
@@ -22,7 +26,12 @@ export const TIER_LIMITS = {
   },
   PRO: {
     name: "Pro",
+    labelBadge: "PRO • BISNIS MANDIRI",
+    originalPrice: 850000,
     price: 600000,
+    discountBadge: "HEMAT 30%",
+    popularBadge: "PALING POPULER",
+    tagline: "Solusi Lengkap Toko Berkembang: Bebas Curi Foto",
     period: "/ bulan",
     maxActiveProducts: 30,
     maxAdmins: 3,
@@ -43,7 +52,12 @@ export const TIER_LIMITS = {
   },
   ADVANCE: {
     name: "Advance",
+    labelBadge: "ADVANCE • KELAS SULTAN",
+    originalPrice: 1500000,
     price: 1000000,
+    discountBadge: "HEMAT 33%",
+    popularBadge: "EKSKLUSIF",
+    tagline: "Ekosistem Tanpa Batas untuk Jaringan Cabang",
     period: "/ bulan",
     maxActiveProducts: Infinity,
     maxAdmins: 5,

@@ -21,13 +21,14 @@ import {
 } from "lucide-react";
 import { checkSlugAvailabilityAction, registerStoreWithPaymentAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier } from "@/lib/constants/templates";
+import { TIER_LIMITS } from "@/lib/constants/pricing";
 
 const TOTAL_STEPS = 5;
 
 const TIER_PRICE: Record<"STARTER" | "PRO" | "ADVANCE", number> = {
-  STARTER: 250_000,
-  PRO: 600_000,
-  ADVANCE: 1_000_000,
+  STARTER: TIER_LIMITS.STARTER.price,
+  PRO: TIER_LIMITS.PRO.price,
+  ADVANCE: TIER_LIMITS.ADVANCE.price,
 };
 
 function formatRupiah(n: number) {
@@ -344,12 +345,7 @@ export function StoreRegistrationModal({
               <label className="block font-bold text-slate-800 mb-1">Pilih Paket Langganan *</label>
 
               {(["STARTER", "PRO", "ADVANCE"] as const).map((t) => {
-                const prices = { STARTER: "Rp 250.000 /bln", PRO: "Rp 600.000 /bln", ADVANCE: "Rp 1.000.000 /bln" };
-                const descs = {
-                  STARTER: "Katalog s/d 15 Unit HP Aktif · 1 Akun Admin · 2 Template.",
-                  PRO: "Katalog s/d 30 HP Aktif · 3 Akun Admin · 10 Template · Watermark Otomatis · Custom Domain.",
-                  ADVANCE: "Kapasitas UNLIMITED · 5 Akun per Cabang · 30 Template · Watermark Otomatis.",
-                };
+                const config = TIER_LIMITS[t];
                 const isSelected = tier === t;
                 const borderCls = isSelected
                   ? t === "ADVANCE" ? "border-purple-600 bg-purple-50/50 ring-1 ring-purple-600" : "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
@@ -362,16 +358,42 @@ export function StoreRegistrationModal({
                     onClick={() => { setTier(t); setTemplateId(getAvailableTemplatesForTier(t)[0]?.id || "minimal-clean"); }}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition relative ${borderCls}`}
                   >
-                    {t === "PRO" && (
-                      <span className="absolute -top-2.5 right-4 bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                        Paling Banyak Dipilih
+                    {"popularBadge" in config && config.popularBadge && (
+                      <span className={`absolute -top-2.5 right-4 text-white text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        t === "ADVANCE" ? "bg-purple-600" : "bg-blue-600"
+                      }`}>
+                        {config.popularBadge}
                       </span>
                     )}
-                    <div className="flex items-center justify-between">
-                      <div className="font-bold text-sm text-slate-900">{t}</div>
-                      <div className={`font-extrabold ${priceCls}`}>{prices[t]}</div>
+
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-black tracking-wider text-blue-600 uppercase block">
+                          {config.labelBadge}
+                        </span>
+                        <div className="font-extrabold text-sm text-slate-900 mt-0.5">{config.name}</div>
+                      </div>
+
+                      {/* Price Anchoring */}
+                      <div className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <span className="text-slate-400 line-through decoration-rose-500 decoration-2 text-xs font-semibold">
+                            {formatRupiah(config.originalPrice)}
+                          </span>
+                          <span className="bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                            {config.discountBadge}
+                          </span>
+                        </div>
+                        <div className={`font-black text-base ${priceCls}`}>
+                          {formatRupiah(config.price)} <span className="text-slate-500 text-[11px] font-normal">{config.period}</span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">{descs[t]}</p>
+
+                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">{config.description}</p>
+                    <div className="mt-2 text-[10px] text-slate-600 font-medium bg-white/80 rounded-lg p-1.5 border border-slate-100">
+                      ✨ {config.tagline}
+                    </div>
                   </div>
                 );
               })}

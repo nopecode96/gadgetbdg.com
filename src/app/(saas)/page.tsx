@@ -24,8 +24,11 @@ export default function SaaSlandingPage() {
   const pricingTiers = [
     {
       name: "Starter",
-      badge: "Cocok untuk Pemula",
+      labelBadge: "STARTER • PERINTIS",
+      originalPrice: "Rp 350.000",
       price: "Rp 250.000",
+      discountBadge: "HEMAT 28%",
+      tagline: "Langkah Awal Konter Manual Jadi Katalog Online",
       period: "/ bulan",
       description: "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
       features: [
@@ -43,8 +46,12 @@ export default function SaaSlandingPage() {
     },
     {
       name: "Pro",
-      badge: "Paling Populer",
+      labelBadge: "PRO • BISNIS MANDIRI",
+      popularBadge: "PALING POPULER",
+      originalPrice: "Rp 850.000",
       price: "Rp 600.000",
+      discountBadge: "HEMAT 30%",
+      tagline: "Solusi Lengkap Toko Berkembang: Bebas Curi Foto",
       period: "/ bulan",
       description: "Untuk konter HP aktif BEC / Bandung yang ingin scale-up penjualan & branding.",
       features: [
@@ -62,8 +69,12 @@ export default function SaaSlandingPage() {
     },
     {
       name: "Advance",
-      badge: "Grosir / Multi-Cabang",
+      labelBadge: "ADVANCE • KELAS SULTAN",
+      popularBadge: "EKSKLUSIF",
+      originalPrice: "Rp 1.500.000",
       price: "Rp 1.000.000",
+      discountBadge: "HEMAT 33%",
+      tagline: "Ekosistem Tanpa Batas untuk Jaringan Cabang",
       period: "/ bulan",
       description: "Kapasitas tanpa batas untuk juragan HP second dengan perputaran stok masif & multi-cabang.",
       features: [
@@ -269,27 +280,50 @@ export default function SaaSlandingPage() {
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-2xl font-bold text-slate-900">{tier.name}</h3>
-                    <span
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                        tier.highlight ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      {tier.badge}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-black tracking-wider text-blue-600 uppercase">
+                      {tier.labelBadge}
+                    </span>
+                    {tier.popularBadge && (
+                      <span
+                        className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${
+                          tier.highlight
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "bg-purple-600 text-white shadow-xs"
+                        }`}
+                      >
+                        {tier.popularBadge}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-2xl font-black text-slate-900 mb-2">{tier.name}</h3>
+                  <p className="text-xs text-slate-500 mb-5 leading-relaxed">{tier.description}</p>
+
+                  {/* Price Anchoring (Harga Coret) */}
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="text-slate-400 line-through decoration-rose-500 decoration-2 text-sm font-semibold">
+                      {tier.originalPrice}
+                    </span>
+                    <span className="bg-rose-500/10 text-rose-600 border border-rose-500/20 text-xs font-bold px-2 py-0.5 rounded-full">
+                      {tier.discountBadge}
                     </span>
                   </div>
 
-                  <p className="text-sm text-slate-500 mb-6">{tier.description}</p>
-
-                  <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-extrabold text-slate-950">{tier.price}</span>
-                    <span className="text-sm text-slate-500">{tier.period}</span>
+                  {/* Promo Price */}
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-3xl font-black text-slate-900 dark:text-white">{tier.price}</span>
+                    <span className="text-xs text-slate-500 font-semibold">{tier.period}</span>
                   </div>
 
-                  <div className="space-y-3.5 mb-8">
+                  {/* Tagline Pemikat */}
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-600 font-medium mb-6">
+                    ✨ {tier.tagline}
+                  </div>
+
+                  <div className="space-y-3 mb-8">
                     {tier.features.map((feat, i) => (
-                      <div key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
+                      <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
                         <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                         <span>{feat}</span>
                       </div>

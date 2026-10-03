@@ -214,7 +214,7 @@ export default function SaaSlandingPage() {
               <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
             </a>
             <a
-              href="https://toko.gadgetbdg.com"
+              href="/login"
               className="hidden sm:inline-flex px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-blue-600 transition"
             >
               Login Toko

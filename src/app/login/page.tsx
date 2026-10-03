@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { loginAction } from "@/lib/actions/login-actions";
-import { Store, Lock, Mail, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Store, Lock, Mail, Eye, EyeOff, AlertCircle, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -94,7 +95,18 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-500 mt-6">
+        {/* Back to Home */}
+        <div className="mt-5 flex items-center justify-center">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition font-medium"
+          >
+            <Home className="w-3.5 h-3.5" />
+            <span>Kembali ke Beranda</span>
+          </Link>
+        </div>
+
+        <p className="text-center text-xs text-slate-600 mt-3">
           Platform manajemen toko HP bekas Bandung
         </p>
       </div>

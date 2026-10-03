@@ -523,19 +523,19 @@ async function ensureDemoData() {
       data: [
         {
           storeId: goldStore.id,
-          reviewerName: "Calvin Hartono",
+          customerName: "Calvin Hartono",
           rating: 5,
           comment: "Pelayanan butik sangat eksklusif. Unit iPhone 15 Pro Max kondisi 99% seperti baru, baterai awet dan IMEI resmi terdaftar aktif di iBox.",
-          devicePurchased: "iPhone 15 Pro Max 256GB Natural Titanium",
-          isVerified: true,
+          purchasedUnit: "iPhone 15 Pro Max 256GB Natural Titanium",
+          isApproved: true,
         },
         {
           storeId: goldStore.id,
-          reviewerName: "Dr. Hendra Wijaya",
+          customerName: "Dr. Hendra Wijaya",
           rating: 5,
           comment: "Transaksi COD langsung di BEC sangat memuaskan. Toko menyediakan free migrasi data dan pasang temper glass kualitas premium.",
-          devicePurchased: "Samsung Galaxy S24 Ultra 512GB",
-          isVerified: true,
+          purchasedUnit: "Samsung Galaxy S24 Ultra 512GB",
+          isApproved: true,
         },
       ],
     });

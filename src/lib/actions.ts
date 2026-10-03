@@ -96,11 +96,14 @@ import { trackWhatsAppClickAction as baseTrackWhatsAppClickAction } from "./acti
 
 import {
   registerStoreWithPaymentAction as baseRegisterStoreWithPayment,
-  approvePaymentAction as baseApprovePayment,
-  rejectPaymentAction as baseRejectPayment,
   createStaffUserAction as baseCreateStaffUser,
   deleteStaffUserAction as baseDeleteStaffUser,
 } from "./actions/auth-actions";
+
+import {
+  approveSubscriptionPaymentAction,
+  rejectSubscriptionPaymentAction,
+} from "./actions/billing-actions";
 
 import { submitStoreReviewAction as baseSubmitStoreReviewAction } from "./actions/review-actions";
 import { getSubscriptionPlansAction as baseGetSubscriptionPlansAction } from "./actions/pricing-actions";
@@ -132,7 +135,7 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
 }
 
 export async function approvePaymentAction(paymentId: string) {
-  return baseApprovePayment(paymentId);
+  return approveSubscriptionPaymentAction(paymentId);
 }
 
 import {
@@ -178,7 +181,7 @@ export async function paySalesCommissionAction(commissionId: string) {
 }
 
 export async function rejectPaymentAction(paymentId: string, notes: string) {
-  return baseRejectPayment(paymentId, notes);
+  return rejectSubscriptionPaymentAction(paymentId, notes);
 }
 
 export async function createStaffUserAction(formData: FormData) {

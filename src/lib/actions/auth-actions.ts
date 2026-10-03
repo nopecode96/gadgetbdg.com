@@ -22,15 +22,6 @@ const TIER_PRICE: Record<"STARTER" | "PRO" | "ADVANCE", number> = {
 };
 
 // ---------------------------------------------------------------
-// Komisi Sales per Tier
-// ---------------------------------------------------------------
-const SALES_COMMISSION: Record<"STARTER" | "PRO" | "ADVANCE", number> = {
-  STARTER: 50_000,
-  PRO: 100_000,
-  ADVANCE: 150_000,
-};
-
-// ---------------------------------------------------------------
 // 1. REGISTER STORE + OWNER + PAYMENT (dari Wizard Onboarding)
 // ---------------------------------------------------------------
 export async function registerStoreWithPaymentAction(formData: FormData) {
@@ -176,121 +167,6 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
   }
 }
 
-// ---------------------------------------------------------------
-// 2. APPROVE PAYMENT — Super Admin
-// ---------------------------------------------------------------
-export async function approvePaymentAction(paymentId: string) {
-  try {
-    const payment = await prisma.subscriptionPayment.findUnique({
-      where: { id: paymentId },
-      include: {
-        store: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            customDomain: true,
-            whatsapp: true,
-            tier: true,
-            salesUserId: true,
-          },
-        },
-      },
-    });
-
-    if (!payment) return { success: false, error: "Data pembayaran tidak ditemukan." };
-    if (payment.status === "APPROVED") return { success: false, error: "Pembayaran sudah disetujui sebelumnya." };
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30);
-
-    await prisma.$transaction(async (tx) => {
-      // 1. Update status pembayaran menjadi APPROVED
-      await tx.subscriptionPayment.update({
-        where: { id: paymentId },
-        data: { status: "APPROVED" },
-      });
-
-      // 2. Aktifkan toko dan set masa aktif
-      await tx.store.update({
-        where: { id: payment.storeId },
-        data: {
-          isActive: true,
-          subscriptionExpiresAt: expiresAt,
-        },
-      });
-
-      // 3. Otomasi pencatatan komisi jika toko memiliki sales agent pembawanya
-      if (payment.store.salesUserId) {
-        const commissionAmount = SALES_COMMISSION[payment.tier] || 50_000;
-        await tx.salesCommissionLog.create({
-          data: {
-            salesUserId: payment.store.salesUserId,
-            storeId: payment.storeId,
-            paymentId: payment.id,
-            tier: payment.tier,
-            amount: commissionAmount,
-            status: "PENDING",
-          },
-        });
-      }
-    });
-
-    // 4. Kirim pesan selamat dan panduan login langsung ke nomor WhatsApp merchant (Non-blocking)
-    try {
-      if (payment.store.whatsapp) {
-        const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";
-        const storeUrl = payment.store.customDomain || `${payment.store.slug}.${mainDomain}`;
-        const approvalMsg =
-          `🎉 *Selamat! Toko Anda Telah Aktif di GadgetBdg.com*\n\n` +
-          `Pembayaran paket *${payment.tier}* untuk *${payment.store.name}* telah berhasil diverifikasi.\n\n` +
-          `🌐 *Website Toko (PWA):*\nhttps://${storeUrl}\n\n` +
-          `🔐 *Login Panel Admin Toko:*\nhttps://toko.${mainDomain}\n\n` +
-          `Silakan login menggunakan email & kata sandi yang Anda buat saat pendaftaran. Selamat berjualan!`;
-
-        sendWhatsAppMessage({
-          target: payment.store.whatsapp,
-          message: approvalMsg,
-        }).catch((err) => {
-          console.warn("Non-blocking WA notification to merchant failed:", err);
-        });
-      }
-    } catch (err) {
-      console.warn("Error preparing WA notification to merchant:", err);
-    }
-
-    revalidatePath("/super-admin/billing");
-    revalidatePath("/super-admin/stores");
-    revalidatePath("/super-admin");
-    revalidatePath("/super-admin/sales-portal");
-
-    return {
-      success: true,
-      store: payment.store,
-      whatsapp: payment.store.whatsapp,
-    };
-  } catch (error: any) {
-    console.error("Error approvePaymentAction:", error);
-    return { success: false, error: error?.message || "Gagal menyetujui pembayaran." };
-  }
-}
-
-// ---------------------------------------------------------------
-// 3. REJECT PAYMENT — Super Admin
-// ---------------------------------------------------------------
-export async function rejectPaymentAction(paymentId: string, notes: string) {
-  try {
-    await prisma.subscriptionPayment.update({
-      where: { id: paymentId },
-      data: { status: "REJECTED", notes: notes || null },
-    });
-
-    revalidatePath("/super-admin/billing");
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal menolak pembayaran." };
-  }
-}
 
 // ---------------------------------------------------------------
 // 4. CREATE STAFF USER — Store Owner only

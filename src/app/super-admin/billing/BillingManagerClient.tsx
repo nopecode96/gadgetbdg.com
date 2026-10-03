@@ -1,48 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CheckCircle2,
   XCircle,
   Clock,
-  MessageSquare,
   RefreshCw,
   Receipt,
-  ExternalLink,
+  Wallet,
+  Store as StoreIcon,
+  Inbox,
+  X,
+  ImageOff,
+  MessageSquare,
 } from "lucide-react";
-import { approvePaymentAction, rejectPaymentAction } from "@/lib/actions";
-
-interface PaymentItem {
-  id: string;
-  tier: "STARTER" | "PRO" | "ADVANCE";
-  amount: number;
-  receiptUrl: string | null;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  notes: string | null;
-  createdAt: string;
-  store: {
-    id: string;
-    name: string;
-    slug: string;
-    whatsapp: string;
-    salesUser?: {
-      id: string;
-      name: string;
-      referralCode: string | null;
-    } | null;
-  };
-  commissions?: Array<{
-    id: string;
-    amount: number;
-    status: "PENDING" | "PAID";
-  }>;
-}
+import {
+  approveSubscriptionPaymentAction,
+  rejectSubscriptionPaymentAction,
+  type BillingOverview,
+  type BillingPaymentRow,
+} from "@/lib/actions/billing-actions";
 
 function formatRupiah(n: number) {
   return "Rp " + n.toLocaleString("id-ID");
 }
 
-function formatDate(iso: string) {
+function formatDate(iso: string | null) {
+  if (!iso) return "-";
   return new Date(iso).toLocaleString("id-ID", {
     day: "2-digit",
     month: "short",
@@ -52,241 +36,449 @@ function formatDate(iso: string) {
   });
 }
 
-export function BillingManagerClient({ initialPayments }: { initialPayments: PaymentItem[] }) {
-  const [payments, setPayments] = useState<PaymentItem[]>(initialPayments);
+const tierColor = (tier: string) =>
+  tier === "ADVANCE"
+    ? "bg-purple-100 text-purple-800"
+    : tier === "PRO"
+    ? "bg-blue-100 text-blue-800"
+    : "bg-slate-200 text-slate-800";
+
+type ToastState = { type: "success" | "error"; message: string } | null;
+
+export function BillingManagerClient({ initialOverview }: { initialOverview: BillingOverview }) {
+  const [overview, setOverview] = useState(initialOverview);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
-  const [filter, setFilter] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("PENDING");
+  const [toast, setToast] = useState<ToastState>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [approveTarget, setApproveTarget] = useState<BillingPaymentRow | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<BillingPaymentRow | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
-  const filtered = payments.filter((p) => filter === "ALL" || p.status === filter);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
-  const pendingCount = payments.filter((p) => p.status === "PENDING").length;
+  function moveToHistory(
+    id: string,
+    patch: Partial<BillingPaymentRow>,
+    revenueDelta: number,
+    activeDelta: number
+  ) {
+    setOverview((prev) => {
+      const target = prev.pending.find((p) => p.id === id);
+      if (!target) return prev;
+      const updated = { ...target, ...patch };
+      return {
+        ...prev,
+        totalRevenue: prev.totalRevenue + revenueDelta,
+        activeStores: prev.activeStores + activeDelta,
+        pendingCount: prev.pendingCount - 1,
+        pending: prev.pending.filter((p) => p.id !== id),
+        history: [updated, ...prev.history].slice(0, 20),
+      };
+    });
+  }
 
-  async function handleApprove(payment: PaymentItem) {
-    if (!confirm(`Setujui pembayaran toko "${payment.store.name}"?\nIni akan mengaktifkan toko selama 30 hari.`)) return;
+  async function confirmApprove() {
+    if (!approveTarget) return;
+    const payment = approveTarget;
     setLoadingId(payment.id);
-    const res = await approvePaymentAction(payment.id);
+    const res = await approveSubscriptionPaymentAction(payment.id);
     setLoadingId(null);
+    setApproveTarget(null);
 
     if (res.success) {
-      setPayments((prev) =>
-        prev.map((p) => (p.id === payment.id ? { ...p, status: "APPROVED" } : p))
+      const wasInactive =
+        !payment.store.subscriptionExpiresAt ||
+        new Date(payment.store.subscriptionExpiresAt) < new Date();
+      moveToHistory(
+        payment.id,
+        {
+          status: "APPROVED",
+          paidAt: new Date().toISOString(),
+          reviewedByName: "Anda",
+        },
+        payment.amount,
+        wasInactive ? 1 : 0
       );
+      setToast({
+        type: "success",
+        message: `Toko "${payment.store.name}" aktif hingga ${formatDate(res.subscriptionExpiresAt)}.`,
+      });
     } else {
-      alert(res.error || "Gagal menyetujui pembayaran.");
+      setToast({ type: "error", message: res.error });
     }
   }
 
-  async function handleReject(payment: PaymentItem) {
-    const notes = rejectNotes[payment.id] || "";
-    if (!confirm(`Tolak pembayaran toko "${payment.store.name}"?`)) return;
+  async function confirmReject() {
+    if (!rejectTarget) return;
+    const payment = rejectTarget;
+    if (!rejectReason.trim()) {
+      setToast({ type: "error", message: "Alasan penolakan wajib diisi." });
+      return;
+    }
     setLoadingId(payment.id);
-    const res = await rejectPaymentAction(payment.id, notes);
+    const res = await rejectSubscriptionPaymentAction(payment.id, rejectReason);
     setLoadingId(null);
 
     if (res.success) {
-      setPayments((prev) =>
-        prev.map((p) => (p.id === payment.id ? { ...p, status: "REJECTED", notes } : p))
+      moveToHistory(
+        payment.id,
+        { status: "REJECTED", notes: rejectReason.trim(), reviewedByName: "Anda" },
+        0,
+        0
       );
+      setToast({ type: "success", message: `Pembayaran "${payment.store.name}" ditolak.` });
+      setRejectTarget(null);
+      setRejectReason("");
     } else {
-      alert(res.error || "Gagal menolak pembayaran.");
+      setToast({ type: "error", message: res.error });
     }
   }
 
-  function buildWaMessage(payment: PaymentItem) {
+  function buildWaLink(p: BillingPaymentRow) {
     const msg = encodeURIComponent(
-      `Halo ${payment.store.name},\n\nPembayaran paket *${payment.tier}* sebesar *${formatRupiah(payment.amount)}* telah kami terima dan akun Anda sudah AKTIF ✅\n\nWebsite Toko Online:\nhttps://${payment.store.slug}.gadgetbdg.com\n\nLogin Dashboard Admin Toko:\nhttps://toko.gadgetbdg.com\n\nTerima kasih telah berlangganan GadgetBDG.com! 🎉`
+      `Halo ${p.store.name}, pembayaran paket *${p.tier}* sebesar *${formatRupiah(p.amount)}* sudah kami terima dan toko Anda AKTIF ✅`
     );
-    return `https://wa.me/${payment.store.whatsapp}?text=${msg}`;
+    return `https://wa.me/${p.store.whatsapp.replace(/\D/g, "")}?text=${msg}`;
   }
-
-  const tierColor = (tier: string) =>
-    tier === "ADVANCE"
-      ? "bg-purple-100 text-purple-800"
-      : tier === "PRO"
-      ? "bg-blue-100 text-blue-800"
-      : "bg-slate-100 text-slate-700";
 
   return (
-    <div className="space-y-6">
-      {/* Title */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <Receipt className="w-6 h-6 text-amber-400" />
-            <span>Verifikasi Pembayaran QRIS</span>
-            {pendingCount > 0 && (
-              <span className="text-xs font-mono bg-amber-500 text-white px-2.5 py-0.5 rounded-full">
-                {pendingCount} Menunggu
+    <div className="space-y-8">
+      {/* Toast */}
+      {toast && (
+        <div
+          role="status"
+          className={`fixed top-5 right-5 z-[60] max-w-sm rounded-xl border px-4 py-3 text-sm font-semibold shadow-2xl ${
+            toast.type === "success"
+              ? "bg-emerald-950 border-emerald-700 text-emerald-200"
+              : "bg-rose-950 border-rose-700 text-rose-200"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
+
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+          <Receipt className="w-6 h-6 text-amber-400" />
+          Billing &amp; Subscription Control
+        </h1>
+        <p className="text-sm text-slate-400 mt-1">
+          Verifikasi pembayaran QRIS/Transfer dan kelola masa aktif toko klien
+        </p>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-800/70 p-5">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wide">
+            <Wallet className="w-4 h-4 text-indigo-400" /> Total Pendapatan SaaS
+          </div>
+          <div className="mt-2 text-2xl font-black text-white">{formatRupiah(overview.totalRevenue)}</div>
+        </div>
+        <div className="rounded-2xl border border-slate-700 bg-slate-800/70 p-5">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wide">
+            <StoreIcon className="w-4 h-4 text-emerald-400" /> Toko Aktif Berlangganan
+          </div>
+          <div className="mt-2 flex items-center gap-3">
+            <span className="text-2xl font-black text-white">{overview.activeStores}</span>
+            <span className="rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 px-2.5 py-0.5 text-[11px] font-bold">
+              AKTIF
+            </span>
+          </div>
+        </div>
+        <div
+          className={`rounded-2xl border p-5 ${
+            overview.pendingCount > 0
+              ? "border-amber-600 bg-amber-950/40"
+              : "border-slate-700 bg-slate-800/70"
+          }`}
+        >
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wide">
+            <Clock className="w-4 h-4 text-amber-400" /> Tagihan Menunggu Tindakan
+          </div>
+          <div className="mt-2 flex items-center gap-3">
+            <span className="text-2xl font-black text-white">{overview.pendingCount}</span>
+            {overview.pendingCount > 0 && (
+              <span className="animate-pulse rounded-full bg-amber-500 text-slate-950 px-2.5 py-0.5 text-[11px] font-black">
+                PERLU VERIFIKASI
               </span>
             )}
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Antrian verifikasi bukti transfer berlangganan dari merchant baru.
-          </p>
+          </div>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2">
-        {(["PENDING", "APPROVED", "REJECTED", "ALL"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
-              filter === f
-                ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-                : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
-            }`}
-          >
-            {f === "ALL" ? "Semua" : f === "PENDING" ? `⏳ Pending (${pendingCount})` : f === "APPROVED" ? "✅ Disetujui" : "❌ Ditolak"}
-          </button>
-        ))}
-      </div>
-
-      {/* Payments List */}
-      {filtered.length === 0 ? (
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-12 text-center text-slate-500 text-sm">
-          Tidak ada pembayaran dengan status ini.
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filtered.map((payment) => {
-            const isLoading = loadingId === payment.id;
-            return (
-              <div
-                key={payment.id}
-                className={`bg-slate-800/80 border rounded-2xl p-5 space-y-4 ${
-                  payment.status === "PENDING"
-                    ? "border-amber-700/60"
-                    : payment.status === "APPROVED"
-                    ? "border-emerald-800/60"
-                    : "border-rose-900/60"
-                }`}
-              >
-                {/* Header Row */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="font-black text-white text-base">{payment.store.name}</div>
-                      {payment.store.salesUser && (
-                        <span className="text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded-full">
-                          Sales: {payment.store.salesUser.name} ({payment.store.salesUser.referralCode})
+      {/* Pending queue */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-black text-white uppercase tracking-wide">Menunggu Konfirmasi</h2>
+        {overview.pending.length === 0 ? (
+          <div className="rounded-2xl border border-slate-700 bg-slate-800/60 p-12 text-center">
+            <Inbox className="w-10 h-10 text-slate-500 mx-auto mb-3" />
+            <p className="text-sm text-slate-400">
+              Semua tagihan telah diproses. Tidak ada antrean verifikasi saat ini.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-800/60">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-800 text-[11px] uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="px-4 py-3">Waktu Masuk</th>
+                  <th className="px-4 py-3">Toko</th>
+                  <th className="px-4 py-3">Paket</th>
+                  <th className="px-4 py-3">Nominal</th>
+                  <th className="px-4 py-3">Bukti</th>
+                  <th className="px-4 py-3 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700">
+                {overview.pending.map((p) => {
+                  const busy = loadingId === p.id;
+                  return (
+                    <tr key={p.id} className="align-top">
+                      <td className="px-4 py-3 text-xs text-slate-300 whitespace-nowrap">
+                        {formatDate(p.createdAt)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-white">{p.store.name}</div>
+                        <div className="text-xs font-mono text-slate-400">{p.store.slug}.gadgetbdg.com</div>
+                        <a
+                          href={`https://wa.me/${p.store.whatsapp.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-emerald-400 hover:underline"
+                        >
+                          WA: {p.store.whatsapp}
+                        </a>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${tierColor(p.tier)}`}
+                        >
+                          {p.plan?.name ?? p.tier}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 font-black text-indigo-300 whitespace-nowrap">
+                        {formatRupiah(p.amount)}
+                      </td>
+                      <td className="px-4 py-3">
+                        {p.receiptUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => setLightbox(p.receiptUrl)}
+                            className="block h-16 w-16 overflow-hidden rounded-lg border border-slate-600 hover:border-indigo-400 transition"
+                            title="Klik untuk memperbesar"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={p.receiptUrl} alt="Bukti transfer" className="h-full w-full object-cover" />
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                            <ImageOff className="w-4 h-4" /> Belum ada
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col sm:flex-row justify-end gap-2">
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => setApproveTarget(p)}
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-xs font-black text-white disabled:opacity-50 transition"
+                          >
+                            {busy ? (
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            )}
+                            Setujui &amp; Aktifkan
+                          </button>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => {
+                              setRejectTarget(p);
+                              setRejectReason("");
+                            }}
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-800 bg-rose-950/60 hover:bg-rose-900/60 px-3 py-2 text-xs font-bold text-rose-300 disabled:opacity-50 transition"
+                          >
+                            <XCircle className="w-3.5 h-3.5" /> Tolak
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* History */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-black text-white uppercase tracking-wide">Riwayat Billing</h2>
+        {overview.history.length === 0 ? (
+          <div className="rounded-2xl border border-slate-700 bg-slate-800/60 p-8 text-center text-sm text-slate-500">
+            Belum ada riwayat transaksi.
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-800/60">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-800 text-[11px] uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="px-4 py-3">Tanggal Proses</th>
+                  <th className="px-4 py-3">Toko</th>
+                  <th className="px-4 py-3">Paket</th>
+                  <th className="px-4 py-3">Nominal</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Admin</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700">
+                {overview.history.map((p) => (
+                  <tr key={p.id} className="align-top">
+                    <td className="px-4 py-3 text-xs text-slate-300 whitespace-nowrap">
+                      {formatDate(p.paidAt ?? p.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="font-bold text-white">{p.store.name}</div>
+                      <div className="text-xs font-mono text-slate-400">{p.store.slug}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${tierColor(p.tier)}`}
+                      >
+                        {p.plan?.name ?? p.tier}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-bold text-slate-200 whitespace-nowrap">
+                      {formatRupiah(p.amount)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {p.status === "APPROVED" ? (
+                        <div className="space-y-1">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-800 bg-emerald-950 px-2.5 py-0.5 text-[11px] font-bold text-emerald-300">
+                            <CheckCircle2 className="w-3 h-3" /> Disetujui
+                          </span>
+                          <a
+                            href={buildWaLink(p)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-[11px] text-emerald-400 hover:underline"
+                          >
+                            <MessageSquare className="w-3 h-3" /> Kabari via WA
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-rose-800 bg-rose-950 px-2.5 py-0.5 text-[11px] font-bold text-rose-300">
+                            <XCircle className="w-3 h-3" /> Ditolak
+                          </span>
+                          {p.notes && <div className="text-[11px] italic text-rose-300/80">{p.notes}</div>}
+                        </div>
                       )}
-                    </div>
-                    <div className="text-xs font-mono text-slate-400">{payment.store.slug}.gadgetbdg.com</div>
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <span>{formatDate(payment.createdAt)}</span>
-                      <span>·</span>
-                      <span>WA: {payment.store.whatsapp}</span>
-                    </div>
-                  </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-300">{p.reviewedByName ?? "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
-                  <div className="text-right space-y-1.5 shrink-0">
-                    <div className="text-lg font-black text-indigo-400">{formatRupiah(payment.amount)}</div>
-                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${tierColor(payment.tier)}`}>
-                      {payment.tier}
-                    </span>
-                  </div>
-                </div>
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 rounded-full bg-slate-800 p-2 text-white hover:bg-slate-700"
+            onClick={() => setLightbox(null)}
+            aria-label="Tutup"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightbox}
+            alt="Bukti transfer"
+            className="max-h-[90vh] max-w-full rounded-xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
-                {/* Status badge */}
-                <div className="flex items-center gap-2">
-                  {payment.status === "PENDING" ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-950 text-amber-400 border border-amber-800">
-                      <Clock className="w-3.5 h-3.5" /> Menunggu Verifikasi
-                    </span>
-                  ) : payment.status === "APPROVED" ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Disetujui & Aktif
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-rose-950 text-rose-400 border border-rose-800">
-                      <XCircle className="w-3.5 h-3.5" /> Ditolak
-                    </span>
-                  )}
+      {/* Approve confirm */}
+      {approveTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 space-y-4">
+            <h3 className="text-lg font-black text-white">Setujui &amp; Aktifkan Toko?</h3>
+            <p className="text-sm text-slate-300">
+              Toko <b>{approveTarget.store.name}</b> akan diaktifkan pada paket{" "}
+              <b>{approveTarget.plan?.name ?? approveTarget.tier}</b> senilai{" "}
+              <b>{formatRupiah(approveTarget.amount)}</b>. Masa aktif bertambah 30 hari.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setApproveTarget(null)}
+                className="rounded-xl border border-slate-600 px-4 py-2 text-xs font-bold text-slate-300 hover:bg-slate-800"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmApprove}
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-500"
+              >
+                Ya, Setujui
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-                  {/* Receipt link */}
-                  {payment.receiptUrl && (
-                    <a
-                      href={payment.receiptUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-200 hover:bg-slate-600 transition"
-                    >
-                      <ExternalLink className="w-3 h-3" /> Lihat Bukti Transfer
-                    </a>
-                  )}
-                </div>
-
-                {/* Receipt image preview if available */}
-                {payment.receiptUrl && (
-                  <div className="rounded-xl overflow-hidden border border-slate-700 max-w-xs">
-                    <img
-                      src={payment.receiptUrl}
-                      alt="Bukti Transfer"
-                      className="w-full object-cover max-h-48"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                    />
-                  </div>
-                )}
-
-                {/* Actions for PENDING */}
-                {payment.status === "PENDING" && (
-                  <div className="space-y-3">
-                    {/* Reject notes */}
-                    <input
-                      type="text"
-                      placeholder="Catatan penolakan (opsional)..."
-                      value={rejectNotes[payment.id] || ""}
-                      onChange={(e) => setRejectNotes((prev) => ({ ...prev, [payment.id]: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    />
-
-                    <div className="flex items-center gap-3">
-                      {/* Approve */}
-                      <button
-                        onClick={() => handleApprove(payment)}
-                        disabled={isLoading}
-                        className="flex-1 py-2.5 rounded-xl font-black text-xs text-white bg-emerald-600 hover:bg-emerald-500 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                      >
-                        {isLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                        Setujui & Aktifkan Toko
-                      </button>
-
-                      {/* Reject */}
-                      <button
-                        onClick={() => handleReject(payment)}
-                        disabled={isLoading}
-                        className="flex-1 py-2.5 rounded-xl font-bold text-xs text-rose-300 bg-rose-950/60 hover:bg-rose-900/60 border border-rose-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                      >
-                        <XCircle className="w-3.5 h-3.5" /> Tolak Pembayaran
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* WhatsApp notification button for APPROVED */}
-                {payment.status === "APPROVED" && (
-                  <a
-                    href={buildWaMessage(payment)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-600 transition"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    Kirim Notifikasi Aktivasi via WhatsApp
-                  </a>
-                )}
-
-                {/* Rejection notes display */}
-                {payment.status === "REJECTED" && payment.notes && (
-                  <p className="text-xs text-rose-400 italic">Catatan: {payment.notes}</p>
-                )}
-              </div>
-            );
-          })}
+      {/* Reject modal */}
+      {rejectTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 space-y-4">
+            <h3 className="text-lg font-black text-white">Tolak Pembayaran</h3>
+            <p className="text-sm text-slate-300">
+              Toko <b>{rejectTarget.store.name}</b> — {formatRupiah(rejectTarget.amount)}
+            </p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={3}
+              placeholder="Alasan penolakan (wajib), mis. nominal tidak sesuai / bukti tidak terbaca"
+              className="w-full rounded-xl border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setRejectTarget(null)}
+                className="rounded-xl border border-slate-600 px-4 py-2 text-xs font-bold text-slate-300 hover:bg-slate-800"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={loadingId === rejectTarget.id}
+                onClick={confirmReject}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-black text-white hover:bg-rose-500 disabled:opacity-50"
+              >
+                Tolak Pembayaran
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

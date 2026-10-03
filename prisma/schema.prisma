@@ -239,6 +239,8 @@ model SubscriptionPayment {
   receiptUrl  String?
   status      PaymentStatus        @default(PENDING)
   notes       String?
+  paidAt         DateTime?
+  reviewedByName String?
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 

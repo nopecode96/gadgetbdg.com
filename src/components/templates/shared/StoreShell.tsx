@@ -189,7 +189,7 @@ export function StoreShell({
           className={`${
             isMockup
               ? "absolute bottom-3 left-3 right-3 z-30 pointer-events-none"
-              : "fixed bottom-4 left-4 right-4 z-50 pointer-events-none flex justify-center"
+              : "fixed bottom-4 left-4 right-4 max-w-md mx-auto z-50 pointer-events-none flex justify-center"
           }`}
         >
           <nav

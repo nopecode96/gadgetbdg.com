@@ -40,6 +40,12 @@ export interface BillingOverview {
   pendingCount: number;
   pending: BillingPaymentRow[];
   history: BillingPaymentRow[];
+  paymentSetting?: {
+    bankName: string;
+    bankAccountNumber: string;
+    bankAccountHolder: string;
+    qrisImageUrl: string | null;
+  };
 }
 
 const paymentInclude = {
@@ -82,7 +88,7 @@ function serialize(p: any): BillingPaymentRow {
 export async function getBillingOverviewAction(): Promise<BillingOverview> {
   await requireSaasAdmin();
 
-  const [revenue, activeStores, pendingRaw, historyRaw] = await Promise.all([
+  const [revenue, activeStores, pendingRaw, historyRaw, setting] = await Promise.all([
     prisma.subscriptionPayment.aggregate({
       where: { status: "APPROVED" },
       _sum: { amount: true },
@@ -99,6 +105,9 @@ export async function getBillingOverviewAction(): Promise<BillingOverview> {
       orderBy: { updatedAt: "desc" },
       take: 20,
     }),
+    prisma.platformSetting.findUnique({
+      where: { id: "GLOBAL" },
+    }),
   ]);
 
   return {
@@ -107,6 +116,14 @@ export async function getBillingOverviewAction(): Promise<BillingOverview> {
     pendingCount: pendingRaw.length,
     pending: pendingRaw.map(serialize),
     history: historyRaw.map(serialize),
+    paymentSetting: setting
+      ? {
+          bankName: setting.bankName,
+          bankAccountNumber: setting.bankAccountNumber,
+          bankAccountHolder: setting.bankAccountHolder,
+          qrisImageUrl: setting.qrisImageUrl,
+        }
+      : undefined,
   };
 }
 
@@ -172,7 +189,7 @@ export async function approveSubscriptionPaymentAction(paymentId: string) {
         },
       });
 
-      const commAmount = SALES_COMMISSION[payment.tier] || 50_000;
+      const commAmount = Number(plan.salesCommission) > 0 ? Number(plan.salesCommission) : (SALES_COMMISSION[payment.tier] || 50_000);
       const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
       // 1. Catat ke SalesPartner jika toko terhubung ke sales partner via referral

@@ -283,12 +283,28 @@ model SubscriptionPlan {
   hasQrGoogleReview       Boolean               @default(false)
   hasStoryMaker           Boolean               @default(false)
   hasCustomDomain         Boolean               @default(false)
+  customDomain            Boolean               @default(false)
+  salesCommission         Decimal               @default(0) @db.Decimal(12, 2)
+  features                Json?
   reportsLevel            String                @default("BASIC_WA") // "BASIC_WA", "SOLD_LEADERBOARD", "BRANCH_FULL"
   description             String?
   stores                  Store[]
   payments                SubscriptionPayment[]
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
+}
+
+model PlatformSetting {
+  id                String   @id @default("GLOBAL")
+  platformName      String   @default("GadgetBdg.com")
+  supportWhatsapp   String   @default("6281234567890")
+  serverIp          String   @default("72.62.75.149")
+  cnameTarget       String   @default("cname.gadgetbdg.com")
+  bankName          String   @default("BCA")
+  bankAccountNumber String   @default("1234567890")
+  bankAccountHolder String   @default("PT Gadget Bandung Solusindo")
+  qrisImageUrl      String?
+  updatedAt         DateTime @updatedAt
 }
 
 model SalesCommissionLog {

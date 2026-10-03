@@ -212,6 +212,30 @@ export function BillingManagerClient({ initialOverview }: { initialOverview: Bil
         </div>
       </div>
 
+      {/* Dynamic Payment Setting Reference */}
+      {overview.paymentSetting && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <Wallet className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                Rekening Penampung SaaS Resmi
+              </div>
+              <div className="text-sm font-bold text-white flex items-center gap-2">
+                <span>{overview.paymentSetting.bankName}:</span>
+                <span className="font-mono text-emerald-400 font-bold">{overview.paymentSetting.bankAccountNumber}</span>
+                <span className="text-slate-400 font-normal">a.n. {overview.paymentSetting.bankAccountHolder}</span>
+              </div>
+            </div>
+          </div>
+          <div className="text-xs text-slate-400">
+            Pastikan mutasi bank merchant sesuai dengan rekening tujuan di atas sebelum mengonfirmasi pembayaran.
+          </div>
+        </div>
+      )}
+
       {/* Pending queue */}
       <section className="space-y-3">
         <h2 className="text-sm font-black text-white uppercase tracking-wide">Menunggu Konfirmasi</h2>

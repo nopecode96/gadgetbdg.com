@@ -95,9 +95,10 @@ export async function getCustomDomainsOverviewAction(): Promise<CustomDomainsOve
   const verifiedCount = registeredStores.filter((s) => s.customDomainStatus === "ACTIVE").length;
   const pendingSetupCount = storesWithoutDomain.length;
 
-  const serverIp = process.env.NEXT_PUBLIC_SERVER_IP || process.env.SERVER_IPV4 || "72.62.75.149";
+  const setting = await prisma.platformSetting.findUnique({ where: { id: "GLOBAL" } });
+  const serverIp = setting?.serverIp || process.env.NEXT_PUBLIC_SERVER_IP || process.env.SERVER_IPV4 || "72.62.75.149";
   const mainDomain = (process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com").toLowerCase();
-  const cnameTarget = `cname.${mainDomain}`;
+  const cnameTarget = setting?.cnameTarget || `cname.${mainDomain}`;
 
   return {
     totalRegistered,

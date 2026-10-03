@@ -415,8 +415,8 @@ export function MinimalCleanLayout({
                                   {p.brand}
                                 </span>
                                 {p.batteryHealth !== null && p.batteryHealth !== undefined && (
-                                  <span className="px-2 py-0.5 rounded-md bg-amber-500/90 text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-sm">
-                                    <Zap className="w-2.5 h-2.5" />
+                                  <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-black text-[9px] flex items-center gap-1 shadow-sm">
+                                    <Zap className="w-2.5 h-2.5 text-amber-700" />
                                     <span>BH {p.batteryHealth}%</span>
                                   </span>
                                 )}
@@ -506,7 +506,7 @@ export function MinimalCleanLayout({
                             {product.brand}
                           </span>
                           {product.batteryHealth && (
-                            <span className="text-[7.5px] font-black px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 shrink-0">
+                            <span className="text-[7.5px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 shrink-0">
                               ⚡ {product.batteryHealth}%
                             </span>
                           )}
@@ -597,10 +597,10 @@ export function MinimalCleanLayout({
                         key={pill.id}
                         type="button"
                         onClick={() => setActiveFilter(pill.id)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all select-none ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none ${
                           isSelected
                             ? "bg-slate-950 text-white shadow-xs scale-102"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            : "bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200"
                         }`}
                       >
                         {pill.label}

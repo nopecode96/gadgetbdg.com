@@ -114,9 +114,9 @@
 
 /* === FILTER PILLS (DARK GAMING) === */
 .gamingPill {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(71, 85, 105, 0.5);
-  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  color: #cbd5e1;
   transition: all 0.15s ease;
 }
 
@@ -192,6 +192,10 @@
   border: 1px solid rgba(71, 85, 105, 0.5);
   color: #f8fafc;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gamingSearchInput input::placeholder {
+  color: #94a3b8;
 }
 
 .gamingSearchInput:focus-within {

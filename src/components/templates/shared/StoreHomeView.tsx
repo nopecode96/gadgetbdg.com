@@ -320,7 +320,13 @@ export function StoreHomeView({
                           {item.brand}
                         </span>
                         {item.batteryHealth !== null && (
-                          <span className="px-2 py-0.5 rounded-md bg-amber-500/90 text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-sm">
+                          <span
+                            className={`px-2 py-0.5 rounded-md font-black text-[9px] flex items-center gap-1 shadow-sm ${
+                              isDark
+                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                : "bg-amber-100 text-amber-900 border border-amber-300"
+                            }`}
+                          >
                             <BatteryCharging className="w-2.5 h-2.5" />
                             <span>BH {item.batteryHealth}%</span>
                           </span>

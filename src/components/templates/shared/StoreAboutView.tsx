@@ -188,10 +188,10 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
         </div>
 
         <div className={`text-xs ${colors.textSecondary}`}>
-          <p className="font-semibold text-slate-800 dark:text-slate-200">
+          <p className="font-semibold text-slate-800 dark:text-slate-100">
             {store.operationalHours || "Setiap Hari: 10:00 - 20:30 WIB"}
           </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">
+          <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">
             Melayani COD konter, tukar tambah, dan pengiriman kurir instan Bandung Raya.
           </p>
         </div>
@@ -232,7 +232,7 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
                     )}
                   </div>
 
-                  <p className={`text-xs leading-relaxed ${colors.textSecondary}`}>{b.address}</p>
+                  <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : colors.textSecondary}`}>{b.address}</p>
 
                   <div className="flex items-center gap-2 pt-1">
                     <a
@@ -281,7 +281,7 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
             <span>Alamat Fisik Markas Toko</span>
           </div>
 
-          <p className={`text-xs leading-relaxed ${colors.textSecondary}`}>
+          <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : colors.textSecondary}`}>
             {store.address || "Bandung Electronic Center (BEC) Lantai 1 Blok C-05, Jl. Purnawarman No. 13-15, Bandung"}
           </p>
 
@@ -312,19 +312,19 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
         <div className="space-y-2.5 text-xs">
           <div className="flex items-start gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <p className={colors.textSecondary}>
+            <p className={isDark ? "text-slate-300" : colors.textSecondary}>
               <b className={colors.textPrimary}>Garansi Toko Resmi:</b> {store.warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup."}
             </p>
           </div>
           <div className="flex items-start gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <p className={colors.textSecondary}>
+            <p className={isDark ? "text-slate-300" : colors.textSecondary}>
               <b className={colors.textPrimary}>Bebas Blokir IMEI Seumur Hidup:</b> Semua unit berstatus resmi iBox, SEIN, atau terdaftar Kemenperin/Bea Cukai.
             </p>
           </div>
           <div className="flex items-start gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <p className={colors.textSecondary}>
+            <p className={isDark ? "text-slate-300" : colors.textSecondary}>
               <b className={colors.textPrimary}>Gratis Pindah Data di Konter:</b> Didampingi kasir berpengalaman untuk transfer WhatsApp, foto, dan akun iCloud/Google.
             </p>
           </div>

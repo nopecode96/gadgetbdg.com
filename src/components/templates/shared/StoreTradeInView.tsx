@@ -243,7 +243,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Nama Lengkap *
                 </label>
                 <input
@@ -252,12 +252,12 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Contoh: Rian Pratama"
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Nomor WhatsApp Aktif *
                 </label>
                 <input
@@ -266,7 +266,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                   value={customerWa}
                   onChange={(e) => setCustomerWa(e.target.value)}
                   placeholder="Contoh: 081234567890"
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400"
                 />
               </div>
             </div>
@@ -281,7 +281,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Merk & Tipe HP *
                 </label>
                 <input
@@ -290,12 +290,12 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                   value={phoneModel}
                   onChange={(e) => setPhoneModel(e.target.value)}
                   placeholder="Contoh: iPhone 13 128GB / S22 Ultra"
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   RAM & Kapasitas Memori (Opsional)
                 </label>
                 <input
@@ -303,7 +303,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                   value={ramStorage}
                   onChange={(e) => setRamStorage(e.target.value)}
                   placeholder="Contoh: 8GB / 256GB"
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400"
                 />
               </div>
             </div>
@@ -318,7 +318,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
 
             {/* Pilihan Kondisi Fisik */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Kondisi Fisik Unit
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -329,8 +329,8 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                     onClick={() => setCondition(pill)}
                     className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition border ${
                       condition === pill
-                        ? "bg-slate-950 text-white border-slate-950 shadow-xs"
-                        : "bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                        ? "bg-slate-950 text-white border-slate-950 dark:bg-emerald-500 dark:text-slate-950 dark:border-emerald-400 shadow-xs"
+                        : "bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:border-slate-700"
                     }`}
                   >
                     {pill}
@@ -342,7 +342,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
             {/* Battery Health & Legalitas IMEI */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Battery Health (% jika iPhone)
                 </label>
                 <div className="relative">
@@ -353,22 +353,22 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                     value={batteryHealth}
                     onChange={(e) => setBatteryHealth(e.target.value)}
                     placeholder="Contoh: 88"
-                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400"
                   />
-                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">
+                  <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 dark:text-slate-500">
                     %
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Status Legalitas IMEI
                 </label>
                 <select
                   value={imeiStatus}
                   onChange={(e) => setImeiStatus(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400"
                 >
                   {imeiPills.map((p) => (
                     <option key={p} value={p}>
@@ -381,7 +381,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
 
             {/* Kelengkapan Dus & Aksesoris */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Kelengkapan Bawaan
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -392,8 +392,8 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                     onClick={() => setCompleteness(pill)}
                     className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition border ${
                       completeness === pill
-                        ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                        : "bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                        ? "bg-blue-600 text-white border-blue-600 dark:bg-emerald-500 dark:text-slate-950 dark:border-emerald-400 shadow-xs"
+                        : "bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:border-slate-700"
                     }`}
                   >
                     {pill}
@@ -411,7 +411,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Catatan Kejujuran Minus (Jika Ada)
               </label>
               <textarea
@@ -419,12 +419,12 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                 value={minusNotes}
                 onChange={(e) => setMinusNotes(e.target.value)}
                 placeholder="Contoh: TrueTone off, pernah ganti baterai, atau ada goresan halus di layar..."
-                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400 resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Ekspektasi Taksiran Harga Pelanggan (Rp)
               </label>
               <input
@@ -432,7 +432,7 @@ export function StoreTradeInView({ store, theme, isMockup = false }: StoreTradeI
                 value={expectedPrice}
                 onChange={(e) => setExpectedPrice(e.target.value)}
                 placeholder="Contoh: 4500000"
-                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:border-emerald-400"
               />
               {expectedPrice && !isNaN(Number(expectedPrice)) && (
                 <p className="text-[10px] text-blue-600 font-bold mt-1">

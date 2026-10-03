@@ -730,10 +730,10 @@ export function KeynoteObsidianLayout({
                     Buka
                   </span>
                 </div>
-                <p className="font-semibold text-xs text-zinc-200">
+                <p className="font-semibold text-xs text-zinc-100">
                   {store.operationalHours || "Setiap Hari: 10:00 – 20:30 WIB"}
                 </p>
-                <p className="text-[11px] text-zinc-600">COD konter, tukar tambah, pengiriman instan Bandung Raya.</p>
+                <p className="text-[11px] text-zinc-300">COD konter, tukar tambah, pengiriman instan Bandung Raya.</p>
               </div>
 
               {/* Alamat */}
@@ -742,7 +742,7 @@ export function KeynoteObsidianLayout({
                   <MapPin className="w-4 h-4 text-rose-400" />
                   <span>{mainBranch ? mainBranch.name : "Alamat Konter"}</span>
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-zinc-300 leading-relaxed">
                   {mainBranch ? mainBranch.address : store.address || "Bandung Electronic Center (BEC) Lantai 1 Blok C-05"}
                 </p>
                 <a href={isMockup ? "#" : defaultMapsUrl} target="_blank" rel="noreferrer"
@@ -767,8 +767,8 @@ export function KeynoteObsidianLayout({
                   ].map(({ bold, text }) => (
                     <div key={bold} className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                      <p className="text-zinc-400">
-                        <b className="text-zinc-200">{bold}</b> {text}
+                      <p className="text-zinc-300">
+                        <b className="text-zinc-100">{bold}</b> {text}
                       </p>
                     </div>
                   ))}

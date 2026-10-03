@@ -124,7 +124,7 @@
 }
 
 .filterTab {
-  color: #71717a;
+  color: #a1a1aa;
   border-bottom: 2px solid transparent;
   transition: color 0.15s ease, border-color 0.15s ease;
   padding-bottom: 8px;
@@ -193,6 +193,10 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.obsidianSearch input::placeholder {
+  color: #94a3b8;
+}
+
 .obsidianSearch:focus-within {
   border-color: rgba(212, 175, 55, 0.5);
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
@@ -200,9 +204,9 @@
 
 /* === GRADE BADGE (ELITE / PRISTINE) === */
 .gradeBadge {
-  background: rgba(212, 175, 55, 0.12);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  color: #d4af37;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fcd34d;
   font-size: 0.5625rem;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -219,21 +223,27 @@
 .obsidianInput {
   background: rgba(14, 14, 18, 0.95);
   border: 1px solid rgba(39, 39, 42, 0.8);
-  color: #fafafa;
+  color: #ffffff;
+  font-weight: 500;
   transition: border-color 0.15s ease;
+}
+
+.obsidianInput::placeholder {
+  color: #94a3b8;
 }
 
 .obsidianInput:focus {
   outline: none;
-  border-color: rgba(212, 175, 55, 0.5);
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
 }
 
 /* === SELECT DROPDOWN === */
 .obsidianSelect {
   background: rgba(14, 14, 18, 0.95);
   border: 1px solid rgba(39, 39, 42, 0.8);
-  color: #fafafa;
+  color: #ffffff;
+  font-weight: 500;
   appearance: none;
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L2 5h12z'/%3E%3C/svg%3E");

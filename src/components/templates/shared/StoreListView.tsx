@@ -197,10 +197,12 @@ export function StoreListView({
               key={cat}
               type="button"
               onClick={() => handleCategorySelect(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all select-none ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none ${
                 activeCategoryFilter === cat
                   ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs scale-102"
-                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200"
+                  : isDark
+                  ? "bg-slate-900 text-slate-300 font-semibold border border-slate-800 hover:border-slate-700"
+                  : "bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200"
               }`}
             >
               {cat}

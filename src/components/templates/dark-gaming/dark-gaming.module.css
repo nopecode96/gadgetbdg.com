@@ -1,0 +1,247 @@
+/* ============================================================
+   Dark Gaming Neon — Isolated CSS Module
+   Template 2: "Dark Gaming Neon" for GadgetBDG SaaS
+   ============================================================ */
+
+/* === BASE CONTAINER === */
+.gamingContainer {
+  background: #030712;
+  color: #f8fafc;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* === NEON GLOW EFFECTS === */
+.neonGlowEmerald {
+  box-shadow:
+    0 0 8px rgba(16, 185, 129, 0.4),
+    0 0 20px rgba(16, 185, 129, 0.2),
+    0 0 40px rgba(16, 185, 129, 0.08);
+}
+
+.neonGlowEmeraldBorder {
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow:
+    0 0 8px rgba(16, 185, 129, 0.3),
+    0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+.neonGlowCyan {
+  box-shadow:
+    0 0 8px rgba(6, 182, 212, 0.5),
+    0 0 20px rgba(6, 182, 212, 0.2),
+    0 0 40px rgba(6, 182, 212, 0.08);
+}
+
+/* === HUD CARD (Products, Info Blocks) === */
+.hudCard {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hudCard:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow:
+    0 0 12px rgba(16, 185, 129, 0.2),
+    0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* === FLOATING BOTTOM DOCK (DARK GAMING) === */
+.floatingDockDark {
+  background: rgba(10, 15, 30, 0.97);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow:
+    0 0 16px rgba(16, 185, 129, 0.25),
+    0 8px 32px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(16, 185, 129, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* === HEADER (DARK SINGLE ROW) === */
+.gamingHeader {
+  background: rgba(3, 7, 18, 0.97);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* === NEON TEXT GRADIENT === */
+.neonTextEmerald {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === HERO BANNER CYBER === */
+.cyberHero {
+  background: linear-gradient(
+    135deg,
+    #020c06 0%,
+    #051a0f 30%,
+    #0a2818 60%,
+    #020c06 100%
+  );
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyberHero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cyberHero::after {
+  content: "";
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* === FILTER PILLS (DARK GAMING) === */
+.gamingPill {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  color: #94a3b8;
+  transition: all 0.15s ease;
+}
+
+.gamingPillActive {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.6);
+  color: #34d399;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+}
+
+/* === CUSTOM SCROLLBAR (NEON GREEN THIN) === */
+.customScrollbar::-webkit-scrollbar {
+  height: 3px;
+  width: 3px;
+}
+
+.customScrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 999px;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.5);
+  border-radius: 999px;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.8);
+}
+
+/* === NEON AVATAR RING === */
+.neonAvatar {
+  border: 2px solid rgba(16, 185, 129, 0.7);
+  box-shadow:
+    0 0 0 3px rgba(16, 185, 129, 0.15),
+    0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+/* === FPS BADGE === */
+.fpsBadge {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.15));
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  text-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
+}
+
+/* === NEON CTA BUTTON === */
+.neonCtaButton {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  box-shadow:
+    0 0 12px rgba(16, 185, 129, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.neonCtaButton:hover {
+  box-shadow:
+    0 0 20px rgba(16, 185, 129, 0.6),
+    0 4px 20px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+/* === TRUST BADGE (DARK) === */
+.gamingTrustBadge {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+/* === SEARCH INPUT (DARK) === */
+.gamingSearchInput {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  color: #f8fafc;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gamingSearchInput:focus-within {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* === PRODUCT CARD IMAGE CONTAINER === */
+.gamingProductImage {
+  background: rgba(2, 6, 23, 0.8);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+}
+
+/* === SEPARATOR / DIVIDER === */
+.neonDivider {
+  border-color: rgba(16, 185, 129, 0.15);
+}
+
+/* === SCAN LINE ANIMATION (subtle) === */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scanlineOverlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(16, 185, 129, 0.015) 2px,
+    rgba(16, 185, 129, 0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* === WA BUTTON (NEON GREEN) === */
+.neonWaButton {
+  background: linear-gradient(135deg, #059669, #10b981);
+  box-shadow:
+    0 0 10px rgba(16, 185, 129, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.neonWaButton:hover {
+  box-shadow:
+    0 0 16px rgba(16, 185, 129, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+}

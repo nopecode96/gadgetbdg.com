@@ -4,7 +4,7 @@ import React from "react";
 import { StoreData, ProductData } from "./shared/types";
 import { getTemplateConfig } from "@/lib/constants/templates";
 import { MinimalCleanLayout } from "./minimal-clean/MinimalCleanLayout";
-import { DarkGamingStorefront } from "./dark-gaming/Storefront";
+import { DarkGamingLayout } from "./dark-gaming/DarkGamingLayout";
 import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
 import { CyberHudLayout } from "./archetypes/CyberHudLayout";
 import { TokyoEditorialLayout } from "./archetypes/TokyoEditorialLayout";
@@ -25,7 +25,7 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
       return <MinimalCleanLayout store={store} products={products} isMockup={false} />;
 
     case "dark-gaming":
-      return <DarkGamingStorefront store={store} products={products} />;
+      return <DarkGamingLayout store={store} products={products} isMockup={false} />;
 
     case "keynote-obsidian":
       return <KeynoteObsidianLayout store={store} products={products} />;

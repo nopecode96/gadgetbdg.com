@@ -16,11 +16,10 @@ import {
   getAvailableTemplatesForTier,
   getTemplateConfig,
 } from "@/lib/constants/templates";
-import { StoreShell } from "@/components/templates/shared/StoreShell";
-import { StoreHomeView } from "@/components/templates/shared/StoreHomeView";
 import { MinimalCleanLayout } from "@/components/templates/minimal-clean/MinimalCleanLayout";
+import { DarkGamingLayout } from "@/components/templates/dark-gaming/DarkGamingLayout";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
-import { StoreData, ProductData, StoreTabType } from "@/components/templates/shared/types";
+import { StoreData, ProductData } from "@/components/templates/shared/types";
 
 // ---------------------------------------------------------------------------
 // Real Product Data for Live Storefront Mockup (Single Source of Truth)
@@ -106,8 +105,8 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
 // Dynamic Switcher for Smartphone Mockup Screen (Single Source of Truth)
 // ---------------------------------------------------------------------------
 function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }) {
-  const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const currentMockStore = createMockStore(activeTheme);
+
 
   // If minimal-clean, render the dedicated MinimalCleanLayout (dock is rendered at the phone frame level)
   if (activeTheme.id === "minimal-clean") {
@@ -121,26 +120,15 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
     );
   }
 
-  // If dark-gaming, render StoreShell with StoreHomeView
+  // If dark-gaming, render the dedicated DarkGamingLayout (dock rendered at phone frame level)
   if (activeTheme.id === "dark-gaming") {
     return (
-      <div className="h-full overflow-y-auto no-scrollbar pointer-events-auto text-left select-none">
-        <StoreShell
-          store={currentMockStore}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          theme={activeTheme.id}
-          totalProducts={MOCK_PRODUCTS.length}
-          isMockup={true}
-        >
-          <StoreHomeView
-            store={currentMockStore}
-            products={MOCK_PRODUCTS}
-            onNavigateTab={setActiveTab}
-            theme={activeTheme.id}
-          />
-        </StoreShell>
-      </div>
+      <DarkGamingLayout
+        store={currentMockStore}
+        products={MOCK_PRODUCTS}
+        isMockup={true}
+        hideDock={true}
+      />
     );
   }
 

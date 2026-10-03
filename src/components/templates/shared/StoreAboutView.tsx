@@ -365,7 +365,7 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
             {reviews.map((rev) => (
               <div
                 key={rev.id}
-                className={`p-3 rounded-2xl border ${colors.cardBorder} ${isDark ? "bg-slate-900/60" : "bg-neutral-50"}`}
+                className={`p-3 rounded-2xl border ${colors.cardBorder} ${isDark ? "bg-slate-900/60" : "bg-white"}`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-0.5 text-amber-400">
@@ -374,30 +374,44 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
                     ))}
                   </div>
                   {rev.purchasedUnit && (
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800 truncate max-w-[140px]">
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md truncate max-w-[140px] ${
+                      isDark
+                        ? "bg-emerald-900/40 text-emerald-300 border border-emerald-800/60"
+                        : "bg-blue-50 text-blue-700 border border-blue-200"
+                    }`}>
                       Unit: {rev.purchasedUnit}
                     </span>
                   )}
                 </div>
-                <p className={`text-xs italic leading-relaxed ${colors.textSecondary}`}>
+                <p className={`text-xs italic leading-relaxed ${
+                  isDark ? "text-slate-200" : "text-slate-700"
+                }`}>
                   &ldquo;{rev.comment}&rdquo;
                 </p>
-                <span className="text-[10px] text-slate-400 block mt-1.5 font-medium">
+                <span className={`text-[10px] block mt-1.5 font-bold ${
+                  isDark ? "text-slate-400" : "text-slate-500"
+                }`}>
                   — {rev.customerName}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-slate-900/40 text-center space-y-1.5 border border-dashed border-slate-200">
-            <p className={`text-xs ${colors.textSecondary}`}>
+          <div className={`p-4 rounded-2xl text-center space-y-1.5 border border-dashed ${
+            isDark
+              ? "bg-slate-900/40 border-slate-700 text-slate-400"
+              : "bg-neutral-50 border-slate-200 text-slate-500"
+          }`}>
+            <p className="text-xs">
               Belum ada ulasan untuk toko ini. Jadilah pembeli pertama yang memberikan testimoni!
             </p>
             {allowCustomerReviews && (
               <button
                 type="button"
                 onClick={() => setShowModal(true)}
-                className="mt-1 text-xs font-bold text-blue-600 hover:underline inline-flex items-center gap-1"
+                className={`mt-1 text-xs font-bold hover:underline inline-flex items-center gap-1 ${
+                  isDark ? "text-emerald-400 hover:text-emerald-300" : "text-blue-600"
+                }`}
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tulis Ulasan Pembeli Sekarang</span>

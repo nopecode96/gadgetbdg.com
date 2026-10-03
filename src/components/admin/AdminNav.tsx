@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Store, Package, RefreshCw, Share2, ExternalLink, LogOut, Users, Settings, QrCode, Building2 } from "lucide-react";
-import { logoutAction } from "@/lib/actions/login-actions";
+import { merchantLogoutAction } from "@/lib/actions/login-actions";
 import type { Role } from "@prisma/client";
 
 interface AdminNavProps {
@@ -97,7 +97,7 @@ export function AdminNav({ currentSlug, storeName, userName, role }: AdminNavPro
                 </span>
               </div>
             )}
-            <form action={logoutAction}>
+            <form action={merchantLogoutAction}>
               <button
                 type="submit"
                 title="Keluar dari Panel Admin Toko"

@@ -77,22 +77,24 @@ export default async function middleware(req: NextRequest) {
   //   /toko/admin/...  → /admin/...
   //   /toko/*          → /admin/* (catch-all for other toko sub-paths)
   // ─────────────────────────────────────────────────────────────────────────
-  if (pathname === "/toko" || pathname === "/toko/login") {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-  if (pathname === "/toko/register") {
-    return NextResponse.redirect(new URL("/register", req.url));
-  }
-  if (pathname.startsWith("/toko/admin")) {
-    const targetPath = pathname.replace("/toko/admin", "/admin");
-    const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
-    return NextResponse.redirect(new URL(`${targetPath}${targetQuery}`, req.url));
-  }
-  if (pathname.startsWith("/toko/")) {
-    // Catch-all: /toko/anything → /admin/anything (for dashboard sub-pages)
-    const targetPath = pathname.replace("/toko/", "/admin/");
-    const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
-    return NextResponse.redirect(new URL(`${targetPath}${targetQuery}`, req.url));
+  if (currentHost === mainDomain || currentHost === "localhost" || currentHost === "127.0.0.1") {
+    if (pathname === "/toko" || pathname === "/toko/login") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    if (pathname === "/toko/register") {
+      return NextResponse.redirect(new URL("/register", req.url));
+    }
+    if (pathname.startsWith("/toko/admin")) {
+      const targetPath = pathname.replace("/toko/admin", "/admin");
+      const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
+      return NextResponse.redirect(new URL(`${targetPath}${targetQuery}`, req.url));
+    }
+    if (pathname.startsWith("/toko/")) {
+      // Catch-all: /toko/anything → /admin/anything (for dashboard sub-pages)
+      const targetPath = pathname.replace("/toko/", "/admin/");
+      const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
+      return NextResponse.redirect(new URL(`${targetPath}${targetQuery}`, req.url));
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -117,18 +119,16 @@ export default async function middleware(req: NextRequest) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // STEP 1: Main domain / Apex domain or direct local access
-  //         (gadgetbdg.com, www.gadgetbdg.com, localhost, 127.0.0.1)
+  // STEP 1: Detect Root Domain / Apex or Direct Localhost Access
   // ─────────────────────────────────────────────────────────────────────────
-  const isMainDomain =
+  const isApexOrLocalApex =
     currentHost === mainDomain ||
     currentHost === `www.${mainDomain}` ||
     currentHost === "localhost" ||
     currentHost === "127.0.0.1";
 
-  if (isMainDomain) {
-    // All internal routes (SaaS landing, /login, /admin, /super-admin, storefronts)
-    // are handled directly by the Next.js App Router — pass through with anti-cache headers on protected routes.
+  if (isApexOrLocalApex) {
+    // Sajikan landing page utama, pricing, modal pendaftaran, dan rute /login
     const res = NextResponse.next();
     if (isProtectedAdminRoute) {
       res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
@@ -139,68 +139,88 @@ export default async function middleware(req: NextRequest) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // STEP 2: Subdomain routing (*.gadgetbdg.com)
+  // STEP 2: Subdomain Extraction (Production *.gadgetbdg.com & Local *.localhost)
   // ─────────────────────────────────────────────────────────────────────────
+  let subdomain: string | null = null;
   if (currentHost.endsWith(`.${mainDomain}`)) {
-    const subdomain = currentHost.replace(`.${mainDomain}`, "").toLowerCase();
+    subdomain = currentHost.replace(`.${mainDomain}`, "").toLowerCase();
+  } else if (currentHost.endsWith(".localhost")) {
+    subdomain = currentHost.replace(".localhost", "").toLowerCase();
+  }
 
-    // 2a. admin.gadgetbdg.com / super-admin.gadgetbdg.com → Super Admin Panel (/super-admin)
+  if (subdomain) {
+    // 2a. www subdomain -> Pass through to root domain
+    if (subdomain === "www") {
+      return NextResponse.next();
+    }
+
+    // 2b. Super Admin Subdomain (admin.gadgetbdg.com / admin.localhost)
     if (subdomain === "admin" || subdomain === "super-admin" || subdomain === "superadmin") {
-      // GUARD: reserved paths (login, api, _next…) pass through as-is to avoid rewrite loops
-      if (isReservedAppPath(pathname)) {
+      if (isReservedAppPath(pathname) && !pathname.startsWith("/super-admin")) {
         return NextResponse.next();
       }
+
       let targetPath = pathname;
       if (!targetPath.startsWith("/super-admin")) {
         targetPath = targetPath === "/" ? "/super-admin" : `/super-admin${targetPath}`;
       }
       const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
-      return NextResponse.rewrite(new URL(`${targetPath}${targetQuery}`, req.url));
+
+      const res = NextResponse.rewrite(new URL(`${targetPath}${targetQuery}`, req.url));
+      if (isProtectedAdminRoute) {
+        res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+        res.headers.set("Pragma", "no-cache");
+        res.headers.set("Expires", "0");
+      }
+      return res;
     }
 
-    // 2b. toko.gadgetbdg.com → Merchant Admin Panel (/admin)
-    if (subdomain === "toko") {
-      // GUARD: reserved paths pass through as-is.
-      // Specifically prevents: /admin → 307 /login → rewrite /admin/login → 404
-      if (isReservedAppPath(pathname)) {
-        return NextResponse.next();
-      }
-      // Root "/" on toko subdomain → redirect to /login (cleaner UX than blank admin redirect)
-      if (pathname === "/") {
-        return NextResponse.redirect(new URL("/login", req.url));
-      }
-      let targetPath = pathname;
-      if (!targetPath.startsWith("/admin")) {
-        targetPath = `/admin${targetPath}`;
-      }
-      const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
-      return NextResponse.rewrite(new URL(`${targetPath}${targetQuery}`, req.url));
-    }
-
-    // 2c. www.gadgetbdg.com → pass through to root domain
-    if (subdomain === "www") {
-      return NextResponse.next();
-    }
-
-    // 2d. Any other reserved subdomain → pass through (don't let it match a store)
+    // 2c. Reserved platform subdomains (api, billing, etc.)
     if (isReservedSlug(subdomain)) {
       return NextResponse.next();
     }
 
-    // 2e. GUARD: Reserved app paths on any store subdomain pass through directly
-    //     (e.g. berkahcell.gadgetbdg.com/login → /login, not /berkahcell/login)
-    if (isReservedAppPath(pathname)) {
-      return NextResponse.next();
+    // 2d. Store Tenant Subdomain ([slug].gadgetbdg.com / [slug].localhost)
+    // Create new request headers with x-store-slug injected
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-store-slug", subdomain);
+
+    // If accessing merchant admin panel on tenant subdomain (/admin or /[slug]/admin)
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+      const res = NextResponse.rewrite(new URL(`${pathname}${searchParams.length > 0 ? `?${searchParams}` : ""}`, req.url), {
+        request: {
+          headers: requestHeaders,
+        },
+      });
+      if (isProtectedAdminRoute) {
+        res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+        res.headers.set("Pragma", "no-cache");
+        res.headers.set("Expires", "0");
+      }
+      return res;
     }
 
-    // 2f. Storefront: [slug].gadgetbdg.com → /[store]/...
-    return NextResponse.rewrite(new URL(`/${subdomain}${path}`, req.url));
+    // If reserved app path like /login, pass through with headers
+    if (isReservedAppPath(pathname)) {
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+
+    // Default tenant root & pages -> rewrite to storefront (/[store-slug]/...)
+    const storefrontTarget = `/${subdomain}${path}`;
+    return NextResponse.rewrite(new URL(storefrontTarget, req.url), {
+      request: {
+        headers: requestHeaders,
+      },
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────
   // STEP 3: Custom Domain (e.g. tokoberkahbandung.com)
   // ─────────────────────────────────────────────────────────────────────────
-  // GUARD: Reserved app paths on custom domains are served directly.
   if (isReservedAppPath(pathname)) {
     return NextResponse.next();
   }

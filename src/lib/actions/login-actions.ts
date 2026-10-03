@@ -17,7 +17,18 @@ export async function loginAction(formData: FormData) {
   }
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        store: {
+          select: {
+            slug: true,
+            customDomain: true,
+            customDomainStatus: true,
+          },
+        },
+      },
+    });
     if (!user) {
       return { success: false, error: "Email atau password salah." };
     }
@@ -42,13 +53,29 @@ export async function loginAction(formData: FormData) {
       path: "/",
     });
 
+    const rootDomain = (process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com").toLowerCase();
+    const isProd = process.env.NODE_ENV === "production";
+
     // Redirect based on role
     if (user.role === "SALES" || user.role === "SALES_AGENT") {
       return { success: true, redirect: "/sales" };
     }
     if (user.role === "SUPER_ADMIN" || user.role === "ADMIN_SAAS") {
+      if (isProd) {
+        return { success: true, redirect: `https://admin.${rootDomain}` };
+      }
       return { success: true, redirect: "/super-admin" };
     }
+
+    // Merchant Store Owner / Staff
+    const storeSlug = user.store?.slug;
+    if (storeSlug) {
+      if (isProd) {
+        return { success: true, redirect: `https://${storeSlug}.${rootDomain}/admin` };
+      }
+      return { success: true, redirect: `/admin` };
+    }
+
     return { success: true, redirect: "/admin" };
   } catch (error: any) {
     console.error("loginAction error:", error);
@@ -79,5 +106,8 @@ export async function superAdminLogoutAction() {
 }
 
 export async function merchantLogoutAction() {
-  return logoutAction("/login");
+  const rootDomain = (process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com").toLowerCase();
+  const isProd = process.env.NODE_ENV === "production";
+  const loginUrl = isProd ? `https://${rootDomain}/login` : "/login";
+  return logoutAction(loginUrl);
 }

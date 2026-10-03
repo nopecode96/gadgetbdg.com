@@ -8,7 +8,6 @@ export const RESERVED_SLUGS: readonly string[] = [
   "admin",
   "super-admin",
   "superadmin",
-  "toko",
   "dashboard",
   "portal",
   "panel",

@@ -16,6 +16,7 @@ interface StorefrontProps {
 export function DarkGamingStorefront({ store, products }: StorefrontProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [selectedBrand, setSelectedBrand] = useState<string>("ALL");
+  const [selectedCategory, setSelectedCategory] = useState<string>("Semua Unit");
 
   return (
     <StoreShell
@@ -30,6 +31,9 @@ export function DarkGamingStorefront({ store, products }: StorefrontProps) {
           products={products}
           onNavigateTab={setActiveTab}
           onSelectBrand={setSelectedBrand}
+          onSelectCategoryFilter={(filter) => {
+            if (filter.category) setSelectedCategory(filter.category);
+          }}
           theme="dark-gaming"
         />
       )}
@@ -40,6 +44,8 @@ export function DarkGamingStorefront({ store, products }: StorefrontProps) {
           products={products}
           selectedBrand={selectedBrand}
           onBrandChange={setSelectedBrand}
+          initialCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
           theme="dark-gaming"
         />
       )}

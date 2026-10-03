@@ -188,7 +188,29 @@ export function StoreHomeView({
               <button
                 key={pill.id}
                 type="button"
-                onClick={() => setActiveFilter(pill.id)}
+                onClick={() => {
+                  setActiveFilter(pill.id);
+                  const categoryName =
+                    pill.id === "IPHONE"
+                      ? "iPhone"
+                      : pill.id === "ANDROID"
+                      ? "Android"
+                      : pill.id === "GAMING"
+                      ? "Gaming / Flagship"
+                      : pill.id === "BUDGET"
+                      ? "Budget < 3 Jt"
+                      : pill.id === "LIKENEW"
+                      ? "Mulus 99%"
+                      : "Semua Unit";
+
+                  if (onSelectCategoryFilter) {
+                    onSelectCategoryFilter({ category: categoryName });
+                  } else if (onSelectBrand) {
+                    if (pill.id === "IPHONE") onSelectBrand("Apple");
+                    else if (pill.id === "ALL") onSelectBrand("ALL");
+                  }
+                  onNavigateTab("list");
+                }}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl shrink-0 transition-all duration-200 select-none ${
                   isSelected
                     ? isDark

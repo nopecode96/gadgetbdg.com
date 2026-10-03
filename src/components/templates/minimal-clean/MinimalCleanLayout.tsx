@@ -316,7 +316,10 @@ export function MinimalCleanLayout({
                       <button
                         key={pill.id}
                         type="button"
-                        onClick={() => setActiveFilter(pill.id)}
+                        onClick={() => {
+                          setActiveFilter(pill.id);
+                          setActiveTab("list");
+                        }}
                         className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl shrink-0 transition-all duration-200 select-none ${
                           isSelected
                             ? "bg-slate-950 text-white font-black border-2 border-slate-950 shadow-md scale-105"
@@ -582,21 +585,60 @@ export function MinimalCleanLayout({
 
           {/* TAB 2: KATALOG */}
           {activeTab === "list" && (
-            <div className="space-y-4 text-left">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-black text-slate-950">
-                  Daftar Katalog Unit ({smartFilteredProducts.length})
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("home")}
-                  className="text-xs text-blue-600 font-bold hover:underline"
-                >
-                  ← Kembali ke Home
-                </button>
+            <div className="space-y-4 text-left -mx-4 -mt-4">
+              {/* Sticky Top Bilah Filter Lengkap */}
+              <div className="sticky top-[61px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3">
+                {/* Scrollable Horizontal Pill Filter */}
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {smartPills.map((pill) => {
+                    const isSelected = activeFilter === pill.id;
+                    return (
+                      <button
+                        key={pill.id}
+                        type="button"
+                        onClick={() => setActiveFilter(pill.id)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all select-none ${
+                          isSelected
+                            ? "bg-slate-950 text-white shadow-xs scale-102"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {pill.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Counter & Status Filter */}
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                  <span>Menampilkan {smartFilteredProducts.length} unit HP</span>
+                  {activeFilter !== "ALL" && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilter("ALL")}
+                      className="text-blue-600 font-semibold hover:underline"
+                    >
+                      Reset Filter
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="px-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-black text-slate-950">
+                    Daftar Katalog Unit ({smartFilteredProducts.length})
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("home")}
+                    className="text-xs text-blue-600 font-bold hover:underline"
+                  >
+                    ← Kembali ke Home
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                 {smartFilteredProducts.map((p) => {
                   const isCustomDomain =
                     typeof window !== "undefined" &&
@@ -675,6 +717,7 @@ export function MinimalCleanLayout({
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
           )}

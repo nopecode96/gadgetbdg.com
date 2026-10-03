@@ -17,6 +17,8 @@ interface StoreListViewProps {
   products: ProductData[];
   selectedBrand?: string;
   onBrandChange?: (brand: string) => void;
+  initialCategory?: string;
+  onCategoryChange?: (category: string) => void;
   theme?: string;
 }
 
@@ -25,6 +27,8 @@ export function StoreListView({
   products,
   selectedBrand: initialBrand = "ALL",
   onBrandChange,
+  initialCategory = "Semua Unit",
+  onCategoryChange,
   theme,
 }: StoreListViewProps) {
   const currentThemeId = theme || store.templateId || "minimal-clean";
@@ -35,6 +39,7 @@ export function StoreListView({
   const displayProducts = Array.isArray(products) ? products : [];
 
   const [search, setSearch] = useState("");
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>(initialCategory);
   const [brand, setBrand] = useState(initialBrand);
   const [selectedBranchId, setSelectedBranchId] = useState<string>("ALL");
   const [priceRange, setPriceRange] = useState<string>("ALL");
@@ -42,6 +47,20 @@ export function StoreListView({
   const [selectedStorage, setSelectedStorage] = useState<string>("ALL");
   const [selectedCondition, setSelectedCondition] = useState<string>("ALL");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+
+  // Sync when initialCategory prop changes
+  React.useEffect(() => {
+    if (initialCategory) {
+      setActiveCategoryFilter(initialCategory);
+    }
+  }, [initialCategory]);
+
+  const handleCategorySelect = (cat: string) => {
+    setActiveCategoryFilter(cat);
+    if (onCategoryChange) {
+      onCategoryChange(cat);
+    }
+  };
 
   // Extract unique brands
   const allBrands = ["ALL", ...Array.from(new Set(displayProducts.map((p) => p.brand).filter(Boolean)))];
@@ -53,6 +72,47 @@ export function StoreListView({
   const filteredProducts = useMemo(() => {
     return displayProducts.filter((p) => {
       if (!p) return false;
+
+      // 0. Top Category Bar Filter (Semua Unit, iPhone, Android, Gaming / Flagship)
+      if (activeCategoryFilter && activeCategoryFilter !== "Semua Unit") {
+        const brandLower = (p.brand || "").toLowerCase();
+        const nameLower = (p.name || "").toLowerCase();
+
+        if (activeCategoryFilter === "iPhone") {
+          const isApple = brandLower === "apple" || nameLower.includes("iphone");
+          if (!isApple) return false;
+        } else if (activeCategoryFilter === "Android") {
+          const isAndroid = brandLower !== "apple" && !nameLower.includes("iphone");
+          if (!isAndroid) return false;
+        } else if (
+          activeCategoryFilter === "Gaming / Flagship" ||
+          activeCategoryFilter === "Gaming" ||
+          activeCategoryFilter === "Gaming / FPS"
+        ) {
+          const isGaming =
+            brandLower.includes("rog") ||
+            brandLower.includes("iqoo") ||
+            brandLower.includes("poco") ||
+            nameLower.includes("rog") ||
+            nameLower.includes("iqoo") ||
+            nameLower.includes("poco") ||
+            nameLower.includes("gaming") ||
+            nameLower.includes("ultra") ||
+            nameLower.includes("pro max");
+          if (!isGaming) return false;
+        } else if (activeCategoryFilter === "Budget < 3 Jt") {
+          if (Number(p.price || 0) > 3000000) return false;
+        } else if (activeCategoryFilter === "Mulus 99%") {
+          const cond = (p.condition || "").toUpperCase();
+          const isLikeNew =
+            cond === "LIKE_NEW" ||
+            cond.includes("MULUS") ||
+            cond.includes("99%") ||
+            cond.includes("98%") ||
+            cond.includes("LIKE NEW");
+          if (!isLikeNew) return false;
+        }
+      }
 
       // 1. Text search
       const q = search.toLowerCase();
@@ -91,10 +151,21 @@ export function StoreListView({
 
       return matchSearch && matchBrand && matchBranch && matchPrice && matchRam && matchStorage && matchCondition;
     });
-  }, [displayProducts, search, brand, selectedBranchId, priceRange, selectedRam, selectedStorage, selectedCondition]);
+  }, [
+    displayProducts,
+    activeCategoryFilter,
+    search,
+    brand,
+    selectedBranchId,
+    priceRange,
+    selectedRam,
+    selectedStorage,
+    selectedCondition,
+  ]);
 
   function resetFilters() {
     setSearch("");
+    setActiveCategoryFilter("Semua Unit");
     setBrand("ALL");
     setSelectedBranchId("ALL");
     setPriceRange("ALL");
@@ -102,9 +173,11 @@ export function StoreListView({
     setSelectedStorage("ALL");
     setSelectedCondition("ALL");
     if (onBrandChange) onBrandChange("ALL");
+    if (onCategoryChange) onCategoryChange("Semua Unit");
   }
 
   const hasActiveFilters =
+    activeCategoryFilter !== "Semua Unit" ||
     brand !== "ALL" ||
     selectedBranchId !== "ALL" ||
     priceRange !== "ALL" ||
@@ -114,31 +187,68 @@ export function StoreListView({
     search.trim().length > 0;
 
   return (
-    <div className="p-4 space-y-4 animate-fade-in text-xs">
-      {/* 1. Search Bar & Filter Toggle */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari iPhone, Samsung, RAM, IMEI..."
-            className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs focus:outline-none transition ${
-              isDark
-                ? "bg-slate-900 border-slate-800 text-white placeholder-slate-500 focus:border-emerald-500"
-                : "bg-white border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:border-blue-500 shadow-sm"
-            }`}
-          />
-          {search && (
+    <div className="space-y-4 animate-fade-in text-xs">
+      {/* ── TOP BILAH FILTER LENGKAP (Sticky Category Filter Bar) ── */}
+      <div className="sticky top-[61px] z-30 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 py-3">
+        {/* Scrollable Horizontal Pill Filter */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {["Semua Unit", "iPhone", "Android", "Gaming / Flagship"].map((cat) => (
             <button
-              onClick={() => setSearch("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs"
+              key={cat}
+              type="button"
+              onClick={() => handleCategorySelect(cat)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all select-none ${
+                activeCategoryFilter === cat
+                  ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs scale-102"
+                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200"
+              }`}
             >
-              ✕
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Counter & Status Filter */}
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500">
+          <span>Menampilkan {filteredProducts.length} unit HP</span>
+          {activeCategoryFilter !== "Semua Unit" && (
+            <button
+              type="button"
+              onClick={() => handleCategorySelect("Semua Unit")}
+              className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+            >
+              Reset Filter
             </button>
           )}
         </div>
+      </div>
+
+      <div className="p-4 pt-0 space-y-4">
+        {/* 1. Search Bar & Filter Toggle */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari iPhone, Samsung, RAM, IMEI..."
+              className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs focus:outline-none transition ${
+                isDark
+                  ? "bg-slate-900 border-slate-800 text-white placeholder-slate-500 focus:border-emerald-500"
+                  : "bg-white border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:border-blue-500 shadow-sm"
+              }`}
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
 
         <button
           onClick={() => setShowFilterPanel(!showFilterPanel)}
@@ -376,6 +486,7 @@ export function StoreListView({
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

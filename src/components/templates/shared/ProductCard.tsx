@@ -137,8 +137,17 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
         >
           {product.name}
         </h3>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-          {product.ramRom || "Fullset"} • {product.condition || "98% Mulus"}
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
+          <span>{product.ramRom || "Fullset"}</span>
+          <span>•</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
+            {product.grade || product.condition || "98% Mulus"}
+          </span>
+          {product.batteryHealth && (
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/40 px-1 rounded">
+              BH {product.batteryHealth}
+            </span>
+          )}
         </p>
 
         {product.branch && (

@@ -81,6 +81,7 @@ export async function updateTradeInStatusAction(offerId: string, newStatus: any)
 
 import {
   createProductAction as guardedCreateProduct,
+  updateProductAction as guardedUpdateProduct,
   updateProductStatusAction as guardedUpdateProductStatus,
   deleteProductAction as guardedDeleteProduct,
 } from "./actions/product-actions";
@@ -189,8 +190,8 @@ export async function deleteStaffUserAction(userId: string) {
 }
 
 // ─── Product action wrappers (session-secured) ────────────────────
-export async function createProduct(formData: FormData) {
-  return guardedCreateProduct(formData);
+export async function createProduct(input: FormData | Record<string, any>) {
+  return guardedCreateProduct(input);
 }
 
 export async function updateProductStatus(
@@ -221,8 +222,16 @@ export async function toggleProductStatus(
 }
 
 /** Alias used by ProductManagerClient */
-export async function createProductAction(formData: FormData) {
-  return guardedCreateProduct(formData);
+export async function createProductAction(input: FormData | Record<string, any>) {
+  return guardedCreateProduct(input);
+}
+
+export async function updateProduct(productId: string, input: any) {
+  return guardedUpdateProduct(productId, input);
+}
+
+export async function updateProductAction(productId: string, input: any) {
+  return guardedUpdateProduct(productId, input);
 }
 
 /** Alias used by ProductManagerClient */

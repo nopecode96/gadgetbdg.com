@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: CustomDomainPageProps): Promi
       logoUrl: true,
       products: {
         take: 3,
-        select: { name: true },
+        select: { title: true, name: true },
       },
     },
   });
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: CustomDomainPageProps): Promi
   }
 
   const title = `${store.name} - Storefront Resmi`;
-  const productPreview = store.products.map((p) => p.name).join(", ");
+  const productPreview = store.products.map((p) => p.title || p.name).join(", ");
   const description = `Katalog HP second berkualitas di ${store.name}. Unit teruji & bergaransi: ${
     productPreview || "Katalog HP Second Resmi"
   }.`;
@@ -171,15 +171,23 @@ export default async function CustomDomainPage({ params }: CustomDomainPageProps
 
   const productsData = (rawStore.products || []).map((p) => ({
     id: String(p.id),
-    name: String(p.name),
+    name: String(p.title || p.name || ""),
+    title: String(p.title || p.name || ""),
+    slug: String(p.slug || ""),
+    category: String(p.category || "SMARTPHONE"),
     brand: String(p.brand),
     price: Number(p.price || 0),
-    ramRom: String(p.ramRom || ""),
-    batteryHealth: p.batteryHealth !== null && p.batteryHealth !== undefined ? Number(p.batteryHealth) : null,
-    imeiStatus: String(p.imeiStatus || ""),
+    grade: p.grade ? String(p.grade) : (p.condition ? String(p.condition) : null),
+    ram: p.ram ? String(p.ram) : null,
+    storage: p.storage ? String(p.storage) : null,
+    ramRom: p.ram && p.storage ? `${p.ram} / ${p.storage}` : String(p.storage || p.ram || p.ramRom || ""),
+    batteryHealth: p.batteryHealth !== null && p.batteryHealth !== undefined ? String(p.batteryHealth) : null,
+    imeiStatus: String(p.imeiStatus || "Resmi Terdaftar"),
     completeness: String(p.completeness || ""),
-    condition: String(p.condition || ""),
-    minusNotes: p.minusNotes ? String(p.minusNotes) : null,
+    condition: String(p.grade || p.condition || ""),
+    conditionNotes: p.conditionNotes ? String(p.conditionNotes) : (p.minusNotes ? String(p.minusNotes) : null),
+    minusNotes: p.conditionNotes ? String(p.conditionNotes) : (p.minusNotes ? String(p.minusNotes) : null),
+    description: p.description ? String(p.description) : null,
     status: String(p.status || "AVAILABLE"),
     images: Array.isArray(p.images) ? p.images.map(String) : [],
     branchId: p.branchId ? String(p.branchId) : null,

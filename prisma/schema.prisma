@@ -157,30 +157,51 @@ model User {
 }
 
 model Product {
-  id            String        @id @default(cuid())
-  storeId       String
-  branchId      String?
-  name          String
-  brand         String
-  price         Int
-  ramRom        String
-  batteryHealth Int?
-  imeiStatus    String        // e.g. "Kemenperin / All Operator", "Smartfren Only", "Bea Cukai", "WiFi Only"
-  completeness  String        // e.g. "Fullset Original", "Unit Only (Batangan)", "Fullset OEM"
-  condition     String        // e.g. "98% Mulus Like New", "95% Pemakaian Wajar"
-  minusNotes    String?       // e.g. "TrueTone Off", "Layar pernah ganti ori", "No minus mulus"
-  status        ProductStatus @default(AVAILABLE)
-  clickCount    Int           @default(0)
-  images        String[]      @default([])
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id              String         @id @default(cuid())
+  storeId         String
+  store           Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Info Utama
+  title           String         @default("") // Contoh: "iPhone 13 Pro 256GB Sierra Blue"
+  slug            String         @default("")
+  category        String         @default("SMARTPHONE") // SMARTPHONE, TABLET, ACCESSORY, SMARTWATCH
+  brand           String         // Apple, Samsung, Xiaomi, Oppo, Vivo, dll.
+  price           Decimal        @db.Decimal(12, 2)
+  
+  // Multi-Foto (Galeri Sudut HP)
+  images          String[]       @default([]) // Array URL foto (depan, belakang, sudut lecet, kelengkapan)
+  
+  // Spesifikasi Fleksibel (Textbox Bebas)
+  grade           String?        // Contoh: "Grade A+ (Mulus Like New)"
+  ram             String?        // Contoh: "8GB" / "8GB + 8GB"
+  storage         String?        // Contoh: "256GB"
+  batteryHealth   String?        // Contoh: "88% Original" / "Awet Seharian"
+  completeness    String?        // Contoh: "Fullset Box Original" / "Unit Only"
+  
+  // Catatan Minus & Kondisi Riil
+  conditionNotes  String?        // Contoh: "Ada dent halus di bezel kanan atas, TrueTone ON, 3uTools hijau semua"
+  description     String?        // Keterangan tambahan garansi toko / bonus case
+  
+  // Status Stok
+  status          ProductStatus  @default(AVAILABLE) // AVAILABLE, BOOKED, SOLD
+  clickCount      Int            @default(0)
 
-  store         Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  branch        Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  // Backward compatibility fields
+  name            String?
+  ramRom          String?
+  condition       String?
+  minusNotes      String?
+  imeiStatus      String?
+  branchId        String?
+  branch          Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([storeId])
   @@index([branchId])
   @@index([status])
+  @@index([category])
 }
 
 model TradeInOffer {

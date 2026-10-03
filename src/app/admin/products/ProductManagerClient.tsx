@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Plus,
   Trash2,
@@ -13,25 +14,31 @@ import {
   PackageX,
   Zap,
   Camera,
-  Scan,
+  Pencil,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
-import { toggleProductStatus, createProductAction, deleteProductAction } from "@/lib/actions";
-import { BarcodeScannerModal } from "@/components/admin/BarcodeScannerModal";
-import { ProductImageUploader } from "@/components/admin/ProductImageUploader";
+import { toggleProductStatus, deleteProductAction } from "@/lib/actions";
+import { ProductForm } from "@/components/admin/ProductForm";
 
 interface Product {
   id: string;
   storeId: string;
   branchId?: string | null;
   name: string;
+  title?: string;
+  category?: string;
   brand: string;
   price: number;
+  grade?: string | null;
+  ram?: string | null;
+  storage?: string | null;
   ramRom: string;
-  batteryHealth: number | null;
+  batteryHealth: string | number | null;
   imeiStatus: string;
   completeness: string;
   condition: string;
+  conditionNotes?: string | null;
+  description?: string | null;
   minusNotes: string | null;
   status: string;
   images: string[];
@@ -88,12 +95,7 @@ export function ProductManagerClient({
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [scannedImei, setScannedImei] = useState("");
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   // Live active count based on current local state
   const liveActiveCount = products.filter(
@@ -106,7 +108,7 @@ export function ProductManagerClient({
   const filtered = products.filter((p) => {
     const matchStatus = filterStatus === "ALL" || p.status === filterStatus;
     const matchSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.title || p.name).toLowerCase().includes(search.toLowerCase()) ||
       p.brand.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
@@ -133,32 +135,6 @@ export function ProductManagerClient({
       setProducts((prev) => prev.filter((p) => p.id !== productId));
     } else {
       alert(res.error || "Gagal menghapus unit.");
-    }
-  }
-
-  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setFormError(null);
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    // storeId NOT appended — server reads it from session cookie
-
-    // Lampirkan array images hasil upload WebP
-    if (uploadedImages.length > 0) {
-      formData.set("images", JSON.stringify(uploadedImages));
-    }
-
-    const res = await createProductAction(formData);
-    setLoading(false);
-
-    if (res.success && res.product) {
-      setProducts((prev) => [res.product as any, ...prev]);
-      setIsFormOpen(false);
-      setScannedImei("");
-      setUploadedImages([]);
-      (e.target as HTMLFormElement).reset();
-    } else {
-      setFormError(res.error || "Gagal menambahkan unit.");
     }
   }
 
@@ -226,13 +202,23 @@ export function ProductManagerClient({
               <span>Kuota Penuh</span>
             </div>
           ) : (
-            <button
-              onClick={() => setIsFormOpen(!isFormOpen)}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{isFormOpen ? "Tutup Form" : "Tambah Unit HP Second"}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsFormOpen(!isFormOpen)}
+                className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 transition"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{isFormOpen ? "Tutup Form" : "Form Cepat"}</span>
+              </button>
+              <Link
+                href="/admin/products/new"
+                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Tambah Produk Baru</span>
+              </Link>
+            </div>
           )}
         </div>
       </div>
@@ -252,234 +238,18 @@ export function ProductManagerClient({
         </div>
       )}
 
-      {/* ── Add Product Form ── */}
+      {/* ── Add Product Form (3-Blok Layout) ── */}
       {isFormOpen && !isQuotaFull && (
-        <div className="bg-white rounded-2xl p-6 border border-blue-200 shadow-lg">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-5">
-            <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-blue-600" />
-              Form Input Unit HP Bekas
-            </h2>
-            <span className="text-[11px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-md">
-              {store?.name}
-            </span>
-          </div>
-
-          {formError && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-2 text-xs">
-              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-              <span className="text-red-700">{formError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleCreate} className="space-y-4 text-xs">
-            {/* Row 1: Name / Brand / Price */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Nama Unit &amp; Varian *</label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  placeholder="Contoh: iPhone 13 128GB Midnight"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Brand *</label>
-                <select
-                  name="brand"
-                  required
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                >
-                  {[
-                    "Apple", "Samsung", "Xiaomi", "POCO", "Redmi", "ASUS ROG",
-                    "iQOO", "Oppo", "Realme", "Vivo", "OnePlus", "Google",
-                    "Infinix", "Tecno", "Lainnya",
-                  ].map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Harga Jual (Rp) *</label>
-                <input
-                  type="number"
-                  name="price"
-                  required
-                  min="0"
-                  placeholder="8500000"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-            </div>
-
-            {/* Row 2: RAM/ROM / Battery Health */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">RAM / Storage *</label>
-                <input
-                  type="text"
-                  name="ramRom"
-                  required
-                  placeholder="6GB / 128GB"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Battery Health % <span className="text-slate-400">(khusus iPhone)</span>
-                </label>
-                <input
-                  type="number"
-                  name="batteryHealth"
-                  placeholder="87"
-                  min="50"
-                  max="100"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-            </div>
-
-            {/* Row 3: Barcode / IMEI Scanner & Status IMEI */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-cyan-50/50 border border-cyan-100">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-slate-800 flex items-center gap-1.5">
-                    <Scan className="w-3.5 h-3.5 text-cyan-600" />
-                    Nomor IMEI (15 Digit)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsScannerOpen(true)}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-cyan-600 hover:bg-cyan-700 shadow-sm shadow-cyan-600/20 px-2.5 py-1 rounded-lg transition"
-                    title="Buka Kamera Scanner Barcode Dus / IMEI"
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                    <span>Scan Dus / Barcode</span>
-                  </button>
-                </div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="imeiNumber"
-                    value={scannedImei}
-                    onChange={(e) => setScannedImei(e.target.value.replace(/[^0-9]/g, "").slice(0, 15))}
-                    placeholder="Scan atau ketik IMEI 15 digit..."
-                    maxLength={15}
-                    className="w-full px-3 py-2 rounded-xl border border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white font-mono text-slate-800 tracking-wider text-xs"
-                  />
-                  {scannedImei && (
-                    <span className="absolute right-2 top-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800 border border-cyan-200">
-                      {scannedImei.length}/15
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label className="block font-bold text-slate-800 mb-1">Status Legalitas IMEI *</label>
-                <select
-                  name="imeiStatus"
-                  required
-                  className="w-full px-3 py-2 rounded-xl border border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white text-xs"
-                >
-                  <option value="Resmi iBox / Kemenperin Aman">Resmi iBox / Kemenperin Aman</option>
-                  <option value="Resmi SEIN / Resmi Indonesia">Resmi SEIN / Resmi Indonesia</option>
-                  <option value="Bea Cukai Faktur Lengkap">Bea Cukai Faktur Lengkap</option>
-                  <option value="All Operator Terdaftar">All Operator Terdaftar</option>
-                  <option value="Smartfren Only">Smartfren Only</option>
-                  <option value="WiFi Only">WiFi Only</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Row 3: Completeness / Condition */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Kelengkapan Paket *</label>
-                <input
-                  type="text"
-                  name="completeness"
-                  required
-                  placeholder="Fullset Box + Kabel Original / Batangan Unit Only"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Kondisi Fisik *</label>
-                <input
-                  type="text"
-                  name="condition"
-                  required
-                  placeholder="98% Mulus Like New / 92% Pemakaian Wajar"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-            </div>
-
-            {/* Row 4: Minus Notes & Branch Allocation */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Catatan Minus / Riwayat Part
-                </label>
-                <input
-                  type="text"
-                  name="minusNotes"
-                  placeholder="Contoh: No minus mulus total / Layar pernah ganti ori"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Lokasi Cabang / Toko Fisik {branches.length > 0 ? "" : "(Opsional)"}
-                </label>
-                <select
-                  name="branchId"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-xs"
-                >
-                  <option value="">Pusat / Semua Cabang</option>
-                  {branches.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name} {b.isMain ? "(Pusat)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Row 5: Multi-Upload Galeri Foto Unit with Sharp WebP & Watermark */}
-            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200">
-              <ProductImageUploader
-                images={uploadedImages}
-                onChange={setUploadedImages}
-                maxFiles={5}
-                isWatermarked={store?.tier !== "STARTER" || store?.hasWatermark === true}
-              />
-            </div>
-
-            <div className="pt-2 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsFormOpen(false);
-                  setFormError(null);
-                  setUploadedImages([]);
-                }}
-                className="px-4 py-2 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition text-xs"
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-5 py-2 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition disabled:opacity-50 text-xs"
-              >
-                {loading ? "Menyimpan..." : "✓ Publikasikan ke Katalog"}
-              </button>
-            </div>
-          </form>
+        <div className="bg-slate-50/80 rounded-3xl p-5 sm:p-7 border border-blue-200 shadow-md">
+          <ProductForm
+            mode="create"
+            branches={branches}
+            onSuccess={() => {
+              setIsFormOpen(false);
+              window.location.reload();
+            }}
+            onCancel={() => setIsFormOpen(false)}
+          />
         </div>
       )}
 
@@ -570,10 +340,12 @@ export function ProductManagerClient({
                       <span>•</span>
                       <span>{p.ramRom}</span>
                       <span>•</span>
-                      <span>{p.condition}</span>
-                      {p.batteryHealth !== null && (
+                      <span className="font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded text-[10px]">
+                        {p.grade || p.condition}
+                      </span>
+                      {p.batteryHealth !== null && p.batteryHealth !== "" && (
                         <span className="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
-                          <BatteryCharging className="w-3 h-3" /> BH {p.batteryHealth}%
+                          <BatteryCharging className="w-3 h-3" /> BH {p.batteryHealth}
                         </span>
                       )}
                       {p.branch && (
@@ -588,17 +360,17 @@ export function ProductManagerClient({
                       ) : null}
                     </div>
 
-                    {p.minusNotes && (
+                    {(p.conditionNotes || p.minusNotes) && (
                       <p className="text-[11px] text-slate-500 italic flex items-center gap-1">
                         <AlertCircle className="w-3 h-3 text-amber-500 shrink-0" />
-                        <span className="truncate">{p.minusNotes}</span>
+                        <span className="truncate">{p.conditionNotes || p.minusNotes}</span>
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* Quick Toggle + Delete */}
-                <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0">
+                {/* Quick Toggle + Edit + Delete */}
+                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                   <button
                     onClick={() => handleToggleStatus(p.id, p.status)}
                     disabled={statusUpdatingId === p.id}
@@ -620,6 +392,14 @@ export function ProductManagerClient({
                     )}
                   </button>
 
+                  <Link
+                    href={`/admin/products/${p.id}/edit`}
+                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                    title="Edit Spesifikasi & Galeri Foto"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Link>
+
                   <button
                     onClick={() => handleDelete(p.id)}
                     className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
@@ -633,15 +413,6 @@ export function ProductManagerClient({
           )}
         </div>
       </div>
-
-      {/* Barcode / IMEI Scanner Camera Modal */}
-      <BarcodeScannerModal
-        isOpen={isScannerOpen}
-        onClose={() => setIsScannerOpen(false)}
-        onScanSuccess={(decodedImei) => {
-          setScannedImei(decodedImei);
-        }}
-      />
     </div>
   );
 }

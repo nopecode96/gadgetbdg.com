@@ -10,7 +10,7 @@ interface Product {
   brand: string;
   price: number;
   ramRom: string;
-  batteryHealth: number | null;
+  batteryHealth: string | number | null;
   imeiStatus: string;
   completeness: string;
   condition: string;
@@ -271,7 +271,12 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       );
 
       // Badge 4: Battery Health or Kelengkapan
-      const bhText = product.batteryHealth ? `BH ${product.batteryHealth}%` : "Tested Normal";
+      const numericBh = product.batteryHealth ? parseInt(String(product.batteryHealth).replace(/\D/g, ""), 10) : 0;
+      const bhText = product.batteryHealth
+        ? String(product.batteryHealth).includes("%")
+          ? `BH ${product.batteryHealth}`
+          : `BH ${product.batteryHealth}%`
+        : "Tested Normal";
       drawBadge(
         ctx,
         560,
@@ -280,8 +285,8 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
         badgeH,
         product.batteryHealth ? "BATTERY HEALTH" : "KELENGKAPAN",
         product.batteryHealth ? bhText : product.completeness,
-        product.batteryHealth && product.batteryHealth < 80 ? "#78350f" : "#14532d",
-        product.batteryHealth && product.batteryHealth < 80 ? "#fcd34d" : "#4ade80"
+        numericBh > 0 && numericBh < 80 ? "#78350f" : "#14532d",
+        numericBh > 0 && numericBh < 80 ? "#fcd34d" : "#4ade80"
       );
 
       // 6. Minus Notes Bar (Transparan)

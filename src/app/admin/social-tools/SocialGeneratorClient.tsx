@@ -11,7 +11,7 @@ interface Product {
   brand: string;
   price: number;
   ramRom: string;
-  batteryHealth: number | null;
+  batteryHealth: string | number | null;
   imeiStatus: string;
   completeness: string;
   condition: string;

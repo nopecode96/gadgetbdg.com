@@ -40,13 +40,21 @@ export interface StoreData {
 export interface ProductData {
   id: string;
   name: string;
+  title?: string;
+  slug?: string;
+  category?: string;
   brand: string;
   price: number;
+  grade?: string | null;
+  ram?: string | null;
+  storage?: string | null;
   ramRom: string;
-  batteryHealth: number | null;
+  batteryHealth: string | number | null;
   imeiStatus: string;
   completeness: string;
   condition: string;
+  conditionNotes?: string | null;
+  description?: string | null;
   minusNotes: string | null;
   status: string;
   images: string[];

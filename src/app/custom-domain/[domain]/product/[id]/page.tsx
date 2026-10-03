@@ -36,9 +36,11 @@ export async function generateMetadata({ params }: CustomDomainProductPageProps)
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: {
+      title: true,
       name: true,
       price: true,
       condition: true,
+      grade: true,
       imeiStatus: true,
       images: true,
     },
@@ -48,9 +50,10 @@ export async function generateMetadata({ params }: CustomDomainProductPageProps)
     return { title: "Unit HP Tidak Ditemukan" };
   }
 
-  const title = `${product.name} - ${store.name}`;
+  const productName = product.title || product.name || "Unit HP";
+  const title = `${productName} - ${store.name}`;
   const description = `Harga Rp ${Number(product.price).toLocaleString("id-ID")} - Kondisi ${
-    product.condition
+    product.grade || product.condition
   } - IMEI: ${product.imeiStatus}. Siap COD & cek fisik langsung.`;
   const image =
     Array.isArray(product.images) && product.images.length > 0
@@ -63,7 +66,7 @@ export async function generateMetadata({ params }: CustomDomainProductPageProps)
     openGraph: {
       title,
       description,
-      images: [{ url: image, width: 1200, height: 630, alt: product.name }],
+      images: [{ url: image, width: 1200, height: 630, alt: productName }],
       type: "website",
     },
     twitter: {
@@ -139,18 +142,26 @@ export default async function CustomDomainProductDetailPage({
 
   const productData = {
     id: String(rawProduct.id),
-    name: String(rawProduct.name),
+    name: String(rawProduct.title || rawProduct.name || ""),
+    title: String(rawProduct.title || rawProduct.name || ""),
+    slug: String(rawProduct.slug || ""),
+    category: String(rawProduct.category || "SMARTPHONE"),
     brand: String(rawProduct.brand),
     price: Number(rawProduct.price || 0),
-    ramRom: String(rawProduct.ramRom || ""),
+    grade: rawProduct.grade ? String(rawProduct.grade) : (rawProduct.condition ? String(rawProduct.condition) : null),
+    ram: rawProduct.ram ? String(rawProduct.ram) : null,
+    storage: rawProduct.storage ? String(rawProduct.storage) : null,
+    ramRom: rawProduct.ram && rawProduct.storage ? `${rawProduct.ram} / ${rawProduct.storage}` : String(rawProduct.storage || rawProduct.ram || rawProduct.ramRom || ""),
     batteryHealth:
       rawProduct.batteryHealth !== null && rawProduct.batteryHealth !== undefined
-        ? Number(rawProduct.batteryHealth)
+        ? String(rawProduct.batteryHealth)
         : null,
-    imeiStatus: String(rawProduct.imeiStatus || ""),
+    imeiStatus: String(rawProduct.imeiStatus || "Resmi Terdaftar"),
     completeness: String(rawProduct.completeness || ""),
-    condition: String(rawProduct.condition || ""),
-    minusNotes: rawProduct.minusNotes ? String(rawProduct.minusNotes) : null,
+    condition: String(rawProduct.grade || rawProduct.condition || ""),
+    conditionNotes: rawProduct.conditionNotes ? String(rawProduct.conditionNotes) : (rawProduct.minusNotes ? String(rawProduct.minusNotes) : null),
+    minusNotes: rawProduct.conditionNotes ? String(rawProduct.conditionNotes) : (rawProduct.minusNotes ? String(rawProduct.minusNotes) : null),
+    description: rawProduct.description ? String(rawProduct.description) : null,
     status: String(rawProduct.status || "AVAILABLE"),
     images: Array.isArray(rawProduct.images) ? rawProduct.images.map(String) : [],
     branchId: rawProduct.branchId ? String(rawProduct.branchId) : null,

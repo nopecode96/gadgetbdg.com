@@ -335,7 +335,13 @@ export function ProductDetailView({
                 </span>
               </span>
               <div className="text-slate-950 dark:text-white font-black text-base">
-                {product.batteryHealth ? `${product.batteryHealth}% Normal` : "Original Bawaan"}
+                {product.batteryHealth ? (
+                  String(product.batteryHealth).includes("%") || String(product.batteryHealth).toLowerCase().includes("awet")
+                    ? String(product.batteryHealth)
+                    : `${product.batteryHealth}% Normal`
+                ) : (
+                  "Original Bawaan"
+                )}
               </div>
             </div>
 
@@ -361,7 +367,9 @@ export function ProductDetailView({
                 </span>
               </span>
               <div className="text-slate-950 dark:text-white font-black text-base">
-                {product.ramRom || "-"}
+                {product.ram && product.storage
+                  ? `${product.ram} / ${product.storage}`
+                  : product.ramRom || "-"}
               </div>
             </div>
 
@@ -387,7 +395,7 @@ export function ProductDetailView({
                 </span>
               </span>
               <div className="text-slate-950 dark:text-white font-black text-base">
-                {product.condition || "98% Mulus"}
+                {product.grade || product.condition || "98% Mulus"}
               </div>
             </div>
 
@@ -414,11 +422,25 @@ export function ProductDetailView({
           </div>
 
           <p className="text-slate-900 dark:text-slate-100 font-bold text-sm leading-relaxed">
-            {product.minusNotes && product.minusNotes.trim().length > 0
-              ? product.minusNotes
+            {(product.conditionNotes || product.minusNotes) &&
+            (product.conditionNotes || product.minusNotes)!.trim().length > 0
+              ? product.conditionNotes || product.minusNotes
               : "Unit mulus normal tanpa minus fungsional. Lolos 30 titik uji kelayakan toko."}
           </p>
         </div>
+
+        {/* 4.1. KETERANGAN TAMBAHAN / GARANSI & BONUS */}
+        {product.description && (
+          <div className="bg-blue-50/70 border-2 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800/50 rounded-2xl p-4 shadow-xs">
+            <div className="text-blue-950 dark:text-blue-300 font-black text-xs uppercase flex items-center gap-1.5 mb-1.5">
+              <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <span>GARANSI TOKO &amp; KETERANGAN UNIT:</span>
+            </div>
+            <p className="text-slate-800 dark:text-slate-200 font-semibold text-xs leading-relaxed">
+              {product.description}
+            </p>
+          </div>
+        )}
 
         {/* 4.5. LOKASI FISIK CABANG & READY STOCK */}
         {product.branch ? (

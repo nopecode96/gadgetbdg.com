@@ -41,11 +41,11 @@ export default async function AdminDashboardPage() {
 
   const estimatedTurnover = products
     .filter((p) => p.status === "SOLD")
-    .reduce((acc, curr) => acc + curr.price, 0);
+    .reduce((acc, curr) => acc + Number(curr.price), 0);
 
   const activeStockValue = products
     .filter((p) => p.status === "AVAILABLE" || p.status === "BOOKED")
-    .reduce((acc, curr) => acc + curr.price, 0);
+    .reduce((acc, curr) => acc + Number(curr.price), 0);
 
   const mostWantedProducts = [...products]
     .sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0))

@@ -13,6 +13,21 @@ export default async function AdminSocialToolsPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const serializedProducts = products.map((p) => ({
+    ...p,
+    name: p.title || p.name || "",
+    brand: p.brand,
+    price: Number(p.price),
+    ramRom: p.ram && p.storage ? `${p.ram} / ${p.storage}` : p.ramRom || p.storage || p.ram || "",
+    batteryHealth: p.batteryHealth ? String(p.batteryHealth) : null,
+    imeiStatus: p.imeiStatus || "Resmi Terdaftar",
+    completeness: p.completeness || "Fullset",
+    condition: p.grade || p.condition || "Mulus",
+    minusNotes: p.conditionNotes || p.minusNotes || null,
+    status: p.status,
+    images: Array.isArray(p.images) ? p.images : [],
+  }));
+
   const serializedStore = {
     ...store,
     subscriptionExpiresAt: store.subscriptionExpiresAt?.toISOString() ?? null,
@@ -21,7 +36,7 @@ export default async function AdminSocialToolsPage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
-      <SocialGeneratorClient store={serializedStore} products={products} />
+      <SocialGeneratorClient store={serializedStore} products={serializedProducts as any} />
     </div>
   );
 }

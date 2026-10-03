@@ -905,6 +905,7 @@ function PhoneMockupScreen({ activeTheme }: { activeTheme: TemplateThemeConfig }
           onTabChange={setActiveTab}
           theme={activeTheme.id}
           totalProducts={LIVE_MOCK_PRODUCTS.length}
+          isMockup={true}
         >
           <StoreHomeView
             store={mockStore}

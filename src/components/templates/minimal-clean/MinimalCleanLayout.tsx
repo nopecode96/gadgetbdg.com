@@ -358,45 +358,63 @@ export function MinimalCleanLayout({
                       return (
                         <div
                           key={`snap-${p.id}`}
-                          className="w-[220px] sm:w-[240px] shrink-0 rounded-3xl p-3 bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-2 group"
+                          className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white dark:bg-slate-900 rounded-3xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col group"
                         >
-                          <div className="w-full aspect-4/3 rounded-2xl bg-slate-50 p-2 flex items-center justify-center relative overflow-hidden border border-slate-100">
-                            {p.images?.[0] ? (
-                              <img
-                                src={p.images[0]}
-                                alt={p.name}
-                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                              />
-                            ) : (
-                              <Smartphone className="w-10 h-10 text-slate-300" />
-                            )}
+                          <a
+                            href={detailUrl}
+                            onClick={(e) => {
+                              if (isMockup) e.preventDefault();
+                            }}
+                            className="block"
+                          >
+                            <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 flex items-center justify-center">
+                              {p.images?.[0] ? (
+                                <img
+                                  src={p.images[0]}
+                                  alt={p.name}
+                                  className="w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+                                />
+                              ) : (
+                                <Smartphone className="w-10 h-10 text-slate-300" />
+                              )}
 
-                            <span className="absolute top-2 left-2 text-[7.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-950 text-white">
-                              {p.brand}
-                            </span>
-
-                            {p.batteryHealth && (
-                              <span className="absolute top-2 right-2 text-[7.5px] font-black px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow-xs">
-                                ⚡ BH {p.batteryHealth}%
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="space-y-1">
-                            <h4 className="font-black text-xs text-slate-950 line-clamp-1 group-hover:text-blue-600 transition">
-                              {p.name}
-                            </h4>
-                            <p className="text-[10px] text-slate-500 font-medium truncate">
-                              {p.ramRom} • {p.condition}
-                            </p>
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
-                            <div>
-                              <div className="text-[9px] text-slate-400 font-bold uppercase leading-none">
-                                Harga Spesial
+                              <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10 pointer-events-none">
+                                <span className="px-2 py-0.5 rounded-md bg-slate-900/90 text-white font-black text-[9px] uppercase tracking-wider backdrop-blur-xs">
+                                  {p.brand}
+                                </span>
+                                {p.batteryHealth !== null && p.batteryHealth !== undefined && (
+                                  <span className="px-2 py-0.5 rounded-md bg-amber-500/90 text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-sm">
+                                    <Zap className="w-2.5 h-2.5" />
+                                    <span>BH {p.batteryHealth}%</span>
+                                  </span>
+                                )}
                               </div>
-                              <div className="text-xs font-black text-blue-700">
+                            </div>
+                          </a>
+
+                          <div className="mt-2.5">
+                            <a
+                              href={detailUrl}
+                              onClick={(e) => {
+                                if (isMockup) e.preventDefault();
+                              }}
+                              className="block"
+                            >
+                              <h4 className="font-bold text-sm text-slate-950 dark:text-white line-clamp-1 group-hover:text-blue-600 transition">
+                                {p.name}
+                              </h4>
+                            </a>
+                            <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mb-3 mt-0.5">
+                              {p.ramRom || "Fullset"} • {p.condition || "98% Mulus"}
+                            </div>
+                          </div>
+
+                          <div className="mt-auto pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                            <div>
+                              <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">
+                                Harga Spesial
+                              </span>
+                              <div className="text-sm font-black text-blue-700 dark:text-blue-400">
                                 {formatRupiah(p.price)}
                               </div>
                             </div>
@@ -408,7 +426,7 @@ export function MinimalCleanLayout({
                               onClick={(e) => {
                                 if (isMockup) e.preventDefault();
                               }}
-                              className="px-2.5 py-1.5 rounded-xl font-black text-[10px] text-white bg-emerald-600 hover:bg-emerald-500 shadow-xs active:scale-95 transition shrink-0"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-xs transition"
                             >
                               Beli Unit
                             </a>

@@ -284,46 +284,46 @@ export function StoreHomeView({
               return (
                 <div
                   key={`spotlight-${item.id}`}
-                  className={`w-64 sm:w-72 shrink-0 snap-start p-3.5 rounded-3xl border transition-all shadow-sm ${
-                    isDark
-                      ? "bg-slate-900 border-slate-800 text-white"
-                      : "bg-white border-slate-200 text-slate-950"
-                  }`}
+                  className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white dark:bg-slate-900 rounded-3xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col group"
                 >
                   <a href={`/${store.slug}/product/${item.id}`} className="block">
-                    <div className="relative aspect-video rounded-2xl bg-neutral-50 dark:bg-slate-950/70 p-2 flex items-center justify-center overflow-hidden border border-neutral-100 dark:border-slate-800">
+                    <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 flex items-center justify-center">
                       <img
                         src={item.images?.[0] || "/images/items/iphone-15-pro.png"}
                         alt={item.name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
                       />
-                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-slate-900/90 text-white font-black text-[9px] uppercase tracking-wider backdrop-blur-xs">
-                        {item.brand}
-                      </span>
-                      {item.batteryHealth !== null && (
-                        <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-amber-500/90 text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-sm">
-                          <BatteryCharging className="w-2.5 h-2.5" />
-                          <span>BH {item.batteryHealth}%</span>
+                      <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10 pointer-events-none">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-900/90 text-white font-black text-[9px] uppercase tracking-wider backdrop-blur-xs">
+                          {item.brand}
                         </span>
-                      )}
+                        {item.batteryHealth !== null && (
+                          <span className="px-2 py-0.5 rounded-md bg-amber-500/90 text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-sm">
+                            <BatteryCharging className="w-2.5 h-2.5" />
+                            <span>BH {item.batteryHealth}%</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </a>
 
-                  <div className="mt-2.5 space-y-1">
+                  <div className="mt-2.5">
                     <a href={`/${store.slug}/product/${item.id}`} className="block">
-                      <h4 className="font-black text-xs truncate hover:underline">
+                      <h4 className="font-bold text-sm text-slate-950 dark:text-white line-clamp-1 hover:underline">
                         {item.name}
                       </h4>
                     </a>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold truncate">
-                      {item.condition || "98% Mulus"} • {item.ramRom || "Fullset"}
+                    <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mb-3 mt-0.5">
+                      {item.ramRom || "Fullset"} • {item.condition || "98% Mulus"}
                     </div>
                   </div>
 
-                  <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="mt-auto pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
                     <div>
-                      <div className="text-[8px] text-slate-400 uppercase font-mono">Harga Spesial</div>
-                      <div className={`font-black text-xs sm:text-sm ${isDark ? "text-emerald-400" : "text-blue-700"}`}>
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">
+                        Harga Spesial
+                      </span>
+                      <div className="text-sm font-black text-blue-700 dark:text-blue-400">
                         {formatRupiah(item.price)}
                       </div>
                     </div>
@@ -331,7 +331,7 @@ export function StoreHomeView({
                       href={waHref}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black transition flex items-center gap-1"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-xs transition"
                     >
                       Beli Unit
                     </a>

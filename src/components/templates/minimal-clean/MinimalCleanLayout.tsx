@@ -40,6 +40,7 @@ export function MinimalCleanLayout({
 }: MinimalCleanLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<
     "ALL" | "IPHONE" | "ANDROID" | "GAMING" | "BUDGET" | "LIKENEW"
   >("ALL");
@@ -130,13 +131,21 @@ export function MinimalCleanLayout({
           isMockup ? "max-w-full flex-1 flex flex-col" : "max-w-lg min-h-screen bg-slate-50 shadow-2xl border-x border-slate-200 pb-28 flex flex-col relative"
         }`}
       >
-        {/* ── 1. HEADER BERSIH (Pilar A) ── */}
-        <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-200 backdrop-blur-md px-4 pt-3.5 pb-3 space-y-2.5 shadow-xs">
-          {/* Baris 1: Logo Toko + Nama Toko Hitam Pekat + Lokasi BEC + WA Button */}
-          <div className="flex items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2.5 min-w-0">
+        {/* ── 1. HEADER BERSIH (Pilar A) - Single-Row Modern Brand Header ── */}
+        <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-200/90 backdrop-blur-md px-4 py-2.5 shadow-2xs">
+          {/* Single Row: Logo Toko + Nama Toko + Pulsing Dot | Action Buttons (Search Toggle + WhatsApp) */}
+          <div className="flex items-center justify-between gap-3 h-10">
+            {/* Left: Avatar/Logo + Store Name + Live Status */}
+            <div
+              className="flex items-center gap-2.5 min-w-0 cursor-pointer select-none"
+              onClick={() => {
+                setActiveTab("home");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              title="Ke Halaman Utama"
+            >
               {/* Store Avatar Logo */}
-              <div className="w-10 h-10 rounded-full bg-slate-950 text-white flex items-center justify-center shrink-0 border border-slate-800 shadow-xs overflow-hidden">
+              <div className="w-9 h-9 rounded-full bg-slate-950 text-white flex items-center justify-center shrink-0 border border-slate-800 shadow-xs overflow-hidden">
                 {store.logoUrl ? (
                   <img
                     src={store.logoUrl}
@@ -150,60 +159,78 @@ export function MinimalCleanLayout({
                 )}
               </div>
 
-              <div className="min-w-0">
-                <div className="flex items-center">
-                  <h1 className="font-black text-base tracking-tight text-slate-950 leading-tight truncate">
-                    {store.name}
-                  </h1>
-                  <span
-                    className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200 animate-pulse inline-block ml-1.5 shrink-0"
-                    title="Toko Buka"
-                  />
-                </div>
-
-                <div className="flex items-center gap-1 mt-0.5">
-                  <MapPin className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                  <span className="text-xs font-bold text-slate-800 truncate max-w-[200px] sm:max-w-xs leading-tight">
-                    {locationLabel}
-                  </span>
-                </div>
+              <div className="flex items-center min-w-0 gap-1.5">
+                <h1 className="font-black text-sm sm:text-base tracking-tight text-slate-950 leading-none truncate">
+                  {store.name}
+                </h1>
+                <span
+                  className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100 animate-pulse shrink-0 inline-block"
+                  title="Toko Buka Siap COD"
+                />
               </div>
             </div>
 
-            {/* WA Hotline Button */}
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 active:scale-95 transition shrink-0"
-              title="Hubungi WhatsApp Toko"
-            >
-              <MessageCircle className="w-3.5 h-3.5 fill-current" />
-              <span className="hidden xs:inline">WhatsApp</span>
-            </a>
-          </div>
-
-          {/* Baris 2: Search Bar Kontras */}
-          <div className="rounded-2xl bg-slate-100 border border-slate-300/80 focus-within:border-slate-800 px-3.5 py-2.5 flex items-center gap-2 shadow-2xs transition">
-            <Search className="w-4 h-4 text-slate-700 shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari iPhone 15, S24 Ultra, RAM, IMEI..."
-              className="w-full bg-transparent text-xs font-semibold text-slate-950 placeholder:text-slate-600 focus:outline-none"
-            />
-            {searchQuery && (
+            {/* Right: Quick Action Buttons (Search Toggle & WhatsApp Hotline) */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Search Toggle Button */}
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
-                className="text-xs text-slate-400 hover:text-slate-600 px-1"
+                onClick={() => {
+                  setIsSearchOpen(!isSearchOpen);
+                }}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                  isSearchOpen || searchQuery
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-800"
+                }`}
+                title={isSearchOpen ? "Tutup Pencarian" : "Cari Produk"}
               >
-                ✕
+                <Search className="w-4 h-4" />
               </button>
-            )}
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+
+              {/* Direct WhatsApp Hotline */}
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-full flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 active:scale-95 transition"
+                title="Chat WhatsApp Toko"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+              </a>
+            </div>
           </div>
+
+          {/* Expandable Search Input Bar */}
+          {isSearchOpen && (
+            <div className="pt-2.5 pb-1 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="rounded-2xl bg-slate-100 border border-slate-300/80 focus-within:border-slate-900 focus-within:bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs transition">
+                <Search className="w-4 h-4 text-slate-500 shrink-0" />
+                <input
+                  type="text"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (activeTab !== "list" && activeTab !== "home") {
+                      setActiveTab("list");
+                    }
+                  }}
+                  placeholder="Cari iPhone, Samsung, RAM, IMEI..."
+                  className="w-full bg-transparent text-xs font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="w-5 h-5 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-[10px] font-bold"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </header>
 
         {/* ── 2. SCROLLABLE MAIN CONTENT ── */}

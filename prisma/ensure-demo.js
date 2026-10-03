@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
@@ -826,7 +827,49 @@ async function ensureDemoData() {
     });
   }
 
-  console.log("✅ Demo stores and products are guaranteed to exist with full multi-images and specs!");
+  // 6. Ensure default credentials & demo store owners (Password: Admin123!)
+  const defaultPassword = "Admin123!";
+  const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+  // Super Admin
+  await prisma.user.upsert({
+    where: { email: "admin@gadgetbdg.com" },
+    update: { passwordHash, role: "SUPER_ADMIN", name: "Super Admin GadgetBdg" },
+    create: {
+      email: "admin@gadgetbdg.com",
+      passwordHash,
+      name: "Super Admin GadgetBdg",
+      phone: "6281122334455",
+      role: "SUPER_ADMIN",
+      storeId: null,
+    },
+  });
+
+  // Demo store owners
+  const demoOwners = [
+    { email: "demo@berkacell.com", name: "Owner Berkah Cell Gadget", storeId: berkahCell.id },
+    { email: "demo@berkahcell.com", name: "Owner Berkah Cell Gadget", storeId: berkahCell.id },
+    { email: "demo@gamersgadget.com", name: "Owner Gamers Gadget Bandung", storeId: gamersGadget.id },
+    { email: "demo@tokyostreet.com", name: "Owner Tokyo Street Cell", storeId: tokyoStore.id },
+    { email: "demo@cybercell.com", name: "Owner Cyber Telemetry Cell", storeId: cyberStore.id },
+    { email: "demo@goldcell.com", name: "Owner Midnight Gold Concierge", storeId: goldStore.id },
+  ];
+
+  for (const owner of demoOwners) {
+    await prisma.user.upsert({
+      where: { email: owner.email },
+      update: { passwordHash, storeId: owner.storeId, role: "STORE_OWNER", name: owner.name },
+      create: {
+        email: owner.email,
+        passwordHash,
+        name: owner.name,
+        role: "STORE_OWNER",
+        storeId: owner.storeId,
+      },
+    });
+  }
+
+  console.log("✅ Demo stores, products, and default accounts (Admin123!) are guaranteed to exist!");
 }
 
 if (require.main === module) {

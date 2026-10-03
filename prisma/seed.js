@@ -96,10 +96,11 @@ async function main() {
   }
 
   console.log("🔑 Generating password hashes (bcrypt salt 10)...");
-  const adminPass = await bcrypt.hash("admin123", 10);
-  const ownerPass = await bcrypt.hash("owner123", 10);
-  const kasirPass = await bcrypt.hash("kasir123", 10);
-  const salesPass = await bcrypt.hash("sales123", 10);
+  const defaultPass = await bcrypt.hash("Admin123!", 10);
+  const adminPass = defaultPass;
+  const ownerPass = defaultPass;
+  const kasirPass = defaultPass;
+  const salesPass = defaultPass;
 
   // =========================================================================
   // 1. Akun Platform SaaS (storeId: null)
@@ -107,7 +108,7 @@ async function main() {
   console.log("👑 Seeding SaaS Platform Team Users...");
   const superAdmin = await prisma.user.create({
     data: {
-      email: "superadmin@gadgetbdg.com",
+      email: "admin@gadgetbdg.com",
       passwordHash: adminPass,
       name: "Super Admin GadgetBdg",
       phone: "6281122334455",
@@ -301,7 +302,7 @@ async function main() {
       users: {
         create: [
           {
-            email: "owner@berkahcell.com",
+            email: "demo@berkacell.com",
             passwordHash: ownerPass,
             name: "Haji Dedi (Owner Berkah)",
             phone: "6281234567890",
@@ -844,21 +845,21 @@ async function main() {
   console.log("=================================================");
   console.log("🎉 DATABASE SEEDING COMPLETED SUCCESSFULLY!");
   console.log("=================================================");
-  console.log("👑 SaaS Internal Admins & Partners:");
-  console.log(`   - Super Admin : ${superAdmin.email} | pass: admin123`);
-  console.log(`   - Staff Admin : ${staffAdmin.email} | pass: admin123`);
-  console.log(`   - Sales Agent : ${salesAgent.email} | pass: sales123 (Ref: ${salesAgent.referralCode})`);
+  console.log("👑 SaaS Internal Admins & Partners (Password: Admin123!):");
+  console.log(`   - Super Admin : ${superAdmin.email} | pass: Admin123!`);
+  console.log(`   - Staff Admin : ${staffAdmin.email} | pass: Admin123!`);
+  console.log(`   - Sales Agent : ${salesAgent.email} | pass: Admin123! (Ref: ${salesAgent.referralCode})`);
   console.log("🏬 Toko 1 (STARTER):");
   console.log(`   - Store : ${storeStarter.name} (/${storeStarter.slug})`);
-  console.log(`   - Owner : owner@bandungcell.com | pass: owner123 (Total 1 user)`);
+  console.log(`   - Owner : owner@bandungcell.com | pass: Admin123! (Total 1 user)`);
   console.log("🏬 Toko 2 (PRO):");
   console.log(`   - Store : ${storePro.name} (/${storePro.slug} & ${storePro.customDomain})`);
-  console.log(`   - Owner : owner@berkahcell.com | pass: owner123`);
-  console.log(`   - Staf  : kasir1@berkahcell.com & kasir2@berkahcell.com | pass: kasir123 (Total 3 users)`);
+  console.log(`   - Owner : demo@berkacell.com | pass: Admin123!`);
+  console.log(`   - Staf  : kasir1@berkahcell.com & kasir2@berkahcell.com | pass: Admin123! (Total 3 users)`);
   console.log("🏬 Toko 3 (ADVANCE):");
   console.log(`   - Store : ${storeAdvance.name} (/${storeAdvance.slug} & ${storeAdvance.customDomain})`);
-  console.log(`   - Owner : owner@juraganhp.com | pass: owner123`);
-  console.log(`   - Staf  : kasir1@juraganhp.com s/d kasir4@juraganhp.com | pass: kasir123 (Total 5 users)`);
+  console.log(`   - Owner : owner@juraganhp.com | pass: Admin123!`);
+  console.log(`   - Staf  : kasir1@juraganhp.com s/d kasir4@juraganhp.com | pass: Admin123! (Total 5 users)`);
   console.log("=================================================");
 }
 

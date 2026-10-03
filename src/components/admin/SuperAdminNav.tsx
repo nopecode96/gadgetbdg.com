@@ -1,5 +1,18 @@
 import Link from "next/link";
-import { ShieldAlert, Store, Globe, ArrowLeft, BarChart3, Receipt, Users, ShieldCheck, TrendingUp, Sliders } from "lucide-react";
+import {
+  ShieldAlert,
+  Store,
+  Globe,
+  ArrowLeft,
+  BarChart3,
+  Receipt,
+  Users,
+  ShieldCheck,
+  TrendingUp,
+  Sliders,
+  LogOut,
+} from "lucide-react";
+import { superAdminLogoutAction } from "@/lib/actions/login-actions";
 
 export function SuperAdminNav() {
   return (
@@ -73,6 +86,17 @@ export function SuperAdminNav() {
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Portal SaaS
           </Link>
+
+          <form action={superAdminLogoutAction}>
+            <button
+              type="submit"
+              title="Keluar dari Sesi Super Admin"
+              className="text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl border border-transparent hover:border-rose-500/20 transition-colors flex items-center gap-1.5 text-xs font-semibold"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Keluar</span>
+            </button>
+          </form>
         </div>
       </div>
     </header>

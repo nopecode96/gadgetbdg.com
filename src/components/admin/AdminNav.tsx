@@ -86,22 +86,28 @@ export function AdminNav({ currentSlug, storeName, userName, role }: AdminNavPro
           </Link>
 
           {/* User badge + logout */}
-          {userName && (
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">
-                {userName}
-              </span>
-              <form action={logoutAction}>
-                <button
-                  type="submit"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
-                  title="Keluar"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {userName && (
+              <div className="hidden sm:flex flex-col items-end text-right">
+                <span className="text-xs font-semibold text-slate-700 leading-tight">
+                  {userName}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {role === "STORE_OWNER" ? "Pemilik Toko" : "Staf Toko"}
+                </span>
+              </div>
+            )}
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                title="Keluar dari Panel Admin Toko"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition text-xs font-semibold"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Keluar</span>
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </header>

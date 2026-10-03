@@ -266,3 +266,35 @@ export async function deleteStaffUserAction(userId: string) {
     return { success: false, error: error?.message || "Gagal menghapus staf." };
   }
 }
+
+// ---------------------------------------------------------------
+// 6. LOGOUT ACTIONS — Session Clean & Redirect
+// ---------------------------------------------------------------
+export async function logoutAction(target?: FormData | string) {
+  const { cookies } = await import("next/headers");
+  const { redirect } = await import("next/navigation");
+  const { SESSION_COOKIE } = await import("@/lib/auth/session");
+
+  const cookieStore = cookies();
+  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+
+  revalidatePath("/", "layout");
+  const redirectTo = typeof target === "string" ? target : "/login";
+  redirect(redirectTo);
+}
+
+export async function superAdminLogoutAction() {
+  return logoutAction("/login?role=super_admin");
+}
+
+export async function merchantLogoutAction() {
+  return logoutAction("/login");
+}
+

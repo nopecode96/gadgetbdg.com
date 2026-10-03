@@ -57,8 +57,27 @@ export async function loginAction(formData: FormData) {
 }
 
 // ─── Logout ───────────────────────────────────────────────────────
-export async function logoutAction() {
+export async function logoutAction(target?: FormData | string) {
+  const { revalidatePath } = await import("next/cache");
   const cookieStore = cookies();
   cookieStore.delete(SESSION_COOKIE);
-  redirect("/login");
+  cookieStore.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+  revalidatePath("/", "layout");
+
+  const redirectTo = typeof target === "string" ? target : "/login";
+  redirect(redirectTo);
+}
+
+export async function superAdminLogoutAction() {
+  return logoutAction("/login?role=super_admin");
+}
+
+export async function merchantLogoutAction() {
+  return logoutAction("/login");
 }

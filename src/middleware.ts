@@ -96,6 +96,27 @@ export default async function middleware(req: NextRequest) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // STEP 0.5: Protected Route Auth Guard (Middleware-level)
+  // Ensures unauthenticated users cannot access /admin or /super-admin via browser back/forward cache.
+  // ─────────────────────────────────────────────────────────────────────────
+  const hasSession = req.cookies.has("gb_session");
+  const isProtectedAdminRoute =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/super-admin") ||
+    pathname.startsWith("/sales");
+
+  if (isProtectedAdminRoute && !hasSession) {
+    const loginTarget = pathname.startsWith("/super-admin")
+      ? "/login?role=super_admin"
+      : "/login";
+    const response = NextResponse.redirect(new URL(loginTarget, req.url));
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // STEP 1: Main domain / Apex domain or direct local access
   //         (gadgetbdg.com, www.gadgetbdg.com, localhost, 127.0.0.1)
   // ─────────────────────────────────────────────────────────────────────────
@@ -107,8 +128,14 @@ export default async function middleware(req: NextRequest) {
 
   if (isMainDomain) {
     // All internal routes (SaaS landing, /login, /admin, /super-admin, storefronts)
-    // are handled directly by the Next.js App Router — just pass through.
-    return NextResponse.next();
+    // are handled directly by the Next.js App Router — pass through with anti-cache headers on protected routes.
+    const res = NextResponse.next();
+    if (isProtectedAdminRoute) {
+      res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.headers.set("Pragma", "no-cache");
+      res.headers.set("Expires", "0");
+    }
+    return res;
   }
 
   // ─────────────────────────────────────────────────────────────────────────

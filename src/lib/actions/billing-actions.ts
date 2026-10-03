@@ -92,17 +92,26 @@ export async function getBillingOverviewAction(): Promise<BillingOverview> {
 
   const [revenue, activeStores, pendingRaw, historyRaw, setting] = await Promise.all([
     prisma.subscriptionPayment.aggregate({
-      where: { status: "APPROVED" },
+      where: {
+        status: "APPROVED",
+        store: { isDemo: false },
+      },
       _sum: { amount: true },
     }),
-    prisma.store.count({ where: { isActive: true } }),
+    prisma.store.count({ where: { isActive: true, isDemo: false } }),
     prisma.subscriptionPayment.findMany({
-      where: { status: "PENDING" },
+      where: {
+        status: "PENDING",
+        store: { isDemo: false },
+      },
       include: paymentInclude,
       orderBy: { createdAt: "asc" },
     }),
     prisma.subscriptionPayment.findMany({
-      where: { status: { in: ["APPROVED", "REJECTED"] } },
+      where: {
+        status: { in: ["APPROVED", "REJECTED"] },
+        store: { isDemo: false },
+      },
       include: paymentInclude,
       orderBy: { updatedAt: "desc" },
       take: 20,

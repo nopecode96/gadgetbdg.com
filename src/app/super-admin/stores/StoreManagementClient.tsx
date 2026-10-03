@@ -100,7 +100,12 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
   const [stores, setStores] = useState<StoreAdminListItem[]>(initialStores);
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState<string>("ALL");
+  const [demoFilter, setDemoFilter] = useState<"ALL" | "REAL" | "DEMO">("ALL");
   const [selectedStore, setSelectedStore] = useState<StoreAdminListItem | null>(null);
+
+  // Counts for tabs
+  const realCount = useMemo(() => stores.filter((s) => !s.isDemo).length, [stores]);
+  const demoCount = useMemo(() => stores.filter((s) => s.isDemo).length, [stores]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -109,6 +114,10 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
   // Filtered stores
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
+      // Demo filter
+      if (demoFilter === "REAL" && s.isDemo) return false;
+      if (demoFilter === "DEMO" && !s.isDemo) return false;
+
       const matchSearch =
         s.name.toLowerCase().includes(search.toLowerCase()) ||
         s.slug.toLowerCase().includes(search.toLowerCase()) ||
@@ -121,7 +130,7 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
       const matchTier = tierFilter === "ALL" || s.tier === tierFilter;
       return matchSearch && matchTier;
     });
-  }, [stores, search, tierFilter]);
+  }, [stores, search, tierFilter, demoFilter]);
 
   // Total pages
   const totalItems = filteredStores.length;
@@ -193,6 +202,63 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
         </div>
       </div>
 
+      {/* Tab Switcher: [ Semua Toko ] | [ Klien Riil ] | [ Toko Demo (6) ] */}
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <button
+          type="button"
+          onClick={() => {
+            setDemoFilter("ALL");
+            setCurrentPage(1);
+          }}
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 ${
+            demoFilter === "ALL"
+              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+              : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
+          }`}
+        >
+          Semua Toko
+          <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-slate-800/80 text-slate-300">
+            {stores.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setDemoFilter("REAL");
+            setCurrentPage(1);
+          }}
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 ${
+            demoFilter === "REAL"
+              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+              : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
+          }`}
+        >
+          Klien Riil
+          <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
+            {realCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setDemoFilter("DEMO");
+            setCurrentPage(1);
+          }}
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 ${
+            demoFilter === "DEMO"
+              ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+              : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
+          }`}
+        >
+          Toko Demo
+          <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/30">
+            {demoCount}
+          </span>
+        </button>
+      </div>
+
       {/* Clean Master Table */}
       <div className="border border-slate-800 rounded-2xl bg-slate-900/60 shadow-xl overflow-hidden">
         <div className="overflow-x-auto">
@@ -233,8 +299,13 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
                             <Store className="w-4 h-4" />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-bold text-white group-hover:text-indigo-300 transition truncate">
-                              {store.name}
+                            <div className="font-bold text-white group-hover:text-indigo-300 transition flex items-center gap-2 truncate">
+                              <span className="truncate">{store.name}</span>
+                              {store.isDemo && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-900/60 text-purple-300 border border-purple-500/40 tracking-wider shrink-0">
+                                  DEMO
+                                </span>
+                              )}
                             </div>
                             <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 mt-0.5">
                               <span className="truncate">{store.slug}.gadgetbdg.com</span>

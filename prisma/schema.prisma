@@ -75,12 +75,14 @@ model Store {
   tier            StoreTier     @default(STARTER)
   planId          String        @default("STARTER")
   templateId      String        @default("default")
+  template        String        @default("minimal-clean")
   primaryColor    String        @default("#2563eb")
   logoUrl         String?
   bannerUrl       String?
   hasWatermark    Boolean       @default(false)
   lastTemplateChangeAt DateTime?
   isActive        Boolean       @default(false)
+  isDemo          Boolean       @default(false)
   subscriptionStartedAt DateTime? @default(now())
   subscriptionExpiresAt DateTime?
   salesUserId     String?

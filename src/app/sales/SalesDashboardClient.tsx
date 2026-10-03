@@ -19,9 +19,11 @@ import {
   Sparkles,
   BellRing,
   AlertTriangle,
+  LayoutTemplate,
 } from "lucide-react";
 import { updateSalesBankDetailsAction } from "@/lib/actions/sales-actions";
 import { logoutAction } from "@/lib/actions/login-actions";
+import { TEMPLATE_REGISTRY } from "@/lib/constants/templates";
 
 export interface RecruitedStore {
   id: string;
@@ -358,6 +360,133 @@ export function SalesDashboardClient({
           </div>
           <div className="mt-2 text-[11px] text-indigo-300/70">
             Starter Rp 50rb • Pro Rp 100rb • Adv Rp 150rb
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section Khusus: Katalog Showroom Template (Demo Sales) ─── */}
+      <div className="bg-slate-900/90 border border-indigo-500/30 rounded-2xl shadow-xl overflow-hidden relative">
+        <div className="px-6 py-5 border-b border-slate-800 bg-indigo-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
+              <LayoutTemplate className="w-5 h-5 text-indigo-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-white">
+                  Katalog Showroom Template (Demo Sales)
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  6 Template Live
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Buka tautan demo ini di smartphone/tablet Anda untuk dipresentasikan langsung ke pemilik konter HP.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                id: "demo1",
+                slug: "demo1",
+                name: "Demo 1: Minimal Clean",
+                themeId: "minimal-clean",
+                tier: "STARTER",
+                tierBadge: "bg-slate-800 text-slate-300 border-slate-700",
+                desc: "Desain e-commerce mobile terang, modern & clean. Cocok untuk konter reguler.",
+              },
+              {
+                id: "demo2",
+                slug: "demo2",
+                name: "Demo 2: Gamers Cyber",
+                themeId: "dark-gaming",
+                tier: "STARTER",
+                tierBadge: "bg-emerald-950/80 text-emerald-300 border-emerald-800/60",
+                desc: "Nuansa gelap gaming Spectra dengan aksen neon mint-teal (#00e5b3) & spec chips.",
+              },
+              {
+                id: "demo3",
+                slug: "demo3",
+                name: "Demo 3: Midnight Gold",
+                themeId: "midnight-gold",
+                tier: "ADVANCE",
+                tierBadge: "bg-amber-950/80 text-amber-300 border-amber-800/60",
+                desc: "VIP luxury store hitam obsidian & emas. Cocok untuk toko spesialis iPhone & flagship.",
+              },
+              {
+                id: "demo4",
+                slug: "demo4",
+                name: "Demo 4: Tokyo Street Clean",
+                themeId: "tokyo-editorial",
+                tier: "PRO",
+                tierBadge: "bg-rose-950/80 text-rose-300 border-rose-800/60",
+                desc: "Streetwear tech magazine off-white, aksen rose bold, layout editorial dinamis.",
+              },
+              {
+                id: "demo5",
+                slug: "demo5",
+                name: "Demo 5: Modern Retail",
+                themeId: "minimal-clean",
+                tier: "PRO",
+                tierBadge: "bg-indigo-950/80 text-indigo-300 border-indigo-800/60",
+                desc: "Retail outlet terstruktur dengan navigasi cepat kategori dan penawaran tukar tambah.",
+              },
+              {
+                id: "demo6",
+                slug: "demo6",
+                name: "Demo 6: Official Store (Obsidian)",
+                themeId: "keynote-obsidian",
+                tier: "ADVANCE",
+                tierBadge: "bg-zinc-800 text-zinc-200 border-zinc-700",
+                desc: "Atmosfer panggung Apple Keynote dark obsidian dengan spotlight ambient flagship.",
+              },
+            ].map((demo) => {
+              const url = `https://${demo.slug}.gadgetbdg.com`;
+              return (
+                <div
+                  key={demo.id}
+                  className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:border-indigo-500/40 transition group"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="font-bold text-white text-sm group-hover:text-indigo-300 transition">
+                        {demo.name}
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded-full font-mono font-bold text-[10px] border ${demo.tierBadge}`}
+                      >
+                        {demo.tier}
+                      </span>
+                    </div>
+                    <div className="text-[11px] font-mono text-indigo-400 mb-2">
+                      {demo.slug}.gadgetbdg.com
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                      {demo.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase font-mono text-purple-300 font-bold bg-purple-950/50 px-2 py-0.5 rounded border border-purple-500/30">
+                      Showcase Demo
+                    </span>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition"
+                    >
+                      Buka Demo
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

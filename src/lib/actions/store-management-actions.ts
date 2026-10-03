@@ -19,6 +19,8 @@ export interface StoreAdminListItem {
   subscriptionStartedAt: string | null;
   subscriptionExpiresAt: string | null;
   isActive: boolean;
+  isDemo: boolean;
+  template: string;
   address: string | null;
   createdAt: string;
   updatedAt: string;
@@ -130,6 +132,8 @@ export async function getAllStoresAction(filters?: {
       subscriptionStartedAt: s.subscriptionStartedAt ? s.subscriptionStartedAt.toISOString() : null,
       subscriptionExpiresAt: s.subscriptionExpiresAt ? s.subscriptionExpiresAt.toISOString() : null,
       isActive: s.isActive,
+      isDemo: Boolean(s.isDemo),
+      template: s.template || "minimal-clean",
       address: s.address,
       createdAt: s.createdAt.toISOString(),
       updatedAt: s.updatedAt.toISOString(),

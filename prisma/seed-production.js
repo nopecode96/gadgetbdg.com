@@ -178,67 +178,74 @@ async function main() {
   console.log("✅ PlatformSetting GLOBAL verified.");
 
   // =========================================================================
-  // 4. Seed Toko Demo Resmi Sales ('demo' -> demo.gadgetbdg.com)
+  // 4. Seed Toko Demo Resmi Sales ('demo1' s/d 'demo6')
   // =========================================================================
-  console.log("🏪 Ensuring Official Demo Store (demo.gadgetbdg.com)...");
+  console.log("🏪 Ensuring Official Demo Stores (demo1 s/d demo6)...");
 
-  // A. Upsert Store 'demo'
   const lifetimeExpiry = new Date("2099-12-31T23:59:59.000Z");
-  const demoStore = await prisma.store.upsert({
-    where: { slug: "demo" },
-    update: {
-      name: "Gadget Store Demo",
-      planId: "ADVANCE",
-      tier: "ADVANCE",
-      isActive: true,
-      whatsapp: "62895389974414",
-      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Bandung",
-      operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
-      warrantyPolicy: "Garansi Resmi & Garansi Personal Toko 30 Hari Replace Unit Bebas Blokir IMEI.",
-      verifiedBadge: true,
-      hasWatermark: true,
-      subscriptionExpiresAt: lifetimeExpiry,
-    },
-    create: {
-      name: "Gadget Store Demo",
-      slug: "demo",
-      planId: "ADVANCE",
-      tier: "ADVANCE",
-      isActive: true,
-      whatsapp: "62895389974414",
-      address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Bandung",
-      operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
-      warrantyPolicy: "Garansi Resmi & Garansi Personal Toko 30 Hari Replace Unit Bebas Blokir IMEI.",
-      verifiedBadge: true,
+
+  const demoStoresConfig = [
+    {
+      slug: "demo1",
+      name: "Demo 1: Minimal Clean",
+      planId: "STARTER",
+      tier: "STARTER",
+      template: "minimal-clean",
       templateId: "minimal-clean",
-      primaryColor: "#2563eb",
-      hasWatermark: true,
-      subscriptionStartedAt: new Date(),
-      subscriptionExpiresAt: lifetimeExpiry,
+      primaryColor: "#0f172a",
+      desc: "Desain e-commerce mobile terang, modern & clean.",
     },
-  });
-
-  // B. Upsert Owner User for Demo Store
-  const demoOwner = await prisma.user.upsert({
-    where: { email: "demo@gadgetbdg.com" },
-    update: {
-      name: "Owner Toko Demo",
-      role: "STORE_OWNER",
-      storeId: demoStore.id,
+    {
+      slug: "demo2",
+      name: "Demo 2: Gamers Cyber",
+      planId: "STARTER",
+      tier: "STARTER",
+      template: "gamers-cyber",
+      templateId: "dark-gaming",
+      primaryColor: "#00e5b3",
+      desc: "Nuansa gelap gaming Spectra dengan aksen neon mint-teal (#00e5b3).",
     },
-    create: {
-      email: "demo@gadgetbdg.com",
-      name: "Owner Toko Demo",
-      passwordHash: defaultPasswordHash,
-      phone: "62895389974414",
-      role: "STORE_OWNER",
-      storeId: demoStore.id,
+    {
+      slug: "demo3",
+      name: "Demo 3: Midnight Gold",
+      planId: "ADVANCE",
+      tier: "ADVANCE",
+      template: "midnight-gold",
+      templateId: "midnight-gold",
+      primaryColor: "#f59e0b",
+      desc: "VIP luxury store hitam obsidian & emas.",
     },
-  });
-  console.log(`✅ Demo Store Owner: ${demoOwner.email} linked to ${demoStore.slug}.`);
-
-  // C. Ensure 4 Realistic Demo Catalog Products
-  console.log("📱 Ensuring 4 Realistic Demo Smartphones in Demo Store...");
+    {
+      slug: "demo4",
+      name: "Demo 4: Tokyo Street Clean",
+      planId: "PRO",
+      tier: "PRO",
+      template: "tokyo-street",
+      templateId: "tokyo-editorial",
+      primaryColor: "#e11d48",
+      desc: "Streetwear tech magazine off-white, aksen rose bold.",
+    },
+    {
+      slug: "demo5",
+      name: "Demo 5: Modern Retail",
+      planId: "PRO",
+      tier: "PRO",
+      template: "modern-retail",
+      templateId: "minimal-clean",
+      primaryColor: "#4f46e5",
+      desc: "Retail outlet terstruktur dengan navigasi cepat kategori.",
+    },
+    {
+      slug: "demo6",
+      name: "Demo 6: Official Store (Obsidian)",
+      planId: "ADVANCE",
+      tier: "ADVANCE",
+      template: "official-store",
+      templateId: "keynote-obsidian",
+      primaryColor: "#ffffff",
+      desc: "Atmosfer panggung Apple Keynote dark obsidian.",
+    },
+  ];
 
   const demoProducts = [
     {
@@ -317,54 +324,115 @@ async function main() {
     },
   ];
 
-  for (const item of demoProducts) {
-    const existing = await prisma.product.findFirst({
-      where: { storeId: demoStore.id, slug: item.slug },
+  for (const demoConfig of demoStoresConfig) {
+    const store = await prisma.store.upsert({
+      where: { slug: demoConfig.slug },
+      update: {
+        name: demoConfig.name,
+        planId: demoConfig.planId,
+        tier: demoConfig.tier,
+        template: demoConfig.template,
+        templateId: demoConfig.templateId,
+        isDemo: true,
+        isActive: true,
+        whatsapp: "62895389974414",
+        address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Bandung",
+        operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
+        warrantyPolicy: "Garansi Resmi & Garansi Personal Toko 30 Hari Replace Unit Bebas Blokir IMEI.",
+        verifiedBadge: true,
+        hasWatermark: true,
+        primaryColor: demoConfig.primaryColor,
+        subscriptionExpiresAt: lifetimeExpiry,
+      },
+      create: {
+        name: demoConfig.name,
+        slug: demoConfig.slug,
+        planId: demoConfig.planId,
+        tier: demoConfig.tier,
+        template: demoConfig.template,
+        templateId: demoConfig.templateId,
+        isDemo: true,
+        isActive: true,
+        whatsapp: "62895389974414",
+        address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Bandung",
+        operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
+        warrantyPolicy: "Garansi Resmi & Garansi Personal Toko 30 Hari Replace Unit Bebas Blokir IMEI.",
+        verifiedBadge: true,
+        hasWatermark: true,
+        primaryColor: demoConfig.primaryColor,
+        subscriptionStartedAt: new Date(),
+        subscriptionExpiresAt: lifetimeExpiry,
+      },
     });
 
-    if (existing) {
-      await prisma.product.update({
-        where: { id: existing.id },
-        data: {
-          title: item.title,
-          category: item.category,
-          brand: item.brand,
-          price: item.price,
-          images: item.images,
-          grade: item.grade,
-          ram: item.ram,
-          storage: item.storage,
-          batteryHealth: item.batteryHealth,
-          completeness: item.completeness,
-          conditionNotes: item.conditionNotes,
-          description: item.description,
-          status: item.status,
-        },
+    const ownerEmail = `${demoConfig.slug}@gadgetbdg.com`;
+    await prisma.user.upsert({
+      where: { email: ownerEmail },
+      update: {
+        name: `Owner ${demoConfig.name}`,
+        role: "STORE_OWNER",
+        storeId: store.id,
+      },
+      create: {
+        email: ownerEmail,
+        name: `Owner ${demoConfig.name}`,
+        passwordHash: defaultPasswordHash,
+        phone: "62895389974414",
+        role: "STORE_OWNER",
+        storeId: store.id,
+      },
+    });
+
+    for (const item of demoProducts) {
+      const existing = await prisma.product.findFirst({
+        where: { storeId: store.id, slug: item.slug },
       });
-    } else {
-      await prisma.product.create({
-        data: {
-          storeId: demoStore.id,
-          title: item.title,
-          slug: item.slug,
-          category: item.category,
-          brand: item.brand,
-          price: item.price,
-          images: item.images,
-          grade: item.grade,
-          ram: item.ram,
-          storage: item.storage,
-          batteryHealth: item.batteryHealth,
-          completeness: item.completeness,
-          conditionNotes: item.conditionNotes,
-          description: item.description,
-          status: item.status,
-        },
-      });
+
+      if (existing) {
+        await prisma.product.update({
+          where: { id: existing.id },
+          data: {
+            title: item.title,
+            category: item.category,
+            brand: item.brand,
+            price: item.price,
+            images: item.images,
+            grade: item.grade,
+            ram: item.ram,
+            storage: item.storage,
+            batteryHealth: item.batteryHealth,
+            completeness: item.completeness,
+            conditionNotes: item.conditionNotes,
+            description: item.description,
+            status: item.status,
+          },
+        });
+      } else {
+        await prisma.product.create({
+          data: {
+            storeId: store.id,
+            title: item.title,
+            slug: item.slug,
+            category: item.category,
+            brand: item.brand,
+            price: item.price,
+            images: item.images,
+            grade: item.grade,
+            ram: item.ram,
+            storage: item.storage,
+            batteryHealth: item.batteryHealth,
+            completeness: item.completeness,
+            conditionNotes: item.conditionNotes,
+            description: item.description,
+            status: item.status,
+          },
+        });
+      }
     }
+
+    console.log(`✅ Demo store ${demoConfig.slug} (${demoConfig.name}) provisioned with 4 products.`);
   }
 
-  console.log("✅ 4 Demo products verified.");
   console.log("🎉 Idempotent production seeding completed successfully!");
 }
 

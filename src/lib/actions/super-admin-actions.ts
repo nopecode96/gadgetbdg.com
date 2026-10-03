@@ -81,15 +81,16 @@ export async function getSuperAdminDashboardMetricsAction(): Promise<SuperAdminD
     realizedRevenueAgg,
     recentStoresRaw,
   ] = await Promise.all([
-    // a. Total stores
-    prisma.store.count(),
-    // a. Active stores
-    prisma.store.count({ where: { isActive: true } }),
-    // c. Total products in catalog
-    prisma.product.count(),
-    // d. Active stores with custom domain
+    // a. Total stores (excluding demo)
+    prisma.store.count({ where: { isDemo: false } }),
+    // a. Active paying stores (excluding demo)
+    prisma.store.count({ where: { isActive: true, isDemo: false } }),
+    // c. Total products in catalog (excluding demo store products)
+    prisma.product.count({ where: { store: { isDemo: false } } }),
+    // d. Active stores with custom domain (excluding demo)
     prisma.store.count({
       where: {
+        isDemo: false,
         AND: [
           { customDomain: { not: null } },
           { customDomain: { not: "" } },
@@ -100,24 +101,25 @@ export async function getSuperAdminDashboardMetricsAction(): Promise<SuperAdminD
     prisma.subscriptionPlan.findMany({
       orderBy: { price: "asc" },
     }),
-    // b. Active stores with assigned plan for accurate dynamic MRR
+    // b. Active stores with assigned plan for accurate dynamic MRR (Strictly isDemo: false)
     prisma.store.findMany({
-      where: { isActive: true },
+      where: { isActive: true, isDemo: false },
       include: { plan: true },
     }),
-    // e. Distribution count per planId
+    // e. Distribution count per planId (excluding demo)
     prisma.store.groupBy({
       by: ["planId"],
-      where: { isActive: true },
+      where: { isActive: true, isDemo: false },
       _count: { id: true },
     }),
-    // b. Realized revenue from completed/approved payments
+    // b. Realized revenue from completed/approved payments (excluding demo)
     prisma.subscriptionPayment.aggregate({
-      where: { status: "APPROVED" },
+      where: { status: "APPROVED", store: { isDemo: false } },
       _sum: { amount: true },
     }),
     // f. 5 most recent stores
     prisma.store.findMany({
+      where: { isDemo: false },
       take: 5,
       orderBy: { createdAt: "desc" },
       include: {
@@ -137,7 +139,7 @@ export async function getSuperAdminDashboardMetricsAction(): Promise<SuperAdminD
 
   const inactiveStores = Math.max(0, totalStores - activeStores);
 
-  // b. Dynamic MRR calculated from active stores' current plan prices
+  // b. Dynamic MRR calculated from active paying stores' current plan prices (Excludes Demo)
   const dynamicMRR = activeStoresWithPlan.reduce((acc, store) => {
     return acc + Number(store.plan?.price || 0);
   }, 0);

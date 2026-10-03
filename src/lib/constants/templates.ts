@@ -315,9 +315,11 @@ export function getTemplateConfig(templateId: string | undefined): TemplateTheme
   }
   // Fallback map untuk legacy template ids
   if (templateId === "clean-ledger") return TEMPLATE_REGISTRY["minimal-clean"];
-  if (templateId === "live-drop") return TEMPLATE_REGISTRY["dark-gaming"];
+  if (templateId === "live-drop" || templateId === "gamers-cyber") return TEMPLATE_REGISTRY["dark-gaming"];
   if (templateId === "flagship-gold") return TEMPLATE_REGISTRY["midnight-gold"];
   if (templateId === "tokyo-street") return TEMPLATE_REGISTRY["tokyo-editorial"];
+  if (templateId === "modern-retail") return TEMPLATE_REGISTRY["minimal-clean"];
+  if (templateId === "official-store") return TEMPLATE_REGISTRY["keynote-obsidian"];
 
   return TEMPLATE_REGISTRY["minimal-clean"];
 }

@@ -21,7 +21,12 @@ export interface SerializedSubscriptionPlan {
 export interface SerializedPlatformSetting {
   id: string;
   platformName: string;
+  tagline: string;
+  cityCoverage: string;
+  heroTitle: string;
+  heroSubtitle: string;
   supportWhatsapp: string;
+  supportEmail: string;
   serverIp: string;
   cnameTarget: string;
   bankName: string;
@@ -39,7 +44,12 @@ export interface SystemSettingsOverview {
 const DEFAULT_PLATFORM_SETTINGS = {
   id: "GLOBAL",
   platformName: "GadgetBdg.com",
-  supportWhatsapp: "6281234567890",
+  tagline: "Platform Toko Online Konter HP Terpercaya",
+  cityCoverage: "Bandung Raya",
+  heroTitle: "Buka Web Toko HP Konter Anda Sendiri Dalam 5 Menit",
+  heroSubtitle: "Tingkatkan penjualan unit second & baru, kelola tukar tambah, dan miliki katalog modern tanpa repot koding.",
+  supportWhatsapp: "62895389974414",
+  supportEmail: "support@gadgetbdg.com",
   serverIp: "72.62.75.149",
   cnameTarget: "cname.gadgetbdg.com",
   bankName: "BCA",
@@ -112,7 +122,12 @@ export async function getSystemSettingsAction(): Promise<SystemSettingsOverview>
     settings: {
       id: setting.id,
       platformName: setting.platformName,
+      tagline: setting.tagline || DEFAULT_PLATFORM_SETTINGS.tagline,
+      cityCoverage: setting.cityCoverage || DEFAULT_PLATFORM_SETTINGS.cityCoverage,
+      heroTitle: setting.heroTitle || DEFAULT_PLATFORM_SETTINGS.heroTitle,
+      heroSubtitle: setting.heroSubtitle || DEFAULT_PLATFORM_SETTINGS.heroSubtitle,
       supportWhatsapp: setting.supportWhatsapp,
+      supportEmail: setting.supportEmail || DEFAULT_PLATFORM_SETTINGS.supportEmail,
       serverIp: setting.serverIp,
       cnameTarget: setting.cnameTarget,
       bankName: setting.bankName,
@@ -197,7 +212,12 @@ export async function updateSubscriptionPlanAction(
  */
 export async function updatePlatformSettingsAction(data: {
   platformName?: string;
+  tagline?: string;
+  cityCoverage?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
   supportWhatsapp: string;
+  supportEmail?: string;
   serverIp: string;
   cnameTarget: string;
   bankName: string;
@@ -211,19 +231,29 @@ export async function updatePlatformSettingsAction(data: {
       return { success: false, error: "Hanya Super Admin yang berwenang mengubah konfigurasi platform." };
     }
 
-    const cleanWhatsapp = data.supportWhatsapp?.trim().replace(/\D/g, "") || "6281234567890";
+    const cleanWhatsapp = data.supportWhatsapp?.trim().replace(/\D/g, "") || "62895389974414";
     const cleanServerIp = data.serverIp?.trim() || "72.62.75.149";
     const cleanCname = data.cnameTarget?.trim() || "cname.gadgetbdg.com";
     const bankName = data.bankName?.trim() || "BCA";
     const bankAccountNumber = data.bankAccountNumber?.trim() || "1234567890";
     const bankAccountHolder = data.bankAccountHolder?.trim() || "PT Gadget Bandung Solusindo";
     const platformName = data.platformName?.trim() || "GadgetBdg.com";
+    const tagline = data.tagline?.trim() || "Platform Toko Online Konter HP Terpercaya";
+    const cityCoverage = data.cityCoverage?.trim() || "Bandung Raya";
+    const heroTitle = data.heroTitle?.trim() || "Buka Web Toko HP Konter Anda Sendiri Dalam 5 Menit";
+    const heroSubtitle = data.heroSubtitle?.trim() || "Tingkatkan penjualan unit second & baru, kelola tukar tambah, dan miliki katalog modern tanpa repot koding.";
+    const supportEmail = data.supportEmail?.trim() || "support@gadgetbdg.com";
 
     const updated = await prisma.platformSetting.upsert({
       where: { id: "GLOBAL" },
       update: {
         platformName,
+        tagline,
+        cityCoverage,
+        heroTitle,
+        heroSubtitle,
         supportWhatsapp: cleanWhatsapp,
+        supportEmail,
         serverIp: cleanServerIp,
         cnameTarget: cleanCname,
         bankName,
@@ -234,7 +264,12 @@ export async function updatePlatformSettingsAction(data: {
       create: {
         id: "GLOBAL",
         platformName,
+        tagline,
+        cityCoverage,
+        heroTitle,
+        heroSubtitle,
         supportWhatsapp: cleanWhatsapp,
+        supportEmail,
         serverIp: cleanServerIp,
         cnameTarget: cleanCname,
         bankName,

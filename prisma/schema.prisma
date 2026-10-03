@@ -298,13 +298,23 @@ model SubscriptionPlan {
 model PlatformSetting {
   id                String   @id @default("GLOBAL")
   platformName      String   @default("GadgetBdg.com")
-  supportWhatsapp   String   @default("6281234567890")
-  serverIp          String   @default("72.62.75.149")
-  cnameTarget       String   @default("cname.gadgetbdg.com")
+  tagline           String   @default("Platform Toko Online Konter HP Terpercaya")
+  cityCoverage      String   @default("Bandung Raya")
+  heroTitle         String   @default("Buka Web Toko HP Konter Anda Sendiri Dalam 5 Menit")
+  heroSubtitle      String   @default("Tingkatkan penjualan unit second & baru, kelola tukar tambah, dan miliki katalog modern tanpa repot koding.")
+  supportWhatsapp   String   @default("62895389974414")
+  supportEmail      String   @default("support@gadgetbdg.com")
+
+  // Finansial
   bankName          String   @default("BCA")
   bankAccountNumber String   @default("1234567890")
   bankAccountHolder String   @default("PT Gadget Bandung Solusindo")
   qrisImageUrl      String?
+
+  // Teknis
+  serverIp          String   @default("72.62.75.149")
+  cnameTarget       String   @default("cname.gadgetbdg.com")
+
   updatedAt         DateTime @updatedAt
 }
 

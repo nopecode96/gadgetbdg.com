@@ -36,17 +36,29 @@ function formatRupiah(n: number) {
   return "Rp " + n.toLocaleString("id-ID");
 }
 
+export interface ModalPaymentSetting {
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountHolder: string;
+  qrisImageUrl: string | null;
+  supportWhatsapp?: string;
+}
+
 export function StoreRegistrationModal({
   isOpen,
   onClose,
   initialTier = "PRO",
+  plans: propPlans,
+  paymentSetting,
 }: {
   isOpen: boolean;
   onClose: () => void;
   initialTier?: "STARTER" | "PRO" | "ADVANCE";
+  plans?: SerializedSubscriptionPlan[];
+  paymentSetting?: ModalPaymentSetting;
 }) {
   const [step, setStep] = useState(1);
-  const [dbPlans, setDbPlans] = useState<SerializedSubscriptionPlan[]>([]);
+  const [dbPlans, setDbPlans] = useState<SerializedSubscriptionPlan[]>(propPlans || []);
 
   // Step 1: Info Toko
   const [name, setName] = useState("");
@@ -59,14 +71,16 @@ export function StoreRegistrationModal({
   const [refCode, setRefCode] = useState("");
 
   useEffect(() => {
-    if (isOpen) {
+    if (propPlans && propPlans.length > 0) {
+      setDbPlans(propPlans);
+    } else if (isOpen) {
       getSubscriptionPlansAction().then((res) => {
         if (res.success && res.plans.length > 0) {
           setDbPlans(res.plans);
         }
       });
     }
-  }, [isOpen]);
+  }, [isOpen, propPlans]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -566,24 +580,53 @@ export function StoreRegistrationModal({
                   <p className="text-[11px] text-indigo-500">Berlaku 30 hari · NMID: ID1026592057644</p>
                 </div>
 
-              {/* QRIS Image */}
-              <div className="flex flex-col items-center space-y-2">
+              {/* QRIS & Bank Info */}
+              <div className="flex flex-col items-center space-y-3">
                 <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <QrCode className="w-4 h-4 text-indigo-500" /> Scan QRIS Resmi GadgetBDG.com
+                  <QrCode className="w-4 h-4 text-indigo-500" /> Scan QRIS / Transfer Bank Resmi
                 </p>
-                <div className="relative w-52 h-52 rounded-2xl overflow-hidden border-2 border-indigo-300 shadow-md bg-white">
-                  <Image
-                    src="/images/qris-gadgetbdg.png"
-                    alt="QRIS GadgetBDG"
-                    fill
-                    className="object-contain p-2"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                </div>
+
+                {paymentSetting?.qrisImageUrl ? (
+                  <div className="relative w-52 h-52 rounded-2xl overflow-hidden border-2 border-indigo-300 shadow-md bg-white">
+                    <Image
+                      src={paymentSetting.qrisImageUrl}
+                      alt="QRIS GadgetBDG"
+                      fill
+                      className="object-contain p-2"
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <div className="relative w-52 h-52 rounded-2xl overflow-hidden border-2 border-indigo-300 shadow-md bg-white">
+                    <Image
+                      src="/images/qris-gadgetbdg.png"
+                      alt="QRIS GadgetBDG"
+                      fill
+                      className="object-contain p-2"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Info Rekening Bank */}
+                {paymentSetting && (
+                  <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1 text-center font-mono">
+                    <div className="font-bold text-slate-800">
+                      Transfer Bank: {paymentSetting.bankName}
+                    </div>
+                    <div className="text-indigo-600 font-extrabold text-sm tracking-wider">
+                      {paymentSetting.bankAccountNumber}
+                    </div>
+                    <div className="text-slate-500 font-sans text-[11px]">
+                      a.n. {paymentSetting.bankAccountHolder}
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-[10px] text-slate-400 text-center">
-                  Bayar via GoPay, OVO, DANA, BCA Mobile, atau aplikasi bank manapun yang mendukung QRIS.
+                  Bayar via GoPay, OVO, DANA, BCA Mobile, atau aplikasi bank manapun yang mendukung QRIS / Transfer.
                 </p>
               </div>
 

@@ -83,7 +83,12 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
 
     const res = await updatePlatformSettingsAction({
       platformName: settings.platformName,
+      tagline: settings.tagline,
+      cityCoverage: settings.cityCoverage,
+      heroTitle: settings.heroTitle,
+      heroSubtitle: settings.heroSubtitle,
       supportWhatsapp: settings.supportWhatsapp,
+      supportEmail: settings.supportEmail,
       serverIp: settings.serverIp,
       cnameTarget: settings.cnameTarget,
       bankName: settings.bankName,
@@ -473,6 +478,72 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
                     setSettings({ ...settings, platformName: e.target.value })
                   }
                   className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-bold placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                    Cakupan Wilayah / Kota
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Bandung Raya"
+                    value={settings.cityCoverage}
+                    onChange={(e) =>
+                      setSettings({ ...settings, cityCoverage: e.target.value })
+                    }
+                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                    Tagline Platform
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Platform Toko Online Konter HP Terpercaya"
+                    value={settings.tagline}
+                    onChange={(e) =>
+                      setSettings({ ...settings, tagline: e.target.value })
+                    }
+                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                  Hero Title (Judul Utama Homepage)
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Buka Web Toko HP Konter Anda Sendiri Dalam 5 Menit"
+                  value={settings.heroTitle}
+                  onChange={(e) =>
+                    setSettings({ ...settings, heroTitle: e.target.value })
+                  }
+                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-semibold placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                  Hero Subtitle (Deskripsi Hero)
+                </label>
+                <textarea
+                  rows={2}
+                  required
+                  placeholder="Tingkatkan penjualan unit second & baru..."
+                  value={settings.heroSubtitle}
+                  onChange={(e) =>
+                    setSettings({ ...settings, heroSubtitle: e.target.value })
+                  }
+                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                 />
               </div>
 

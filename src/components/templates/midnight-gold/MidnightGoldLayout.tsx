@@ -39,6 +39,7 @@ import {
   ProductFilterState,
   filterAndSortProducts,
 } from "@/components/storefront/ProductFilterBar";
+import { TradeInModal, TradeInBanner } from "@/components/storefront/TradeInModal";
 import styles from "./midnight-gold.module.css";
 
 interface MidnightGoldLayoutProps {
@@ -56,6 +57,7 @@ export function MidnightGoldLayout({
 }: MidnightGoldLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isTradeInModalOpen, setIsTradeInModalOpen] = useState(false);
   const [filterState, setFilterState] = useState<ProductFilterState>({
     searchQuery: "",
     category: "ALL",
@@ -279,6 +281,16 @@ export function MidnightGoldLayout({
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
+              onClick={() => setIsTradeInModalOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition"
+              title="Tukar Tambah / Jual HP"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+              <span>Tukar Tambah</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`p-2 rounded-xl transition ${
                 isSearchOpen
@@ -417,6 +429,9 @@ export function MidnightGoldLayout({
               </div>
             </div>
 
+            {/* ── BANNER AJAKAN TUKAR TAMBAH / JUAL HP BEKAS ── */}
+            <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
+
             {/* CURATED HIGHLIGHTS GRID */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -546,6 +561,9 @@ export function MidnightGoldLayout({
                 totalFilteredCount={filteredProducts.length}
               />
             </div>
+
+            {/* ── BANNER AJAKAN TUKAR TAMBAH / JUAL HP BEKAS ── */}
+            <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
 
             {/* PRODUCT GRID */}
             {filteredProducts.length === 0 ? (
@@ -1176,6 +1194,16 @@ export function MidnightGoldLayout({
           </div>
         </div>
       )}
+
+      {/* ── TRADE-IN / SELL DEVICE MODAL ── */}
+      <TradeInModal
+        isOpen={isTradeInModalOpen}
+        onClose={() => setIsTradeInModalOpen(false)}
+        store={store}
+        products={displayProducts}
+        theme="midnight-gold"
+        isDark={true}
+      />
     </div>
   );
 }

@@ -30,6 +30,7 @@ import {
   ProductFilterState,
   filterAndSortProducts,
 } from "@/components/storefront/ProductFilterBar";
+import { TradeInModal, TradeInBanner } from "@/components/storefront/TradeInModal";
 
 interface MinimalCleanLayoutProps {
   store: StoreData;
@@ -46,6 +47,7 @@ export function MinimalCleanLayout({
 }: MinimalCleanLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isTradeInModalOpen, setIsTradeInModalOpen] = useState(false);
   const [filterState, setFilterState] = useState<ProductFilterState>({
     searchQuery: "",
     category: "ALL",
@@ -146,6 +148,17 @@ export function MinimalCleanLayout({
 
             {/* Right: Quick Action Buttons (Search Toggle & WhatsApp Hotline) */}
             <div className="flex items-center gap-2 shrink-0">
+              {/* Trade-In Action Button */}
+              <button
+                type="button"
+                onClick={() => setIsTradeInModalOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition shadow-2xs"
+                title="Tukar Tambah / Jual HP"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Tukar Tambah</span>
+              </button>
+
               {/* Search Toggle Button */}
               <button
                 type="button"
@@ -345,6 +358,9 @@ export function MinimalCleanLayout({
                   <div className="text-[9px] text-slate-400">Dukungan Kasir BEC</div>
                 </div>
               </div>
+
+              {/* ── BANNER AJAKAN TUKAR TAMBAH / JUAL HP BEKAS ── */}
+              <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={false} />
 
               {/* ── SNAP SLIDER HORIZONTAL: UNIT PILIHAN MINGGU INI ── */}
               {snapSliderProducts.length > 0 && (
@@ -580,6 +596,8 @@ export function MinimalCleanLayout({
               </div>
 
               <div className="px-4 space-y-4">
+                <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={false} />
+
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-black text-slate-950">
                     Daftar Katalog Unit ({smartFilteredProducts.length})
@@ -777,6 +795,16 @@ export function MinimalCleanLayout({
             </nav>
           </div>
         )}
+
+        {/* ── TRADE-IN / SELL DEVICE MODAL ── */}
+        <TradeInModal
+          isOpen={isTradeInModalOpen}
+          onClose={() => setIsTradeInModalOpen(false)}
+          store={store}
+          products={displayProducts}
+          theme="minimal-clean"
+          isDark={false}
+        />
       </div>
     </div>
   );

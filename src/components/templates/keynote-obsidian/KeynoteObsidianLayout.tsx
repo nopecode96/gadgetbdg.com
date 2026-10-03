@@ -35,6 +35,7 @@ import {
   ProductFilterState,
   filterAndSortProducts,
 } from "@/components/storefront/ProductFilterBar";
+import { TradeInModal, TradeInBanner } from "@/components/storefront/TradeInModal";
 import styles from "./keynote-obsidian.module.css";
 
 interface KeynoteObsidianLayoutProps {
@@ -52,6 +53,7 @@ export function KeynoteObsidianLayout({
 }: KeynoteObsidianLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isTradeInModalOpen, setIsTradeInModalOpen] = useState(false);
   const [filterState, setFilterState] = useState<ProductFilterState>({
     searchQuery: "",
     category: "ALL",
@@ -239,17 +241,29 @@ export function KeynoteObsidianLayout({
               </div>
             </div>
 
-            {/* Right: WA Button */}
-            <a
-              href={isMockup ? "#" : waUrl}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => { if (isMockup) e.preventDefault(); }}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition shrink-0 active:scale-95 ${styles.obsidianWaButton}`}
-              title="Chat WhatsApp"
-            >
-              <MessageCircle className="w-4 h-4 fill-current" />
-            </a>
+            {/* Right: WA Button & Trade-In */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsTradeInModalOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-400/10 text-amber-300 border border-amber-400/30 hover:bg-amber-400/20 transition shrink-0"
+                title="Tukar Tambah / Jual HP"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+                <span>Tukar Tambah</span>
+              </button>
+
+              <a
+                href={isMockup ? "#" : waUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => { if (isMockup) e.preventDefault(); }}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition shrink-0 active:scale-95 ${styles.obsidianWaButton}`}
+                title="Chat WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+              </a>
+            </div>
           </div>
 
           {/* Expandable Search */}
@@ -392,6 +406,9 @@ export function KeynoteObsidianLayout({
                 ))}
               </div>
 
+              {/* ── BANNER AJAKAN TUKAR TAMBAH / JUAL HP BEKAS ── */}
+              <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
+
               {/* SPOTLIGHT SLIDER — Vertical tall cards */}
               {spotlightProducts.length > 0 && (
                 <div className="space-y-2.5">
@@ -477,14 +494,17 @@ export function KeynoteObsidianLayout({
               </div>
 
               {/* Catalog Header */}
-              <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-                <h2 className="text-sm font-black text-zinc-100 tracking-tight uppercase">
-                  Showcase Koleksi
-                </h2>
-                <button type="button" onClick={() => setActiveTab("home")}
-                  className={`text-xs font-bold ${styles.goldAccent} hover:opacity-80`}>
-                  ← Home
-                </button>
+              <div className="px-4 pt-4 pb-1 space-y-3">
+                <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-black text-zinc-100 tracking-tight uppercase">
+                    Showcase Koleksi
+                  </h2>
+                  <button type="button" onClick={() => setActiveTab("home")}
+                    className={`text-xs font-bold ${styles.goldAccent} hover:opacity-80`}>
+                    ← Home
+                  </button>
+                </div>
               </div>
 
               {/* Full-width showcase cards */}
@@ -945,6 +965,16 @@ export function KeynoteObsidianLayout({
           </div>
         </div>
       )}
+
+      {/* ── TRADE-IN / SELL DEVICE MODAL ── */}
+      <TradeInModal
+        isOpen={isTradeInModalOpen}
+        onClose={() => setIsTradeInModalOpen(false)}
+        store={store}
+        products={displayProducts}
+        theme="keynote-obsidian"
+        isDark={true}
+      />
     </div>
   );
 }

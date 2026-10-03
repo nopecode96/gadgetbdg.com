@@ -37,6 +37,7 @@ import {
   ProductFilterState,
   filterAndSortProducts,
 } from "@/components/storefront/ProductFilterBar";
+import { TradeInModal, TradeInBanner } from "@/components/storefront/TradeInModal";
 import styles from "./cyber-hud.module.css";
 
 interface CyberHudLayoutProps {
@@ -54,6 +55,7 @@ export function CyberHudLayout({
 }: CyberHudLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isTradeInModalOpen, setIsTradeInModalOpen] = useState(false);
   const [filterState, setFilterState] = useState<ProductFilterState>({
     searchQuery: "",
     category: "ALL",
@@ -274,6 +276,16 @@ export function CyberHudLayout({
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
+                onClick={() => setIsTradeInModalOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-cyan-950/60 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-900/50 transition shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+                title="Tukar Tambah / Jual HP"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                <span>TRADE-IN</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className={`w-9 h-9 rounded-xl font-mono flex items-center justify-center transition border ${
                   isSearchOpen || filterState.searchQuery
@@ -417,6 +429,11 @@ export function CyberHudLayout({
                 </div>
               </div>
 
+              {/* ── BANNER AJAKAN TUKAR TAMBAH / JUAL HP BEKAS ── */}
+              <div className="pt-1">
+                <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
+              </div>
+
               {/* SLIDER UNIT PILIHAN TELEMETRI */}
               {spotlightProducts.length > 0 && (
                 <div className="space-y-2.5 pt-1">
@@ -543,7 +560,9 @@ export function CyberHudLayout({
               </div>
 
               {/* Grid Produk Cyber HUD */}
-              <div className="p-4 grid grid-cols-2 gap-3">
+              <div className="p-4 space-y-4">
+                <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
+                <div className="grid grid-cols-2 gap-3">
                 {filteredProducts.map((p) => {
                   const isCustomDomain =
                     typeof window !== "undefined" &&
@@ -656,6 +675,7 @@ export function CyberHudLayout({
                     />
                   </div>
                 )}
+                </div>
               </div>
             </div>
           )}
@@ -1248,6 +1268,16 @@ export function CyberHudLayout({
           </div>
         </div>
       )}
+
+      {/* ── TRADE-IN / SELL DEVICE MODAL ── */}
+      <TradeInModal
+        isOpen={isTradeInModalOpen}
+        onClose={() => setIsTradeInModalOpen(false)}
+        store={store}
+        products={displayProducts}
+        theme="cyber-hud"
+        isDark={true}
+      />
     </div>
   );
 }

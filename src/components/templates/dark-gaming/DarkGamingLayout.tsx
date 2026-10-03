@@ -33,6 +33,7 @@ import {
   ProductFilterState,
   filterAndSortProducts,
 } from "@/components/storefront/ProductFilterBar";
+import { TradeInModal, TradeInBanner } from "@/components/storefront/TradeInModal";
 import styles from "./dark-gaming.module.css";
 
 interface DarkGamingLayoutProps {
@@ -50,6 +51,7 @@ export function DarkGamingLayout({
 }: DarkGamingLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isTradeInModalOpen, setIsTradeInModalOpen] = useState(false);
   const [filterState, setFilterState] = useState<ProductFilterState>({
     searchQuery: "",
     category: "ALL",
@@ -148,6 +150,16 @@ export function DarkGamingLayout({
 
             {/* Right: Search + WA */}
             <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsTradeInModalOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition"
+                title="Tukar Tambah / Jual HP"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Tukar Tambah</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -377,6 +389,9 @@ export function DarkGamingLayout({
                   </div>
                 </div>
               </div>
+
+              {/* ── BANNER AJAKAN TUKAR TAMBAH / JUAL HP BEKAS ── */}
+              <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
 
               {/* ── SNAP SLIDER: UNIT PILIHAN ── */}
               {snapSliderProducts.length > 0 && (
@@ -635,6 +650,8 @@ export function DarkGamingLayout({
               </div>
 
               <div className="px-4 space-y-4">
+                <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
+
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-black text-white">
                     KATALOG UNIT ({gamingFilteredProducts.length})
@@ -839,6 +856,16 @@ export function DarkGamingLayout({
             </nav>
           </div>
         )}
+
+        {/* ── TRADE-IN / SELL DEVICE MODAL ── */}
+        <TradeInModal
+          isOpen={isTradeInModalOpen}
+          onClose={() => setIsTradeInModalOpen(false)}
+          store={store}
+          products={displayProducts}
+          theme="dark-gaming"
+          isDark={true}
+        />
       </div>
     </div>
   );

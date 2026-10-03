@@ -36,6 +36,7 @@ import {
   ProductFilterState,
   filterAndSortProducts,
 } from "@/components/storefront/ProductFilterBar";
+import { TradeInModal, TradeInBanner } from "@/components/storefront/TradeInModal";
 import styles from "./tokyo-street.module.css";
 
 interface TokyoStreetLayoutProps {
@@ -53,6 +54,7 @@ export function TokyoStreetLayout({
 }: TokyoStreetLayoutProps) {
   const [activeTab, setActiveTab] = useState<StoreTabType>("home");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isTradeInModalOpen, setIsTradeInModalOpen] = useState(false);
   const [filterState, setFilterState] = useState<ProductFilterState>({
     searchQuery: "",
     category: "ALL",
@@ -275,6 +277,16 @@ export function TokyoStreetLayout({
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
+                onClick={() => setIsTradeInModalOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-neutral-100 text-neutral-900 border border-neutral-300 hover:bg-neutral-200 transition"
+                title="Tukar Tambah / Jual HP"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-rose-600" />
+                <span>Tukar Tambah</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className={`w-9 h-9 rounded-xl flex items-center justify-center transition border ${
                   isSearchOpen || filterState.searchQuery
@@ -418,6 +430,11 @@ export function TokyoStreetLayout({
                 </div>
               </div>
 
+              {/* ── BANNER AJAKAN TUKAR TAMBAH / JUAL HP BEKAS ── */}
+              <div className="pt-1">
+                <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={false} />
+              </div>
+
               {/* SLIDER UNIT REKOMENDASI */}
               {spotlightProducts.length > 0 && (
                 <div className="space-y-2.5 pt-1">
@@ -539,7 +556,9 @@ export function TokyoStreetLayout({
               </div>
 
               {/* Grid Produk */}
-              <div className="p-4 grid grid-cols-2 gap-3">
+              <div className="p-4 space-y-4">
+                <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={false} />
+                <div className="grid grid-cols-2 gap-3">
                 {filteredProducts.map((p) => {
                   const isCustomDomain =
                     typeof window !== "undefined" &&
@@ -648,6 +667,7 @@ export function TokyoStreetLayout({
                     />
                   </div>
                 )}
+                </div>
               </div>
             </div>
           )}
@@ -1240,6 +1260,16 @@ export function TokyoStreetLayout({
           </div>
         </div>
       )}
+
+      {/* ── TRADE-IN / SELL DEVICE MODAL ── */}
+      <TradeInModal
+        isOpen={isTradeInModalOpen}
+        onClose={() => setIsTradeInModalOpen(false)}
+        store={store}
+        products={displayProducts}
+        theme="tokyo-street"
+        isDark={false}
+      />
     </div>
   );
 }

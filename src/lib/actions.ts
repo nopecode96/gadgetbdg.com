@@ -101,6 +101,11 @@ import {
 } from "./actions/auth-actions";
 
 import { submitStoreReviewAction as baseSubmitStoreReviewAction } from "./actions/review-actions";
+import { getSubscriptionPlansAction as baseGetSubscriptionPlansAction } from "./actions/pricing-actions";
+
+export async function getSubscriptionPlansAction() {
+  return baseGetSubscriptionPlansAction();
+}
 
 export async function submitStoreReviewAction(input: {
   storeId: string;

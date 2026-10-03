@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
 import { TIER_LIMITS } from "@/lib/constants/pricing";
+import { assertCanAddProduct } from "@/lib/guards/plan-guard";
 
 // ─── Helper: serialize product (Date → string, Decimal → number) ──
 function serializeProduct(p: any) {
@@ -91,22 +92,12 @@ export async function createProductAction(formData: FormData) {
       }
     }
 
-    // Hitung stok aktif (AVAILABLE + BOOKED) milik toko ini
-    const activeCount = await prisma.product.count({
-      where: {
-        storeId: store.id,
-        status: { in: ["AVAILABLE", "BOOKED"] },
-      },
-    });
-
-    const tierConfig = TIER_LIMITS[store.tier as keyof typeof TIER_LIMITS] || TIER_LIMITS.STARTER;
-    const maxActive = tierConfig.maxActiveProducts;
-
-    // Validasi kuota tier
-    if (maxActive !== Infinity && activeCount >= maxActive) {
+    // Validasi kuota stok aktif via Plan Guard (SSoT dari database SubscriptionPlan)
+    const guardCheck = await assertCanAddProduct(store.id);
+    if (!guardCheck.allowed) {
       return {
         success: false,
-        error: `Kuota stok aktif paket ${tierConfig.name} sudah penuh (${maxActive} unit). Ubah status unit lama ke SOLD, atau upgrade paket untuk menambah lebih banyak unit.`,
+        error: guardCheck.error || "Batas kuota produk aktif telah tercapai.",
       };
     }
 

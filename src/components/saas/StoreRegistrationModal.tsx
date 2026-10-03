@@ -19,9 +19,10 @@ import {
   Clock,
   Tag,
 } from "lucide-react";
-import { checkSlugAvailabilityAction, registerStoreWithPaymentAction } from "@/lib/actions";
+import { checkSlugAvailabilityAction, registerStoreWithPaymentAction, getSubscriptionPlansAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier } from "@/lib/constants/templates";
 import { TIER_LIMITS } from "@/lib/constants/pricing";
+import type { SerializedSubscriptionPlan } from "@/lib/actions/pricing-actions";
 
 const TOTAL_STEPS = 5;
 
@@ -38,11 +39,14 @@ function formatRupiah(n: number) {
 export function StoreRegistrationModal({
   isOpen,
   onClose,
+  initialTier = "PRO",
 }: {
   isOpen: boolean;
   onClose: () => void;
+  initialTier?: "STARTER" | "PRO" | "ADVANCE";
 }) {
   const [step, setStep] = useState(1);
+  const [dbPlans, setDbPlans] = useState<SerializedSubscriptionPlan[]>([]);
 
   // Step 1: Info Toko
   const [name, setName] = useState("");
@@ -55,6 +59,16 @@ export function StoreRegistrationModal({
   const [refCode, setRefCode] = useState("");
 
   useEffect(() => {
+    if (isOpen) {
+      getSubscriptionPlansAction().then((res) => {
+        if (res.success && res.plans.length > 0) {
+          setDbPlans(res.plans);
+        }
+      });
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const ref = params.get("ref");
@@ -65,7 +79,13 @@ export function StoreRegistrationModal({
   }, []);
 
   // Step 2: Tier
-  const [tier, setTier] = useState<"STARTER" | "PRO" | "ADVANCE">("PRO");
+  const [tier, setTier] = useState<"STARTER" | "PRO" | "ADVANCE">(initialTier);
+
+  useEffect(() => {
+    if (initialTier) {
+      setTier(initialTier);
+    }
+  }, [initialTier]);
 
   // Step 3: Template
   const [templateId, setTemplateId] = useState("minimal-clean");
@@ -346,11 +366,21 @@ export function StoreRegistrationModal({
 
               {(["STARTER", "PRO", "ADVANCE"] as const).map((t) => {
                 const config = TIER_LIMITS[t];
+                const dbPlan = dbPlans.find((p) => p.id === t);
                 const isSelected = tier === t;
                 const borderCls = isSelected
                   ? t === "ADVANCE" ? "border-purple-600 bg-purple-50/50 ring-1 ring-purple-600" : "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
                   : "border-slate-200 hover:border-slate-300";
                 const priceCls = t === "ADVANCE" ? "text-purple-600" : t === "PRO" ? "text-blue-600" : "text-slate-900";
+
+                const originalPrice = dbPlan ? dbPlan.originalPrice : config.originalPrice;
+                const price = dbPlan ? dbPlan.price : config.price;
+                const discountBadge = dbPlan?.discountBadge || config.discountBadge;
+                const labelBadge = dbPlan?.labelBadge || config.labelBadge;
+                const popularBadge = dbPlan?.popularBadge || ("popularBadge" in config ? config.popularBadge : null);
+                const templateCount = dbPlan?.availableTemplatesCount ?? config.availableTemplatesCount;
+                const templateRule = dbPlan?.templateChangeRule || config.templateChangeRule;
+                const hasQrGoogleReview = dbPlan ? dbPlan.hasQrGoogleReview : config.hasQrGoogleReview;
 
                 return (
                   <div
@@ -358,49 +388,49 @@ export function StoreRegistrationModal({
                     onClick={() => { setTier(t); setTemplateId(getAvailableTemplatesForTier(t)[0]?.id || "minimal-clean"); }}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition relative ${borderCls}`}
                   >
-                    {"popularBadge" in config && config.popularBadge && (
+                    {popularBadge && (
                       <span className={`absolute -top-2.5 right-4 text-white text-[9px] font-bold px-2 py-0.5 rounded-full ${
                         t === "ADVANCE" ? "bg-purple-600" : "bg-blue-600"
                       }`}>
-                        {config.popularBadge}
+                        {popularBadge}
                       </span>
                     )}
 
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span className="text-[10px] font-black tracking-wider text-blue-600 uppercase block">
-                          {config.labelBadge}
+                          {labelBadge}
                         </span>
-                        <div className="font-extrabold text-sm text-slate-900 mt-0.5">{config.name}</div>
+                        <div className="font-extrabold text-sm text-slate-900 mt-0.5">{dbPlan?.name || config.name}</div>
                       </div>
 
                       {/* Price Anchoring */}
                       <div className="text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <span className="text-slate-400 line-through decoration-rose-500 decoration-2 text-xs font-semibold">
-                            {formatRupiah(config.originalPrice)}
+                            {formatRupiah(originalPrice)}
                           </span>
                           <span className="bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                            {config.discountBadge}
+                            {discountBadge}
                           </span>
                         </div>
                         <div className={`font-black text-base ${priceCls}`}>
-                          {formatRupiah(config.price)} <span className="text-slate-500 text-[11px] font-normal">{config.period}</span>
+                          {formatRupiah(price)} <span className="text-slate-500 text-[11px] font-normal">{dbPlan?.period || config.period}</span>
                         </div>
                       </div>
                     </div>
 
-                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">{config.description}</p>
+                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">{dbPlan?.description || config.description}</p>
 
                     <div className="mt-2 grid grid-cols-2 gap-1.5 text-[10px] text-slate-700 font-semibold">
                       <div className="flex items-center gap-1">
-                        <span className="text-blue-600">✓</span> {config.availableTemplatesCount} Template Storefront
+                        <span className="text-blue-600">✓</span> {templateCount} Template Storefront
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-blue-600">✓</span> {config.templateChangeRule}
+                        <span className="text-blue-600">✓</span> {templateRule}
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-blue-600">✓</span> {config.hasQrGoogleReview ? "QR Meja + Google Review" : "QR Display Meja Toko"}
+                        <span className="text-blue-600">✓</span> {hasQrGoogleReview ? "QR Meja + Google Review" : "QR Display Meja Toko"}
                       </div>
                       <div className="flex items-center gap-1">
                         <span className="text-blue-600">✓</span> {config.reports}
@@ -523,14 +553,18 @@ export function StoreRegistrationModal({
           )}
 
           {/* ── STEP 5: Pembayaran QRIS ── */}
-          {step === 5 && (
-            <div className="space-y-4 animate-fade-in">
-              {/* Nominal */}
-              <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl text-center space-y-1">
-                <p className="text-xs text-indigo-600 font-semibold">Nominal Transfer Paket {tier}</p>
-                <p className="text-3xl font-black text-indigo-700">{formatRupiah(TIER_PRICE[tier])}</p>
-                <p className="text-[11px] text-indigo-500">Berlaku 30 hari · NMID: ID1026592057644</p>
-              </div>
+          {step === 5 && (() => {
+            const currentPlan = dbPlans.find((p) => p.id === tier);
+            const activePrice = currentPlan ? currentPlan.price : TIER_PRICE[tier];
+
+            return (
+              <div className="space-y-4 animate-fade-in">
+                {/* Nominal */}
+                <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl text-center space-y-1">
+                  <p className="text-xs text-indigo-600 font-semibold">Nominal Transfer Paket {currentPlan?.name || tier}</p>
+                  <p className="text-3xl font-black text-indigo-700">{formatRupiah(activePrice)}</p>
+                  <p className="text-[11px] text-indigo-500">Berlaku 30 hari · NMID: ID1026592057644</p>
+                </div>
 
               {/* QRIS Image */}
               <div className="flex flex-col items-center space-y-2">
@@ -589,8 +623,9 @@ export function StoreRegistrationModal({
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-800 leading-relaxed">
                 <b>⚡ Proses Verifikasi Cepat:</b> Tim kami akan memverifikasi pembayaran dalam 5–15 menit pada jam kerja (08.00–21.00 WIB). Setelah aktif, Anda dapat langsung login dan mengisi katalog HP.
               </div>
-            </div>
-          )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Footer Navigation */}

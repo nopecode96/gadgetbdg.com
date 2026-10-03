@@ -16,6 +16,7 @@ export default async function QrStandsPage() {
     address: store.address,
     mapsUrl: store.mapsUrl,
     tier: store.tier as "STARTER" | "PRO" | "ADVANCE",
+    hasQrGoogleReview: Boolean(store.plan?.hasQrGoogleReview ?? (store.tier !== "STARTER")),
     logoUrl: store.logoUrl,
     primaryColor: store.primaryColor,
   };

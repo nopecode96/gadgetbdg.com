@@ -12,6 +12,88 @@ async function main() {
   await prisma.product.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.store.deleteMany({});
+  await prisma.subscriptionPlan.deleteMany({});
+
+  console.log("📦 Seeding Subscription Plans...");
+  const plans = [
+    {
+      id: "STARTER",
+      name: "Starter",
+      labelBadge: "STARTER • PERINTIS",
+      tagline: "Langkah Awal Konter Manual Jadi Katalog Online",
+      price: 250000,
+      originalPrice: 350000,
+      discountBadge: "HEMAT 28%",
+      popularBadge: null,
+      period: "/ bulan",
+      maxActiveProducts: 15,
+      maxAdmins: 1,
+      availableTemplatesCount: 2,
+      templateCooldownDays: -1,
+      templateChangeRule: "Hanya 1x saat pendaftaran",
+      hasWatermark: false,
+      hasQrWebsite: true,
+      hasQrGoogleReview: false,
+      hasStoryMaker: false,
+      hasCustomDomain: false,
+      reportsLevel: "BASIC_WA",
+      description: "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
+    },
+    {
+      id: "PRO",
+      name: "Pro",
+      labelBadge: "PRO • BISNIS MANDIRI",
+      tagline: "Solusi Lengkap Toko Berkembang: Bebas Curi Foto",
+      price: 600000,
+      originalPrice: 850000,
+      discountBadge: "HEMAT 30%",
+      popularBadge: "PALING POPULER",
+      period: "/ bulan",
+      maxActiveProducts: 30,
+      maxAdmins: 3,
+      availableTemplatesCount: 4,
+      templateCooldownDays: 30,
+      templateChangeRule: "Ganti template tiap 30 hari",
+      hasWatermark: true,
+      hasQrWebsite: true,
+      hasQrGoogleReview: true,
+      hasStoryMaker: true,
+      hasCustomDomain: true,
+      reportsLevel: "SOLD_LEADERBOARD",
+      description: "Untuk konter HP aktif BEC / Bandung yang ingin scale-up penjualan & branding profesional.",
+    },
+    {
+      id: "ADVANCE",
+      name: "Advance",
+      labelBadge: "ADVANCE • KELAS SULTAN",
+      tagline: "Ekosistem Tanpa Batas untuk Jaringan Cabang",
+      price: 1000000,
+      originalPrice: 1500000,
+      discountBadge: "HEMAT 33%",
+      popularBadge: "EKSKLUSIF",
+      period: "/ bulan",
+      maxActiveProducts: 999999,
+      maxAdmins: 5,
+      availableTemplatesCount: 6,
+      templateCooldownDays: 0,
+      templateChangeRule: "Bebas ganti template kapan saja",
+      hasWatermark: true,
+      hasQrWebsite: true,
+      hasQrGoogleReview: true,
+      hasStoryMaker: true,
+      hasCustomDomain: true,
+      reportsLevel: "BRANCH_FULL",
+      description: "Kapasitas tanpa batas untuk juragan HP second dengan perputaran stok masif & multi-cabang.",
+    },
+  ];
+
+  for (const plan of plans) {
+    await prisma.subscriptionPlan.upsert({
+      where: { id: plan.id },
+      update: plan,
+      create: plan,
+    });
+  }
 
   console.log("🔑 Generating password hashes (bcrypt salt 10)...");
   const adminPass = await bcrypt.hash("admin123", 10);
@@ -77,6 +159,7 @@ async function main() {
       address: "ITC Kebon Kelapa Lantai 3 Blok B-12, Bandung",
       mapsUrl: "https://maps.google.com/?q=ITC+Kebon+Kelapa+Bandung",
       tier: "STARTER",
+      planId: "STARTER",
       templateId: "minimal-clean",
       primaryColor: "#2563eb",
       logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
@@ -100,6 +183,7 @@ async function main() {
         create: [
           {
             tier: "STARTER",
+            planId: "STARTER",
             amount: 250000,
             status: "APPROVED",
             receiptUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80",
@@ -204,6 +288,7 @@ async function main() {
       address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-05, Bandung",
       mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
       tier: "PRO",
+      planId: "PRO",
       templateId: "flagship-gold",
       primaryColor: "#eab308",
       logoUrl: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=200&auto=format&fit=crop&q=80",
@@ -242,6 +327,7 @@ async function main() {
         create: [
           {
             tier: "PRO",
+            planId: "PRO",
             amount: 600000,
             status: "APPROVED",
             receiptUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80",
@@ -441,6 +527,7 @@ async function main() {
       address: "Sentra Gadget Dago & BEC Lantai 2, Bandung (Multi-Branch)",
       mapsUrl: "https://maps.google.com/?q=Sentra+Gadget+Dago+Bandung",
       tier: "ADVANCE",
+      planId: "ADVANCE",
       templateId: "cyber-blue",
       primaryColor: "#06b6d4",
       logoUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&auto=format&fit=crop&q=80",
@@ -492,6 +579,7 @@ async function main() {
         create: [
           {
             tier: "ADVANCE",
+            planId: "ADVANCE",
             amount: 1000000,
             status: "APPROVED",
             receiptUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80",

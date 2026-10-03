@@ -30,6 +30,7 @@ interface StoreProps {
   address: string | null;
   mapsUrl: string | null;
   tier: "STARTER" | "PRO" | "ADVANCE";
+  hasQrGoogleReview?: boolean;
   primaryColor: string;
   logoUrl: string | null;
 }
@@ -39,7 +40,7 @@ export function QrStandsClient({ store }: { store: StoreProps }) {
   const [paperSize, setPaperSize] = useState<"A6" | "A5">("A6");
 
   const tierConfig = TIER_LIMITS[store.tier] || TIER_LIMITS.STARTER;
-  const isGoogleReviewAllowed = tierConfig.hasQrGoogleReview;
+  const isGoogleReviewAllowed = store.hasQrGoogleReview ?? tierConfig.hasQrGoogleReview;
 
   // URLs
   const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";

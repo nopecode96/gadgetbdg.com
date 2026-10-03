@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Smartphone,
@@ -27,27 +27,63 @@ import {
 } from "lucide-react";
 import { StoreRegistrationModal } from "@/components/saas/StoreRegistrationModal";
 import { TemplateShowcase } from "@/components/saas/TemplateShowcase";
+import { getSubscriptionPlansAction } from "@/lib/actions";
+import type { SerializedSubscriptionPlan } from "@/lib/actions/pricing-actions";
 
 export default function SaaSlandingPage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<"STARTER" | "PRO" | "ADVANCE">("PRO");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [dbPlans, setDbPlans] = useState<SerializedSubscriptionPlan[]>([]);
 
-  const pricingTiers = [
+  useEffect(() => {
+    getSubscriptionPlansAction().then((res) => {
+      if (res.success && res.plans.length > 0) {
+        setDbPlans(res.plans);
+      }
+    });
+  }, []);
+
+  function handleOpenRegister(tierId: "STARTER" | "PRO" | "ADVANCE" = "PRO") {
+    setSelectedTier(tierId);
+    setIsRegisterOpen(true);
+  }
+
+  const starterDb = dbPlans.find((p) => p.id === "STARTER");
+  const proDb = dbPlans.find((p) => p.id === "PRO");
+  const advanceDb = dbPlans.find((p) => p.id === "ADVANCE");
+
+  const pricingTiers: Array<{
+    id: "STARTER" | "PRO" | "ADVANCE";
+    name: string;
+    labelBadge: string;
+    popularBadge?: string;
+    originalPrice: string;
+    price: string;
+    discountBadge: string;
+    tagline: string;
+    period: string;
+    description: string;
+    features: string[];
+    highlight: boolean;
+    ctaText: string;
+  }> = [
     {
-      name: "Starter",
-      labelBadge: "STARTER • PERINTIS",
-      originalPrice: "Rp 350.000",
-      price: "Rp 250.000",
-      discountBadge: "HEMAT 28%",
-      tagline: "Langkah Awal Konter Manual Jadi Katalog Online",
-      period: "/ bulan",
-      description: "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
+      id: "STARTER",
+      name: starterDb?.name || "Starter",
+      labelBadge: starterDb?.labelBadge || "STARTER • PERINTIS",
+      originalPrice: starterDb ? `Rp ${starterDb.originalPrice.toLocaleString("id-ID")}` : "Rp 350.000",
+      price: starterDb ? `Rp ${starterDb.price.toLocaleString("id-ID")}` : "Rp 250.000",
+      discountBadge: starterDb?.discountBadge || "HEMAT 28%",
+      tagline: starterDb?.tagline || "Langkah Awal Konter Manual Jadi Katalog Online",
+      period: starterDb?.period || "/ bulan",
+      description: starterDb?.description || "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
       features: [
         "Subdomain [toko].gadgetbdg.com",
-        "Katalog s/d 15 Unit HP Aktif",
-        "Akses 1 Akun Admin Toko",
-        "Pilihan 2 Template Storefront (Clean & Dark)",
-        "Aturan Tema: 1x saat pendaftaran",
+        `Katalog s/d ${starterDb?.maxActiveProducts ?? 15} Unit HP Aktif`,
+        `Akses ${starterDb?.maxAdmins ?? 1} Akun Admin Toko`,
+        `Pilihan ${starterDb?.availableTemplatesCount ?? 2} Template Storefront (Clean & Dark)`,
+        `Aturan Tema: ${starterDb?.templateChangeRule ?? "Hanya 1x saat pendaftaran"}`,
         "Label Spesifikasi HP Bekas (BH, IMEI, Minus)",
         "Cetak QR Code Display Meja Toko (Website)",
         "Laporan Performa: Klik WhatsApp Saja",
@@ -58,22 +94,23 @@ export default function SaaSlandingPage() {
       ctaText: "Mulai Paket Starter",
     },
     {
-      name: "Pro",
-      labelBadge: "PRO • BISNIS MANDIRI",
-      popularBadge: "PALING LARIS",
-      originalPrice: "Rp 850.000",
-      price: "Rp 600.000",
-      discountBadge: "HEMAT 30%",
-      tagline: "Solusi Lengkap Toko Berkembang: Bebas Curi Foto",
-      period: "/ bulan",
-      description: "Untuk konter HP aktif BEC / Bandung yang ingin scale-up penjualan & branding.",
+      id: "PRO",
+      name: proDb?.name || "Pro",
+      labelBadge: proDb?.labelBadge || "PRO • BISNIS MANDIRI",
+      popularBadge: proDb?.popularBadge || "PALING LARIS",
+      originalPrice: proDb ? `Rp ${proDb.originalPrice.toLocaleString("id-ID")}` : "Rp 850.000",
+      price: proDb ? `Rp ${proDb.price.toLocaleString("id-ID")}` : "Rp 600.000",
+      discountBadge: proDb?.discountBadge || "HEMAT 30%",
+      tagline: proDb?.tagline || "Solusi Lengkap Toko Berkembang: Bebas Curi Foto",
+      period: proDb?.period || "/ bulan",
+      description: proDb?.description || "Untuk konter HP aktif BEC / Bandung yang ingin scale-up penjualan & branding.",
       features: [
         "Semua fitur Starter",
         "Dukungan Custom Domain (.com / .id)",
-        "Katalog s/d 30 Unit HP Aktif",
-        "Akses hingga 3 Akun Admin/Kasir",
-        "Pilihan 4 Template Premium",
-        "Bebas Ganti Template Tiap 30 Hari",
+        `Katalog s/d ${proDb?.maxActiveProducts ?? 30} Unit HP Aktif`,
+        `Akses hingga ${proDb?.maxAdmins ?? 3} Akun Admin/Kasir`,
+        `Pilihan ${proDb?.availableTemplatesCount ?? 4} Template Premium`,
+        `Bebas Ganti Template Tiap ${proDb?.templateCooldownDays ?? 30} Hari`,
         "Watermark Foto Otomatis Logo Toko",
         "Cetak QR Display Meja Toko + QR Google Review ⭐⭐⭐⭐⭐",
         "Laporan: Rekap Omset SOLD & Leaderboard Produk",
@@ -83,20 +120,21 @@ export default function SaaSlandingPage() {
       ctaText: "Pilih Paket Pro",
     },
     {
-      name: "Advance",
-      labelBadge: "ADVANCE • KELAS SULTAN",
-      popularBadge: "EKSKLUSIF",
-      originalPrice: "Rp 1.500.000",
-      price: "Rp 1.000.000",
-      discountBadge: "HEMAT 33%",
-      tagline: "Ekosistem Tanpa Batas untuk Jaringan Cabang",
-      period: "/ bulan",
-      description: "Kapasitas tanpa batas untuk juragan HP second dengan perputaran stok masif & multi-cabang.",
+      id: "ADVANCE",
+      name: advanceDb?.name || "Advance",
+      labelBadge: advanceDb?.labelBadge || "ADVANCE • KELAS SULTAN",
+      popularBadge: advanceDb?.popularBadge || "EKSKLUSIF",
+      originalPrice: advanceDb ? `Rp ${advanceDb.originalPrice.toLocaleString("id-ID")}` : "Rp 1.500.000",
+      price: advanceDb ? `Rp ${advanceDb.price.toLocaleString("id-ID")}` : "Rp 1.000.000",
+      discountBadge: advanceDb?.discountBadge || "HEMAT 33%",
+      tagline: advanceDb?.tagline || "Ekosistem Tanpa Batas untuk Jaringan Cabang",
+      period: advanceDb?.period || "/ bulan",
+      description: advanceDb?.description || "Kapasitas tanpa batas untuk juragan HP second dengan perputaran stok masif & multi-cabang.",
       features: [
         "Semua fitur Pro",
         "Kapasitas Stok UNLIMITED (Tanpa Batas)",
-        "5 Akun Akses per Cabang (Multi-Branch)",
-        "Pilihan 6 Template Lengkap (Termasuk Luxury & Cyber)",
+        `${advanceDb?.maxAdmins ?? 5} Akun Akses per Cabang (Multi-Branch)`,
+        `Pilihan ${advanceDb?.availableTemplatesCount ?? 6} Template Lengkap (Termasuk Luxury & Cyber)`,
         "Bebas Ganti Template Kapan Saja",
         "Watermark Foto Otomatis Logo Toko",
         "Cetak QR Display Meja Toko + QR Google Review ⭐⭐⭐⭐⭐",
@@ -539,7 +577,7 @@ export default function SaaSlandingPage() {
                 </div>
 
                 <button
-                  onClick={() => setIsRegisterOpen(true)}
+                  onClick={() => handleOpenRegister(tier.id)}
                   className={`w-full py-3.5 rounded-xl font-black text-center text-sm transition shadow-sm ${
                     tier.highlight
                       ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/30"
@@ -662,6 +700,7 @@ export default function SaaSlandingPage() {
       <StoreRegistrationModal
         isOpen={isRegisterOpen}
         onClose={() => setIsRegisterOpen(false)}
+        initialTier={selectedTier}
       />
     </div>
   );

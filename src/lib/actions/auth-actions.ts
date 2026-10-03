@@ -106,6 +106,7 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
           name,
           slug: cleanSlug,
           tier,
+          planId: tier,
           templateId,
           whatsapp: cleanWa,
           address: address || null,
@@ -131,6 +132,7 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
         data: {
           storeId: store.id,
           tier,
+          planId: tier,
           amount: TIER_PRICE[tier],
           receiptUrl: receiptUrl || null,
           status: "PENDING",

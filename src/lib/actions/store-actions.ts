@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { TIER_LIMITS } from "@/lib/constants/pricing";
+import { assertCanChangeTemplate } from "@/lib/guards/plan-guard";
 
 export async function changeStoreTemplate(storeId: string, newTemplateId: string) {
   try {
@@ -14,26 +15,13 @@ export async function changeStoreTemplate(storeId: string, newTemplateId: string
       return { success: false, error: "Toko tidak ditemukan." };
     }
 
-    // Validasi untuk paket PRO: batas ganti template 1x per 30 hari
-    if (store.tier === "PRO" && store.lastTemplateChangeAt) {
-      const now = new Date();
-      const lastChange = new Date(store.lastTemplateChangeAt);
-      const diffTime = now.getTime() - lastChange.getTime();
-      const diffDays = diffTime / (1000 * 3600 * 24);
-
-      if (diffDays < 30) {
-        const nextAvailableDate = new Date(lastChange.getTime() + 30 * 24 * 3600 * 1000);
-        const formattedDate = nextAvailableDate.toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        });
-
-        return {
-          success: false,
-          error: `Paket Pro hanya dapat mengganti tema 1x dalam 30 hari. Anda baru dapat mengganti tema kembali pada ${formattedDate}. Upgrade ke Advance untuk bebas ganti tema kapan saja.`,
-        };
-      }
+    // Validasi pergantian template via Plan Guard (SSoT SubscriptionPlan)
+    const guardCheck = await assertCanChangeTemplate(storeId, newTemplateId);
+    if (!guardCheck.allowed) {
+      return {
+        success: false,
+        error: guardCheck.error || "Tidak diizinkan mengganti template saat ini.",
+      };
     }
 
     // Update template dan catat timestamp pergantian
@@ -83,27 +71,15 @@ export async function updateStoreSettings(formData: FormData) {
       return { success: false, error: "Toko tidak ditemukan." };
     }
 
-    // Jika ada permintaan pergantian templateId, verifikasi cooldown
+    // Jika ada permintaan pergantian templateId, verifikasi aturan via Plan Guard
     let shouldUpdateLastChange = false;
     if (templateId && templateId !== currentStore.templateId) {
-      if (currentStore.tier === "PRO" && currentStore.lastTemplateChangeAt) {
-        const now = new Date();
-        const lastChange = new Date(currentStore.lastTemplateChangeAt);
-        const diffDays = (now.getTime() - lastChange.getTime()) / (1000 * 3600 * 24);
-
-        if (diffDays < 30) {
-          const nextAvailableDate = new Date(lastChange.getTime() + 30 * 24 * 3600 * 1000);
-          const formattedDate = nextAvailableDate.toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          });
-
-          return {
-            success: false,
-            error: `Paket Pro hanya dapat mengganti tema 1x dalam 30 hari. Anda baru dapat mengganti tema kembali pada ${formattedDate}. Upgrade ke Advance untuk bebas ganti tema kapan saja.`,
-          };
-        }
+      const guardCheck = await assertCanChangeTemplate(storeId, templateId);
+      if (!guardCheck.allowed) {
+        return {
+          success: false,
+          error: guardCheck.error || "Tidak diizinkan mengganti template saat ini.",
+        };
       }
       shouldUpdateLastChange = true;
     }

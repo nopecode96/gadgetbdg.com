@@ -65,6 +65,8 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
           warrantyPolicy: true,
           verifiedBadge: true,
           tier: true,
+          planId: true,
+          plan: true,
           templateId: true,
           primaryColor: true,
           logoUrl: true,
@@ -91,6 +93,13 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     store: user.store
       ? {
           ...user.store,
+          plan: user.store.plan
+            ? {
+                ...user.store.plan,
+                price: Number(user.store.plan.price),
+                originalPrice: Number(user.store.plan.originalPrice),
+              }
+            : null,
           subscriptionExpiresAt: user.store.subscriptionExpiresAt ?? null,
           lastTemplateChangeAt: user.store.lastTemplateChangeAt ?? null,
         }
@@ -151,12 +160,22 @@ export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
   ]);
 
   const tier = store.tier as StoreTier;
-  const limits = TIER_LIMITS[tier];
+  const fallbackLimits = TIER_LIMITS[tier] || TIER_LIMITS.STARTER;
+  const dbPlan = store.plan;
+
+  const maxActiveProducts = dbPlan
+    ? (dbPlan.maxActiveProducts >= 999999 ? Infinity : dbPlan.maxActiveProducts)
+    : fallbackLimits.maxActiveProducts;
+  const maxAdmins = dbPlan ? dbPlan.maxAdmins : fallbackLimits.maxAdmins;
+  const allowedTemplates = dbPlan ? dbPlan.availableTemplatesCount : fallbackLimits.allowedTemplates;
+  const templateChangeCooldownDays = dbPlan ? dbPlan.templateCooldownDays : fallbackLimits.templateChangeCooldownDays;
+  const hasWatermark = dbPlan ? dbPlan.hasWatermark : fallbackLimits.hasWatermark;
+  const customDomain = dbPlan ? dbPlan.hasCustomDomain : fallbackLimits.customDomain;
 
   const remainingProductQuota =
-    limits.maxActiveProducts === Infinity
+    maxActiveProducts === Infinity
       ? Infinity
-      : limits.maxActiveProducts - activeProductCount;
+      : Math.max(0, maxActiveProducts - activeProductCount);
 
   return {
     user,
@@ -165,12 +184,12 @@ export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
       tier,
     },
     limits: {
-      maxActiveProducts: limits.maxActiveProducts,
-      maxAdmins: limits.maxAdmins,
-      allowedTemplates: limits.allowedTemplates,
-      templateChangeCooldownDays: limits.templateChangeCooldownDays,
-      hasWatermark: limits.hasWatermark,
-      customDomain: limits.customDomain,
+      maxActiveProducts,
+      maxAdmins,
+      allowedTemplates,
+      templateChangeCooldownDays,
+      hasWatermark,
+      customDomain,
     },
     usage: {
       activeProductCount,
@@ -179,8 +198,8 @@ export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
     },
     permissions: {
       canAddProduct: remainingProductQuota > 0,
-      canAddStaff: staffCount < limits.maxAdmins,
-      canUseCustomDomain: limits.customDomain,
+      canAddStaff: staffCount < maxAdmins,
+      canUseCustomDomain: customDomain,
       isOwner: user.role === "STORE_OWNER",
     },
   };

@@ -12,23 +12,18 @@ import {
   User,
   CheckCircle2,
   AlertCircle,
+  Building,
+  CreditCard,
+  Hash,
 } from "lucide-react";
-import { createSaasStaffAction, deleteSaasStaffAction } from "@/lib/actions";
+import {
+  createInternalAdminAction,
+  deleteInternalAdminAction,
+  InternalAdminItem,
+} from "@/lib/actions/admin-management-actions";
 
-interface SaasAdminUser {
-  id: string;
-  name: string;
-  email: string;
-  role: "SUPER_ADMIN" | "ADMIN_SAAS" | "SALES_AGENT";
-  referralCode?: string | null;
-  bankName?: string | null;
-  bankNumber?: string | null;
-  bankHolder?: string | null;
-  createdAt: string;
-}
-
-export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdminUser[] }) {
-  const [admins, setAdmins] = useState<SaasAdminUser[]>(initialAdmins);
+export function AdminsManagerClient({ initialAdmins }: { initialAdmins: InternalAdminItem[] }) {
+  const [admins, setAdmins] = useState<InternalAdminItem[]>(initialAdmins);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,158 +31,175 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"SUPER_ADMIN" | "ADMIN_SAAS" | "SALES_AGENT">("ADMIN_SAAS");
+  const [role, setRole] = useState<"SUPER_ADMIN" | "ADMIN_SAAS" | "SALES">("ADMIN_SAAS");
   const [referralCode, setReferralCode] = useState("");
   const [bankName, setBankName] = useState("");
-  const [bankNumber, setBankNumber] = useState("");
+  const [bankAccount, setBankAccount] = useState("");
   const [bankHolder, setBankHolder] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const isSalesRole = role === "SALES";
 
   async function handleCreateAdmin(e: React.FormEvent) {
     e.preventDefault();
-    setErrorMsg("");
-    setSuccessMsg("");
+    setToast(null);
 
-    if (!name || !email || !password) {
-      setErrorMsg("Semua kolom formulir wajib diisi.");
+    if (!name.trim() || !email.trim() || !password) {
+      setToast({ type: "error", message: "Semua kolom formulir utama wajib diisi." });
       return;
     }
 
     if (password.length < 6) {
-      setErrorMsg("Password minimal 6 karakter.");
+      setToast({ type: "error", message: "Password minimal 6 karakter." });
       return;
     }
 
     setIsSubmitting(true);
-    const res = await createSaasStaffAction({
-      name,
-      email,
+    const res = await createInternalAdminAction({
+      name: name.trim(),
+      email: email.trim(),
       password,
       role,
-      referralCode: role === "SALES_AGENT" ? referralCode : undefined,
-      bankName: role === "SALES_AGENT" ? bankName : undefined,
-      bankNumber: role === "SALES_AGENT" ? bankNumber : undefined,
-      bankHolder: role === "SALES_AGENT" ? bankHolder : undefined,
+      referralCode: isSalesRole ? referralCode.trim() : undefined,
+      bankName: isSalesRole ? bankName.trim() : undefined,
+      bankAccount: isSalesRole ? bankAccount.trim() : undefined,
+      bankHolder: isSalesRole ? bankHolder.trim() : undefined,
     });
     setIsSubmitting(false);
 
     if (res.success && res.user) {
-      setSuccessMsg(res.message || "Admin baru berhasil didaftarkan!");
-      setAdmins((prev) => [res.user as SaasAdminUser, ...prev]);
+      setToast({ type: "success", message: res.message || "Admin baru berhasil didaftarkan!" });
+      setAdmins((prev) => [res.user as InternalAdminItem, ...prev]);
       setName("");
       setEmail("");
       setPassword("");
       setRole("ADMIN_SAAS");
       setReferralCode("");
       setBankName("");
-      setBankNumber("");
+      setBankAccount("");
       setBankHolder("");
     } else {
-      setErrorMsg(res.error || "Gagal membuat akun admin.");
+      setToast({ type: "error", message: res.error || "Gagal membuat akun admin." });
     }
   }
 
-  async function handleDeleteAdmin(admin: SaasAdminUser) {
-    if (
-      !confirm(
-        `Yakin ingin menghapus akses internal untuk ${admin.name} (${admin.email})?\nTindakan ini tidak dapat dibatalkan.`
-      )
-    ) {
-      return;
-    }
+  async function handleDeleteAdmin(admin: InternalAdminItem) {
+    const isConfirmed = window.confirm(
+      `Hapus akses staf ${admin.name} (${admin.email})?\nTindakan ini akan mencabut seluruh akses dan tidak dapat dibatalkan.`
+    );
+    if (!isConfirmed) return;
 
     setLoadingId(admin.id);
-    const res = await deleteSaasStaffAction(admin.id);
+    setToast(null);
+
+    const res = await deleteInternalAdminAction(admin.id);
     setLoadingId(null);
 
     if (res.success) {
+      setToast({ type: "success", message: res.message || "Akun berhasil dihapus." });
       setAdmins((prev) => prev.filter((a) => a.id !== admin.id));
     } else {
-      alert(res.error || "Gagal menghapus admin.");
+      setToast({ type: "error", message: res.error || "Gagal menghapus akun." });
     }
   }
 
   return (
     <div className="space-y-8">
-      {/* Title */}
+      {/* Toast Alert Banner */}
+      {toast && (
+        <div
+          className={`p-4 rounded-2xl border text-xs font-semibold flex items-center justify-between shadow-lg transition-all ${
+            toast.type === "success"
+              ? "bg-emerald-950/90 border-emerald-800 text-emerald-300"
+              : "bg-rose-950/90 border-rose-800 text-rose-300"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {toast.type === "success" ? (
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+            ) : (
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+          <button
+            onClick={() => setToast(null)}
+            className="text-xs opacity-70 hover:opacity-100 ml-4 font-mono underline"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
+      {/* Header Page Title */}
       <div>
-        <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-          <span>Tim Internal Platform SaaS</span>
-          <span className="text-xs font-mono bg-purple-950 text-purple-400 px-2.5 py-0.5 rounded-full border border-purple-800">
-            {admins.length} Personel
+        <div className="flex items-center gap-2 mb-1">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            INTERNAL SAAS RBAC
           </span>
+          <span className="flex items-center gap-1 text-xs text-slate-400">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> PostgreSQL Multi-Tenant Protected
+          </span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          Tim Pengelola SaaS &amp; Mitra Sales
         </h1>
         <p className="text-xs text-slate-400 mt-1">
-          Kelola hak akses operator platform GadgetBdg.com: Super Admin (Akses Penuh) &amp; Admin SaaS (Operasional &amp; Billing).
+          Kelola wewenang hak akses admin internal platform, verifikator pembayaran, dan akun mitra Sales Partner.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form Tambah Admin */}
-        <div className="lg:col-span-1 bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-sm space-y-4 h-fit">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-700/60 text-white font-bold text-sm">
-            <UserPlus className="w-4 h-4 text-indigo-400" />
-            <span>Tambah Tim Pengelola SaaS</span>
-          </div>
-
-          {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-800 text-xs text-rose-300 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800 text-xs text-emerald-300 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <span>{successMsg}</span>
-            </div>
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Form Tambah Staf Baru */}
+        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-xl h-fit">
+          <h2 className="font-bold text-sm text-white mb-4 flex items-center gap-2">
+            <UserPlus className="w-4 h-4 text-purple-400" />
+            <span>Tambah Akun Staf / Mitra Baru</span>
+          </h2>
 
           <form onSubmit={handleCreateAdmin} className="space-y-4 text-xs">
             <div>
               <label className="block text-slate-300 font-semibold mb-1.5">Nama Lengkap:</label>
               <div className="relative">
-                <User className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+                <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
                 <input
                   type="text"
                   required
+                  placeholder="Contoh: Budi Sales BEC"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Misal: Budi Operasional"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1.5">Email Kredensial:</label>
+              <label className="block text-slate-300 font-semibold mb-1.5">Email Akun (Login):</label>
               <div className="relative">
-                <Mail className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+                <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
                 <input
                   type="email"
                   required
+                  placeholder="budi@gadgetbdg.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@gadgetbdg.com"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1.5">Kata Sandi Awal:</label>
+              <label className="block text-slate-300 font-semibold mb-1.5">Password Awal:</label>
               <div className="relative">
-                <KeyRound className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+                <KeyRound className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
                 <input
-                  type="text"
+                  type="password"
                   required
-                  minLength={6}
+                  placeholder="Minimal 6 karakter"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimal 6 karakter"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
@@ -197,29 +209,36 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as any)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="ADMIN_SAAS">ADMIN_SAAS (Verifikasi Bayar &amp; Monitoring)</option>
                 <option value="SUPER_ADMIN">SUPER_ADMIN (Hak Akses Penuh Termasuk User)</option>
-                <option value="SALES_AGENT">SALES_AGENT (Partner Sales Komisi &amp; Referral)</option>
+                <option value="SALES">SALES (Mitra Sales Partner &amp; Referral)</option>
               </select>
             </div>
 
-            {role === "SALES_AGENT" && (
-              <div className="p-3.5 bg-slate-950/70 border border-indigo-900/60 rounded-xl space-y-3">
-                <span className="text-[11px] font-bold text-indigo-400 block">
-                  ⚙️ Informasi Mitra Sales (Opsional / Otomatis)
+            {/* Field Tambahan Khusus Sales */}
+            {isSalesRole && (
+              <div className="p-3.5 bg-slate-950/70 border border-purple-900/60 rounded-xl space-y-3">
+                <span className="text-[11px] font-bold text-purple-400 block flex items-center gap-1.5">
+                  <Building className="w-3.5 h-3.5" />
+                  Informasi Mitra Sales Partner
                 </span>
+
                 <div>
                   <label className="block text-slate-400 text-[11px] mb-1">Kode Referral Unik:</label>
-                  <input
-                    type="text"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    placeholder="Contoh: SALES-ANDI"
-                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono uppercase text-xs focus:ring-1 focus:ring-indigo-500"
-                  />
+                  <div className="relative">
+                    <Hash className="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-500" />
+                    <input
+                      type="text"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      placeholder="Contoh: BUDI-BEC"
+                      className="w-full pl-8 pr-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono uppercase text-xs focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
                 </div>
+
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-slate-400 text-[11px] mb-1">Bank Pencairan:</label>
@@ -235,13 +254,14 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
                     <label className="block text-slate-400 text-[11px] mb-1">Nomor Rekening:</label>
                     <input
                       type="text"
-                      value={bankNumber}
-                      onChange={(e) => setBankNumber(e.target.value)}
+                      value={bankAccount}
+                      onChange={(e) => setBankAccount(e.target.value)}
                       placeholder="1234567890"
                       className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs font-mono"
                     />
                   </div>
                 </div>
+
                 <div>
                   <label className="block text-slate-400 text-[11px] mb-1">Nama Pemilik Rekening:</label>
                   <input
@@ -258,56 +278,52 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold transition flex items-center justify-center gap-2 shadow-md shadow-indigo-600/30"
+              className="w-full py-2.5 rounded-xl font-bold bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white transition flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 text-xs"
             >
-              {isSubmitting ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
-              ) : (
-                <UserPlus className="w-4 h-4" />
-              )}
-              <span>Buat Akun Staf SaaS</span>
+              {isSubmitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />}
+              <span>{isSubmitting ? "Mendaftarkan..." : "Buat Akun Staf SaaS"}</span>
             </button>
           </form>
         </div>
 
-        {/* Tabel Tim Admin */}
-        <div className="lg:col-span-2 bg-slate-800/80 border border-slate-700/80 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+        {/* Tabel Daftar Pengguna Berwenang */}
+        <div className="lg:col-span-2 bg-slate-800/80 border border-slate-700/80 rounded-2xl shadow-xl overflow-hidden h-fit">
+          <div className="px-6 py-4 border-b border-slate-700/80 flex items-center justify-between">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-purple-400" />
-              <span>Daftar Pengguna Berwenang &amp; Mitra</span>
+              <Shield className="w-4 h-4 text-purple-400" />
+              <span>Daftar Pengguna Berwenang &amp; Mitra ({admins.length})</span>
             </h2>
-            <span className="text-[11px] text-slate-400 font-mono">storeId: null (Internal)</span>
+            <span className="text-[11px] text-slate-400 font-mono">storeId: null (Platform Internal)</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-900/90 text-slate-400 uppercase font-mono text-[10px] border-b border-slate-700">
                 <tr>
-                  <th className="px-5 py-3">Nama &amp; Email</th>
-                  <th className="px-5 py-3">Role Wewenang</th>
-                  <th className="px-5 py-3">Ref / Rekening</th>
-                  <th className="px-5 py-3">Dibuat Pada</th>
-                  <th className="px-5 py-3 text-right">Aksi</th>
+                  <th className="px-5 py-3.5">Nama &amp; Email</th>
+                  <th className="px-5 py-3.5">Role Wewenang</th>
+                  <th className="px-5 py-3.5">Ref / Rekening</th>
+                  <th className="px-5 py-3.5">Dibuat Pada</th>
+                  <th className="px-5 py-3.5 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/60">
                 {admins.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500">
+                    <td colSpan={5} className="px-5 py-10 text-center text-slate-500">
                       Belum ada staf SaaS terdaftar.
                     </td>
                   </tr>
                 ) : (
                   admins.map((adm) => {
-                    const isLoading = loadingId === adm.id;
+                    const isBusy = loadingId === adm.id;
                     const isSuper = adm.role === "SUPER_ADMIN";
-                    const isSales = adm.role === "SALES_AGENT";
+                    const isSales = adm.role === "SALES" || adm.role === "SALES_AGENT";
 
                     return (
                       <tr key={adm.id} className="hover:bg-slate-750/50 transition">
                         <td className="px-5 py-3.5">
-                          <div className="font-bold text-white text-sm flex items-center gap-2">
+                          <div className="font-bold text-white text-sm flex items-center gap-2.5">
                             <div
                               className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
                                 isSuper
@@ -370,12 +386,13 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: SaasAdmi
 
                         <td className="px-5 py-3.5 text-right">
                           <button
+                            type="button"
                             onClick={() => handleDeleteAdmin(adm)}
-                            disabled={isLoading}
-                            className="p-1.5 rounded-lg bg-slate-700/60 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 border border-slate-600 transition disabled:opacity-50"
-                            title="Cabut Akses Admin"
+                            disabled={isBusy}
+                            className="p-2 rounded-lg bg-slate-700/60 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 border border-slate-600 transition disabled:opacity-50"
+                            title="Cabut Akses Staf / Hapus Akun"
                           >
-                            {isLoading ? (
+                            {isBusy ? (
                               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                             ) : (
                               <Trash2 className="w-3.5 h-3.5" />

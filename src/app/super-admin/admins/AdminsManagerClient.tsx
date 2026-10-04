@@ -33,6 +33,7 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: Internal
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"SUPER_ADMIN" | "ADMIN_SAAS" | "SALES">("ADMIN_SAAS");
   const [referralCode, setReferralCode] = useState("");
+  const [phone, setPhone] = useState("");
   const [bankName, setBankName] = useState("");
   const [bankAccount, setBankAccount] = useState("");
   const [bankHolder, setBankHolder] = useState("");
@@ -55,12 +56,18 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: Internal
       return;
     }
 
+    if (isSalesRole && phone.replace(/\D/g, "").length < 9) {
+      setToast({ type: "error", message: "Nomor WhatsApp aktif sales wajib diisi (minimal 9 digit)." });
+      return;
+    }
+
     setIsSubmitting(true);
     const res = await createInternalAdminAction({
       name: name.trim(),
       email: email.trim(),
       password,
       role,
+      phone: isSalesRole ? phone.trim() : undefined,
       referralCode: isSalesRole ? referralCode.trim() : undefined,
       bankName: isSalesRole ? bankName.trim() : undefined,
       bankAccount: isSalesRole ? bankAccount.trim() : undefined,
@@ -76,6 +83,7 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: Internal
       setPassword("");
       setRole("ADMIN_SAAS");
       setReferralCode("");
+      setPhone("");
       setBankName("");
       setBankAccount("");
       setBankHolder("");
@@ -226,7 +234,18 @@ export function AdminsManagerClient({ initialAdmins }: { initialAdmins: Internal
                 </span>
 
                 <div>
-                  <label className="block text-slate-400 text-[11px] mb-1">Kode Referral Unik:</label>
+                  <label className="block text-slate-400 text-[11px] mb-1">Nomor WhatsApp Aktif (wajib):</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="08xxxxxxxxxx"
+                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 text-[11px] mb-1">Kode Referral Unik (kosongkan untuk otomatis):</label>
                   <div className="relative">
                     <Hash className="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-500" />
                     <input

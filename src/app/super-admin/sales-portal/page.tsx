@@ -16,22 +16,31 @@ export default async function SalesPortalPage() {
   const currentUser = await requireSalesAgent();
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN_SAAS";
 
+  const salesRoles: ("SALES" | "SALES_AGENT")[] = ["SALES", "SALES_AGENT"];
+  const storeSelect = {
+    id: true,
+    name: true,
+    slug: true,
+    tier: true,
+    isActive: true,
+    subscriptionExpiresAt: true,
+    createdAt: true,
+    whatsapp: true,
+  } as const;
+
   const salesAgentsRaw = await prisma.user.findMany({
     where: isSuperAdmin
-      ? { role: "SALES_AGENT" }
-      : { id: currentUser.id, role: "SALES_AGENT" },
+      ? { role: { in: salesRoles } }
+      : { id: currentUser.id, role: { in: salesRoles } },
     include: {
       clientStores: {
         orderBy: { createdAt: "desc" },
+        select: storeSelect,
+      },
+      salesPartner: {
         select: {
-          id: true,
-          name: true,
-          slug: true,
-          tier: true,
-          isActive: true,
-          subscriptionExpiresAt: true,
-          createdAt: true,
-          whatsapp: true,
+          _count: { select: { stores: true } },
+          stores: { orderBy: { createdAt: "desc" }, select: storeSelect },
         },
       },
       commissions: {
@@ -46,7 +55,13 @@ export default async function SalesPortalPage() {
     orderBy: { createdAt: "asc" },
   });
 
-  const allAgents = salesAgentsRaw.map((agent) => ({
+  const allAgents = salesAgentsRaw.map((agent) => {
+    // Gabungkan toko via referral (SalesPartner.stores) & atribusi lama (salesUserId), dedupe by id
+    const merged = new Map<string, (typeof agent.clientStores)[number]>();
+    for (const s of [...(agent.salesPartner?.stores || []), ...agent.clientStores]) merged.set(s.id, s);
+    const clientStoresList = Array.from(merged.values());
+    return { agent, clientStoresList, storeCount: agent.salesPartner?._count.stores ?? 0 };
+  }).map(({ agent, clientStoresList, storeCount }) => ({
     id: agent.id,
     name: agent.name,
     email: agent.email,
@@ -54,7 +69,8 @@ export default async function SalesPortalPage() {
     bankName: agent.bankName,
     bankNumber: agent.bankNumber,
     bankHolder: agent.bankHolder,
-    clientStores: agent.clientStores.map((s) => ({
+    storeCount,
+    clientStores: clientStoresList.map((s) => ({
       id: s.id,
       name: s.name,
       slug: s.slug,

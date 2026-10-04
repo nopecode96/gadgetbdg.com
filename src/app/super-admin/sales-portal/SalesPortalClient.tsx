@@ -50,6 +50,7 @@ interface SalesAgentData {
   bankName: string | null;
   bankNumber: string | null;
   bankHolder: string | null;
+  storeCount?: number;
   clientStores: ClientStore[];
   commissions: CommissionItem[];
 }
@@ -89,7 +90,7 @@ export function SalesPortalClient({
 
   const referralLink = `https://gadgetbdg.com?ref=${currentAgent.referralCode}`;
 
-  const totalClients = currentAgent.clientStores.length;
+  const totalClients = Math.max(currentAgent.storeCount ?? 0, currentAgent.clientStores.length);
   const activeClients = currentAgent.clientStores.filter((s) => s.isActive).length;
 
   const pendingCommissions = currentAgent.commissions.filter((c) => c.status === "PENDING");

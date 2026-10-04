@@ -22,6 +22,7 @@ export interface CreateAdminInput {
   email: string;
   password: string;
   role: "SUPER_ADMIN" | "ADMIN_SAAS" | "SALES" | "SALES_AGENT";
+  phone?: string;
   referralCode?: string;
   bankName?: string;
   bankAccount?: string;
@@ -106,18 +107,40 @@ export async function createInternalAdminAction(data: CreateAdminInput) {
     const passwordHash = await bcrypt.hash(password, 10);
     const isSalesRole = role === "SALES" || role === "SALES_AGENT";
 
+    let cleanPhone: string | null = null;
     let cleanRefCode: string | null = null;
     if (isSalesRole) {
-      cleanRefCode = (
-        referralCode?.trim() ||
-        `SALES-${name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) || "PARTNER"}`
-      ).toUpperCase();
+      let digits = (data.phone || "").replace(/\D/g, "");
+      if (digits.length < 9) {
+        return { success: false, error: "Nomor WhatsApp aktif sales wajib diisi." };
+      }
+      if (digits.startsWith("0")) digits = "62" + digits.slice(1);
+      cleanPhone = digits;
 
-      const existingRef = await prisma.salesPartner.findUnique({
-        where: { code: cleanRefCode },
-      });
-      if (existingRef) {
-        cleanRefCode = `${cleanRefCode}-${Math.floor(100 + Math.random() * 900)}`;
+      const isCodeTaken = async (code: string) =>
+        (await prisma.salesPartner.findUnique({ where: { code } })) ||
+        (await prisma.user.findUnique({ where: { referralCode: code } }));
+
+      const manualCode = referralCode?.trim().toUpperCase();
+      if (manualCode) {
+        if (await isCodeTaken(manualCode)) {
+          return {
+            success: false,
+            error: "Kode referral sudah digunakan oleh sales lain, silakan gunakan kode lain",
+          };
+        }
+        cleanRefCode = manualCode;
+      } else {
+        const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        for (let attempt = 0; attempt < 10 && !cleanRefCode; attempt++) {
+          let suffix = "";
+          for (let i = 0; i < 4; i++) suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
+          const candidate = `SLS-${suffix}`;
+          if (!(await isCodeTaken(candidate))) cleanRefCode = candidate;
+        }
+        if (!cleanRefCode) {
+          return { success: false, error: "Gagal membuat kode referral otomatis, coba lagi." };
+        }
       }
     }
 
@@ -129,6 +152,7 @@ export async function createInternalAdminAction(data: CreateAdminInput) {
           email: cleanEmail,
           passwordHash,
           role,
+          phone: cleanPhone,
           storeId: null, // Internal platform user
           referralCode: cleanRefCode,
           bankName: isSalesRole ? bankName || null : null,
@@ -138,13 +162,13 @@ export async function createInternalAdminAction(data: CreateAdminInput) {
       });
 
       // 2. If SALES, create SalesPartner
-      if (isSalesRole && cleanRefCode) {
+      if (isSalesRole && cleanRefCode && cleanPhone) {
         await tx.salesPartner.create({
           data: {
             userId: user.id,
             code: cleanRefCode,
             name: user.name,
-            phone: user.phone || "081234567890",
+            phone: cleanPhone,
             bankName: bankName || null,
             bankAccount: bankAccount || null,
             bankHolder: bankHolder || user.name,

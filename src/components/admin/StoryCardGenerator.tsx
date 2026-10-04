@@ -94,15 +94,39 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     ctx.fill();
     ctx.restore();
 
-    // 2. Header Section
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 52px -apple-system, BlinkMacSystemFont, sans-serif";
+    // 2. Header Section (Store info with safe horizontal padding)
     ctx.textAlign = "center";
-    ctx.fillText(storeName.toUpperCase(), W / 2, 120);
+    const headerMaxW = W - 160;
+
+    let storeNameFontSize = 48;
+    if (storeName.length > 30) {
+      storeNameFontSize = 38;
+    } else if (storeName.length > 20) {
+      storeNameFontSize = 42;
+    }
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `900 ${storeNameFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    
+    // Auto truncate header store name if too wide
+    let safeStoreName = storeName.toUpperCase();
+    if (ctx.measureText(safeStoreName).width > headerMaxW) {
+      while (ctx.measureText(safeStoreName + "...").width > headerMaxW && safeStoreName.length > 0) {
+        safeStoreName = safeStoreName.slice(0, -1);
+      }
+      safeStoreName += "...";
+    }
+    ctx.fillText(safeStoreName, W / 2, 120);
 
     ctx.fillStyle = isGaming ? "#34d399" : "#93c5fd";
-    ctx.font = "600 30px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(`📍 ${storeAddress}`, W / 2, 175);
+    ctx.font = '600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    let safeAddress = `📍 ${storeAddress}`;
+    if (ctx.measureText(safeAddress).width > headerMaxW) {
+      while (ctx.measureText(safeAddress + "...").width > headerMaxW && safeAddress.length > 0) {
+        safeAddress = safeAddress.slice(0, -1);
+      }
+      safeAddress += "...";
+    }
+    ctx.fillText(safeAddress, W / 2, 175);
 
     // Status Ribbon
     ctx.fillStyle = isGaming ? "#10b981" : "#2563eb";
@@ -110,7 +134,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     ctx.fill();
 
     ctx.fillStyle = isGaming ? "#022c22" : "#ffffff";
-    ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillText("READY STOCK • UNIT TERUJI", W / 2, 250);
 
     // 3. Main Product Image (Card Container)
@@ -212,34 +236,101 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       fallbackDraw();
     }
 
+    function wrapText(
+      text: string,
+      maxWidth: number,
+      maxLines: number = 2
+    ): string[] {
+      const words = text.split(/\s+/);
+      const lines: string[] = [];
+      let currentLine = "";
+
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const metrics = ctx!.measureText(testLine);
+        if (metrics.width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+          if (lines.length === maxLines - 1) {
+            break;
+          }
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      // Sisa kata
+      if (currentLine && lines.length < maxLines) {
+        // Jika baris terakhir dan masih ada sisa kata yang belum masuk
+        const processedWordsCount = lines.join(" ").split(/\s+/).filter(Boolean).length;
+        const remainingWords = words.slice(processedWordsCount);
+        if (remainingWords.length > 0) {
+          let lastLine = remainingWords.join(" ");
+          // Jika melebihi maxWidth di baris terakhir, truncate dengan ellipsis
+          while (ctx!.measureText(lastLine + "...").width > maxWidth && lastLine.length > 0) {
+            lastLine = lastLine.slice(0, -1).trim();
+          }
+          if (lastLine !== remainingWords.join(" ")) {
+            lines.push(lastLine + "...");
+          } else {
+            lines.push(lastLine);
+          }
+        }
+      }
+
+      return lines.length > 0 ? lines : [text];
+    }
+
     function renderDetails() {
       if (!ctx) return;
 
-      // 4. Product Name & Price
+      // 4. Product Name & Price (Multi-line wrap, safe padding & proportional typography)
       ctx.textAlign = "center";
+      const maxTextW = W - 160; // Safe horizontal padding: 80px left and right (W = 1080)
+      
+      const rawTitle = (product.name || `${product.brand} Smartphone`).trim();
+
+      // Dynamic Font Sizing: sesuaikan jika nama sangat panjang
+      let titleFontSize = 54;
+      if (rawTitle.length > 40) {
+        titleFontSize = 44;
+      } else if (rawTitle.length > 28) {
+        titleFontSize = 48;
+      }
+
+      ctx.font = `900 ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const titleLines = wrapText(rawTitle, maxTextW, 2);
+      const titleLineHeight = titleFontSize + 12;
+
+      // Hitung posisi Y agar seimbang
+      const titleStartY = titleLines.length === 1 ? 1045 : 1025;
       ctx.fillStyle = "#ffffff";
-      ctx.font = "900 58px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText(product.name, W / 2, 1050);
+      titleLines.forEach((line, idx) => {
+        ctx.fillText(line, W / 2, titleStartY + idx * titleLineHeight);
+      });
 
       // Price Tag Box
-      ctx.fillStyle = isGaming ? "#10b981" : "#3b82f6";
-      ctx.font = "900 68px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText(formatRupiah(product.price), W / 2, 1140);
+      const priceY = titleStartY + (titleLines.length - 1) * titleLineHeight + 82;
+      ctx.fillStyle = isGaming ? "#10b981" : "#38bdf8";
+      ctx.font = '900 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(formatRupiah(product.price), W / 2, priceY);
 
       // 5. Specification Badges (Grid of 4 badges)
-      const badgeY = 1200;
-      const badgeH = 80;
-      const badgeW = 440;
+      const badgeY = 1205;
+      const badgeH = 82;
+      const badgeW = 430;
+      const badgeX1 = 80;
+      const badgeX2 = W - 80 - badgeW; // 570
 
       // Badge 1: IMEI Status
       drawBadge(
         ctx,
-        80,
+        badgeX1,
         badgeY,
         badgeW,
         badgeH,
         "STATUS IMEI",
-        product.imeiStatus,
+        product.imeiStatus || "Resmi Terdaftar",
         isGaming ? "#064e3b" : "#1e3a8a",
         isGaming ? "#34d399" : "#60a5fa"
       );
@@ -247,12 +338,12 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       // Badge 2: RAM / Internal Storage
       drawBadge(
         ctx,
-        560,
+        badgeX2,
         badgeY,
         badgeW,
         badgeH,
         "STORAGE / RAM",
-        product.ramRom,
+        product.ramRom || "Standar Pabrik",
         "#334155",
         "#f8fafc"
       );
@@ -260,12 +351,12 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       // Badge 3: Kondisi Fisik
       drawBadge(
         ctx,
-        80,
-        badgeY + 100,
+        badgeX1,
+        badgeY + 102,
         badgeW,
         badgeH,
         "KONDISI FISIK",
-        product.condition,
+        product.condition || "Mulus Normal",
         "#334155",
         "#38bdf8"
       );
@@ -276,39 +367,50 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
         ? String(product.batteryHealth).includes("%")
           ? `BH ${product.batteryHealth}`
           : `BH ${product.batteryHealth}%`
-        : "Tested Normal";
+        : "Tested 100% Normal";
       drawBadge(
         ctx,
-        560,
-        badgeY + 100,
+        badgeX2,
+        badgeY + 102,
         badgeW,
         badgeH,
         product.batteryHealth ? "BATTERY HEALTH" : "KELENGKAPAN",
-        product.batteryHealth ? bhText : product.completeness,
+        product.batteryHealth ? bhText : product.completeness || "Fullset Box",
         numericBh > 0 && numericBh < 80 ? "#78350f" : "#14532d",
         numericBh > 0 && numericBh < 80 ? "#fcd34d" : "#4ade80"
       );
 
-      // 6. Minus Notes Bar (Transparan)
-      const minusY = 1420;
-      ctx.fillStyle = "rgba(30, 41, 59, 0.85)";
-      roundRect(ctx, 80, minusY, W - 160, 110, 24);
+      // 6. Minus Notes Bar (Transparan dengan padding & wrap)
+      const minusY = 1435;
+      ctx.fillStyle = "rgba(30, 41, 59, 0.9)";
+      roundRect(ctx, 80, minusY, W - 160, 115, 24);
       ctx.fill();
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
       ctx.stroke();
 
       ctx.textAlign = "left";
       ctx.fillStyle = "#cbd5e1";
-      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("📋 KELENGKAPAN & CATATAN UNIT:", 110, minusY + 45);
+      ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText("📋 KELENGKAPAN & CATATAN UNIT:", 110, minusY + 42);
 
       ctx.fillStyle = "#94a3b8";
-      ctx.font = "500 24px -apple-system, BlinkMacSystemFont, sans-serif";
-      const note = product.minusNotes || "No minus, siap pakai, bergaransi toko 30 hari!";
-      ctx.fillText(`• ${product.completeness} • ${note}`, 110, minusY + 85, W - 220);
+      ctx.font = '500 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const note = product.minusNotes || "No minus, fungsi 100% normal siap pakai, garansi toko 30 hari!";
+      const fullNoteText = `• ${product.completeness || "Unit"} • ${note}`;
+      
+      // Auto truncate note text cleanly within max bounds
+      let safeNoteText = fullNoteText;
+      const maxNoteW = W - 220;
+      if (ctx.measureText(safeNoteText).width > maxNoteW) {
+        while (ctx.measureText(safeNoteText + "...").width > maxNoteW && safeNoteText.length > 0) {
+          safeNoteText = safeNoteText.slice(0, -1);
+        }
+        safeNoteText += "...";
+      }
+      ctx.fillText(safeNoteText, 110, minusY + 84);
 
       // 7. Footer CTA Box
-      const ctaY = 1570;
+      const ctaY = 1585;
       const ctaGrad = ctx.createLinearGradient(80, ctaY, W - 80, ctaY);
       if (isGaming) {
         ctaGrad.addColorStop(0, "#059669");
@@ -318,21 +420,21 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
         ctaGrad.addColorStop(1, "#4f46e5");
       }
       ctx.fillStyle = ctaGrad;
-      roundRect(ctx, 80, ctaY, W - 160, 240, 36);
+      roundRect(ctx, 80, ctaY, W - 160, 230, 36);
       ctx.fill();
 
       ctx.textAlign = "center";
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 40px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("MINAT? SCREENSHOT STORY INI & HUBUNGI:", W / 2, ctaY + 70);
+      ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText("MINAT? SCREENSHOT STORY INI & HUBUNGI:", W / 2, ctaY + 65);
 
       ctx.fillStyle = "#fef08a";
-      ctx.font = "900 52px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText(`WhatsApp: ${storeWa}`, W / 2, ctaY + 135);
+      ctx.font = '900 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(`WhatsApp: ${storeWa}`, W / 2, ctaY + 130);
 
-      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-      ctx.font = "600 28px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText(`Katalog Online Lengkap: ${storeSlug}.gadgetbdg.com`, W / 2, ctaY + 195);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      ctx.font = '600 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(`Katalog Online: ${storeSlug}.gadgetbdg.com`, W / 2, ctaY + 188);
 
       setRendered(true);
     }
@@ -354,13 +456,29 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     ctx.fill();
 
     ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-    ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+    ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillText(label, x + 24, y + 32);
 
     ctx.fillStyle = textColor;
-    ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(val, x + 24, y + 66, w - 48);
+    const maxValW = w - 48;
+    let valFontSize = 28;
+    ctx.font = `bold ${valFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+
+    let safeVal = val;
+    if (ctx.measureText(safeVal).width > maxValW) {
+      valFontSize = 24;
+      ctx.font = `bold ${valFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    }
+
+    if (ctx.measureText(safeVal).width > maxValW) {
+      while (ctx.measureText(safeVal + "...").width > maxValW && safeVal.length > 0) {
+        safeVal = safeVal.slice(0, -1).trim();
+      }
+      safeVal += "...";
+    }
+
+    ctx.fillText(safeVal, x + 24, y + 66);
   }
 
   function roundRect(

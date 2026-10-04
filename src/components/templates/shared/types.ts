@@ -55,6 +55,8 @@ export interface ProductData {
   condition: string;
   conditionNotes?: string | null;
   description?: string | null;
+  warrantyBonus?: string | null;
+  thumbnail?: string | null;
   minusNotes: string | null;
   status: string;
   images: string[];

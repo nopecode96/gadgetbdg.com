@@ -161,6 +161,8 @@ export default async function StoreProductDetailPage({ params }: ProductPageProp
     conditionNotes: rawProduct.conditionNotes ? String(rawProduct.conditionNotes) : (rawProduct.minusNotes ? String(rawProduct.minusNotes) : null),
     minusNotes: rawProduct.conditionNotes ? String(rawProduct.conditionNotes) : (rawProduct.minusNotes ? String(rawProduct.minusNotes) : null),
     description: rawProduct.description ? String(rawProduct.description) : null,
+    warrantyBonus: (rawProduct as any).warrantyBonus ? String((rawProduct as any).warrantyBonus) : (rawProduct.description ? String(rawProduct.description) : null),
+    thumbnail: (rawProduct as any).thumbnail ? String((rawProduct as any).thumbnail) : (Array.isArray(rawProduct.images) && rawProduct.images.length > 0 ? String(rawProduct.images[0]) : null),
     status: String(rawProduct.status || "AVAILABLE"),
     images: Array.isArray(rawProduct.images) ? rawProduct.images.map(String) : [],
     branchId: rawProduct.branchId ? String(rawProduct.branchId) : null,

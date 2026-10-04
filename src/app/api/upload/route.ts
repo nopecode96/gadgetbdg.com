@@ -130,11 +130,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tidak ada file gambar yang diunggah." }, { status: 400 });
     }
 
-    // Batasi maks 5 gambar
-    const filesToProcess = files.slice(0, 5);
+    // Batasi maks 8 gambar (sesuai spesifikasi galeri produk)
+    const filesToProcess = files.slice(0, 8);
 
     // Target folder penyimpanan
-    const storeUploadDir = path.join(process.cwd(), "public", "uploads", "stores", store.slug);
+    const storeUploadDir = path.join(process.cwd(), "public", "uploads", "products", store.slug);
     await mkdir(storeUploadDir, { recursive: true });
 
     // Watermark aktif jika tier bukan STARTER atau store.hasWatermark bernilai true
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
 
       await writeFile(filepath, outputBuffer);
 
-      const publicUrl = `/uploads/stores/${store.slug}/${filename}`;
+      const publicUrl = `/uploads/products/${store.slug}/${filename}`;
       uploadedUrls.push(publicUrl);
     }
 

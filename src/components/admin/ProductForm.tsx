@@ -232,6 +232,8 @@ export function ProductForm({
         completeness: completeness.trim() || null,
         conditionNotes: conditionNotes.trim() || null,
         description: description.trim() || null,
+        warrantyBonus: description.trim() || null,
+        thumbnail: images.length > 0 ? images[0] : null,
         status,
         branchId: branchId ? branchId : null,
         images,

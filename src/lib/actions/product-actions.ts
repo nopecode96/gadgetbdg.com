@@ -95,6 +95,9 @@ export async function createProductAction(input: FormData | Record<string, any>)
     let images: string[] = [];
     let imeiStatus: string | null = null;
 
+    let warrantyBonus: string | null = null;
+    let thumbnail: string | null = null;
+
     if (input instanceof FormData) {
       title = ((input.get("title") as string) || (input.get("name") as string) || "").trim();
       category = ((input.get("category") as string) || "SMARTPHONE").trim();
@@ -107,12 +110,14 @@ export async function createProductAction(input: FormData | Record<string, any>)
       completeness = (input.get("completeness") as string) || null;
       conditionNotes = (input.get("conditionNotes") as string) || (input.get("minusNotes") as string) || null;
       description = (input.get("description") as string) || null;
+      warrantyBonus = (input.get("warrantyBonus") as string) || (input.get("description") as string) || null;
       const statusRaw = input.get("status") as string;
       if (statusRaw === "BOOKED" || statusRaw === "SOLD") {
         status = statusRaw;
       }
       branchId = (input.get("branchId") as string) || null;
       imeiStatus = (input.get("imeiStatus") as string) || null;
+      thumbnail = (input.get("thumbnail") as string) || null;
 
       // Parse images (array JSON, multiple form entries, atau single imageUrl)
       const imagesJson = input.get("images") as string | null;
@@ -142,14 +147,20 @@ export async function createProductAction(input: FormData | Record<string, any>)
       completeness = input.completeness || null;
       conditionNotes = input.conditionNotes || input.minusNotes || null;
       description = input.description || null;
+      warrantyBonus = input.warrantyBonus || input.description || null;
       if (input.status === "BOOKED" || input.status === "SOLD") {
         status = input.status;
       }
       branchId = input.branchId || null;
       imeiStatus = input.imeiStatus || null;
+      thumbnail = input.thumbnail || null;
       if (Array.isArray(input.images)) {
         images = input.images.filter((url: any) => typeof url === "string" && url.trim().length > 0);
       }
+    }
+
+    if (!thumbnail && images.length > 0) {
+      thumbnail = images[0];
     }
 
     if (!title || !brand || !priceRaw) {
@@ -198,6 +209,8 @@ export async function createProductAction(input: FormData | Record<string, any>)
         completeness,
         conditionNotes,
         description,
+        warrantyBonus,
+        thumbnail,
         status,
         images,
         ramRom,
@@ -372,6 +385,10 @@ export async function updateProductAction(
         completeness,
         conditionNotes,
         description,
+        warrantyBonus: input instanceof FormData
+          ? ((input.get("warrantyBonus") as string) || (input.get("description") as string) || description)
+          : (input.warrantyBonus !== undefined ? input.warrantyBonus : description),
+        thumbnail: images.length > 0 ? images[0] : null,
         status,
         images,
         branchId: validBranchId,

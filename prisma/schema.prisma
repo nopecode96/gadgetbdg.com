@@ -205,6 +205,8 @@ model Product {
   condition       String?
   minusNotes      String?
   imeiStatus      String?
+  warrantyBonus   String?
+  thumbnail       String?
   branchId        String?
   branch          Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
 

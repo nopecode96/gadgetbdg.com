@@ -19,6 +19,7 @@ import {
   Copy,
   Check,
   ExternalLink,
+  Repeat,
 } from "lucide-react";
 import { StoreData, ProductData } from "./types";
 import { getTemplateConfig } from "@/lib/constants/templates";
@@ -56,10 +57,29 @@ export function ProductDetailView({
 
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
+  const spekDetails = [
+    product.grade || product.condition ? `• Kondisi: ${product.grade || product.condition}` : "",
+    product.ram || product.storage ? `• Spek: ${product.ram && product.storage ? `${product.ram}/${product.storage}` : product.ramRom || product.storage || product.ram}` : "",
+    product.batteryHealth ? `• Battery Health: ${product.batteryHealth}` : "",
+    product.imeiStatus ? `• IMEI: ${product.imeiStatus}` : "",
+    product.completeness ? `• Kelengkapan: ${product.completeness}` : "",
+  ].filter(Boolean).join("\n");
+
   const waMessage = encodeURIComponent(
-    `Halo ${store.name}, saya tertarik dengan unit *${product.name}* (${formatRupiah(
-      product.price
-    )}) yang ada di link:\n${currentUrl}\n\nApakah unit masih ada dan bisa dicek/COD?`
+    `Halo ${store.name}, saya tertarik membeli unit ini:\n\n` +
+    `*${product.name}*\n` +
+    `Harga: ${formatRupiah(product.price)}\n` +
+    `${spekDetails ? `${spekDetails}\n` : ""}` +
+    `Link: ${currentUrl}\n\n` +
+    `Apakah unit masih ready dan bisa dicek/COD?`
+  );
+
+  const tradeInMessage = encodeURIComponent(
+    `Halo ${store.name}, saya ingin mengajukan *TUKAR TAMBAH* ke unit ini:\n\n` +
+    `*Target Unit: ${product.name}* (${formatRupiah(product.price)})\n` +
+    `${spekDetails ? `${spekDetails}\n` : ""}` +
+    `Link: ${currentUrl}\n\n` +
+    `Boleh dibantu taksiran harga HP lama saya?`
   );
 
   const shareWaUrl = `https://wa.me/?text=${encodeURIComponent(
@@ -537,16 +557,29 @@ export function ProductDetailView({
             </div>
           </div>
 
-          <a
-            href={`https://wa.me/${cleanWa}?text=${waMessage}`}
-            onClick={handleOrderClick}
-            target="_blank"
-            rel="noreferrer"
-            className="flex-1 max-w-xs py-3 px-4 rounded-2xl text-xs sm:text-sm font-black text-white bg-emerald-600 hover:bg-emerald-500 transition shadow-lg flex items-center justify-center gap-2 tracking-wide"
-          >
-            <MessageCircle className="w-4 h-4 fill-current shrink-0" />
-            <span>Beli / Nego via WhatsApp</span>
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href={`https://wa.me/${cleanWa}?text=${tradeInMessage}`}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex py-3 px-3.5 rounded-2xl text-xs font-black text-slate-800 dark:text-slate-100 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-slate-700 items-center justify-center gap-1.5 shrink-0"
+              title="Ajukan tukar tambah HP lama ke unit ini"
+            >
+              <Repeat className="w-3.5 h-3.5 text-blue-500" />
+              <span>Tukar Tambah</span>
+            </a>
+
+            <a
+              href={`https://wa.me/${cleanWa}?text=${waMessage}`}
+              onClick={handleOrderClick}
+              target="_blank"
+              rel="noreferrer"
+              className="py-3 px-4 sm:px-5 rounded-2xl text-xs sm:text-sm font-black text-white bg-emerald-600 hover:bg-emerald-500 transition shadow-lg flex items-center justify-center gap-2 tracking-wide shrink-0"
+            >
+              <MessageCircle className="w-4 h-4 fill-current shrink-0" />
+              <span>Beli via WhatsApp</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>

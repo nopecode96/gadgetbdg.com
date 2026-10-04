@@ -18,9 +18,9 @@ cd /app
 # Push skema database
 npx prisma db push --skip-generate || true
 
-# Jalankan ensure-demo.js untuk menjamin toko demo selalu siap
-echo "==> Memastikan data demo toko berkahcell & gamersgadget tersedia..."
-node ./prisma/ensure-demo.js || true
+# Jalankan seeder produksi resmi (Super Admin, Master Plans, PlatformSetting, demo1-demo6)
+echo "==> Menjalankan seeder produksi resmi (Super Admin & demo1-demo6)..."
+node ./prisma/seed-production.js || true
 
 echo "==> Memulai Next.js di internal port 3001..."
 exec npm run start -- -p 3001

@@ -51,9 +51,18 @@ export function ProductDetailView({
 
   const showWatermark = Boolean(store.hasWatermark || store.tier !== "STARTER");
 
-  // Phone clean
-  let cleanWa = (store.whatsapp || "").replace(/\D/g, "");
+  // Destination WhatsApp: prioritize branch hotline if product is allocated to a branch
+  const targetWaNumber =
+    product.branch?.whatsapp ||
+    product.branch?.phone ||
+    store.whatsapp ||
+    "";
+  let cleanWa = targetWaNumber.replace(/\D/g, "");
   if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
+
+  const destinationStoreName = product.branch?.name
+    ? `${store.name} (${product.branch.name})`
+    : store.name;
 
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
@@ -66,7 +75,7 @@ export function ProductDetailView({
   ].filter(Boolean).join("\n");
 
   const waMessage = encodeURIComponent(
-    `Halo ${store.name}, saya tertarik membeli unit ini:\n\n` +
+    `Halo ${destinationStoreName}, saya tertarik membeli unit ini:\n\n` +
     `*${product.name}*\n` +
     `Harga: ${formatRupiah(product.price)}\n` +
     `${spekDetails ? `${spekDetails}\n` : ""}` +
@@ -75,7 +84,7 @@ export function ProductDetailView({
   );
 
   const tradeInMessage = encodeURIComponent(
-    `Halo ${store.name}, saya ingin mengajukan *TUKAR TAMBAH* ke unit ini:\n\n` +
+    `Halo ${destinationStoreName}, saya ingin mengajukan *TUKAR TAMBAH* ke unit ini:\n\n` +
     `*Target Unit: ${product.name}* (${formatRupiah(product.price)})\n` +
     `${spekDetails ? `${spekDetails}\n` : ""}` +
     `Link: ${currentUrl}\n\n` +

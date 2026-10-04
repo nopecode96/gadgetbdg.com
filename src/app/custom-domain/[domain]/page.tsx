@@ -239,6 +239,7 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
           id: String(p.branch.id),
           name: String(p.branch.name),
           address: String(p.branch.address),
+          whatsapp: p.branch.whatsapp || p.branch.phone || null,
           phone: p.branch.phone ? String(p.branch.phone) : null,
           mapsUrl: p.branch.mapsUrl ? String(p.branch.mapsUrl) : null,
           isMain: Boolean(p.branch.isMain),

@@ -8,12 +8,13 @@
  *   3. Validates store.isActive and subscription expiry
  *   4. Redirects to /login or /billing-suspended if invalid
  *
- * The resolved TenantContext is passed as props to children via
- * page-level props (Server Component pattern — no React Context needed).
+ * Wraps all merchant admin pages with the modern collapsible left sidebar
+ * and minimal top header (MerchantLayout).
  */
 
 import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
-import { AdminNav } from "@/components/admin/AdminNav";
+import { prisma } from "@/lib/prisma";
+import { MerchantLayout } from "@/components/admin/MerchantLayout";
 
 export default async function AdminLayout({
   children,
@@ -23,15 +24,24 @@ export default async function AdminLayout({
   // This will redirect if not authenticated / store not active
   const ctx = await requireStoreOwnerOrStaff();
 
+  // Query pending trade-in offers count for the badge in sidebar
+  const tradeInPendingCount = await prisma.tradeInOffer.count({
+    where: {
+      storeId: ctx.store.id,
+      status: "PENDING",
+    },
+  });
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <AdminNav
-        currentSlug={ctx.store.slug}
-        storeName={ctx.store.name}
-        userName={ctx.user.name}
-        role={ctx.user.role}
-      />
-      <main className="flex-1">{children}</main>
-    </div>
+    <MerchantLayout
+      currentSlug={ctx.store.slug}
+      storeName={ctx.store.name}
+      userName={ctx.user.name}
+      role={ctx.user.role}
+      tier={ctx.store.tier}
+      tradeInPendingCount={tradeInPendingCount}
+    >
+      {children}
+    </MerchantLayout>
   );
 }

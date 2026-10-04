@@ -9,7 +9,7 @@
  * and cleared by logoutAction.
  */
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { TIER_LIMITS } from "@/lib/constants/pricing";
@@ -144,15 +144,71 @@ export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
     redirect("/sales");
   }
 
-  if (user.role !== "STORE_OWNER" && user.role !== "STORE_STAFF") {
+  const headerList = headers();
+  const host = headerList.get("host") || "";
+  const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
+
+  // In localhost / dev mode, allow dev convenience if user is SUPER_ADMIN accessing /admin directly
+  let effectiveStore = user.store;
+  let effectiveStoreId = user.storeId;
+
+  if (isLocalhost && (user.role === "SUPER_ADMIN" || user.role === "ADMIN_SAAS")) {
+    const headerSlug = headerList.get("x-store-slug");
+    const targetStore = await prisma.store.findFirst({
+      where: headerSlug ? { slug: headerSlug } : { isDemo: true },
+      include: { plan: true },
+      orderBy: { createdAt: "asc" },
+    });
+    if (targetStore) {
+      effectiveStoreId = targetStore.id;
+      effectiveStore = {
+        ...targetStore,
+        plan: targetStore.plan
+          ? {
+              ...targetStore.plan,
+              price: Number(targetStore.plan.price),
+              originalPrice: Number(targetStore.plan.originalPrice),
+            }
+          : null,
+        subscriptionExpiresAt: targetStore.subscriptionExpiresAt ?? null,
+        lastTemplateChangeAt: targetStore.lastTemplateChangeAt ?? null,
+      } as any;
+    }
+  } else if (user.role !== "STORE_OWNER" && user.role !== "STORE_STAFF") {
     throw new Error("403: Akses ditolak. Hanya Store Owner dan Staff yang dapat mengakses merchant panel.");
   }
 
-  if (!user.storeId || !user.store) {
+  // Check if store resolution was found (Priority 1: from session; Priority 2: fallback dev store on localhost)
+  if (!effectiveStoreId || !effectiveStore) {
+    if (isLocalhost) {
+      const fallbackDevStore = await prisma.store.findFirst({
+        where: { isDemo: true },
+        include: { plan: true },
+        orderBy: { createdAt: "asc" },
+      });
+      if (fallbackDevStore) {
+        effectiveStoreId = fallbackDevStore.id;
+        effectiveStore = {
+          ...fallbackDevStore,
+          plan: fallbackDevStore.plan
+            ? {
+                ...fallbackDevStore.plan,
+                price: Number(fallbackDevStore.plan.price),
+                originalPrice: Number(fallbackDevStore.plan.originalPrice),
+              }
+            : null,
+          subscriptionExpiresAt: fallbackDevStore.subscriptionExpiresAt ?? null,
+          lastTemplateChangeAt: fallbackDevStore.lastTemplateChangeAt ?? null,
+        } as any;
+      }
+    }
+  }
+
+  if (!effectiveStoreId || !effectiveStore) {
     redirect("/login?error=no_store");
   }
 
-  const store = user.store;
+  const store = effectiveStore;
 
   // Check if subscription is expired
   const isExpired =

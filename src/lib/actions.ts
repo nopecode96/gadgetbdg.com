@@ -135,6 +135,8 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
   return baseRegisterStoreWithPayment(formData);
 }
 
+export const registerStoreAction = registerStoreWithPaymentAction;
+
 export async function approvePaymentAction(paymentId: string) {
   return approveSubscriptionPaymentAction(paymentId);
 }

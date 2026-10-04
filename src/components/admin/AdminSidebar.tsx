@@ -71,9 +71,10 @@ export function AdminSidebar({
       badge: tradeInPendingCount > 0 ? String(tradeInPendingCount) : null,
     },
     {
-      title: "Generator Medsos",
-      href: "/admin/social-tools",
+      title: "Marketing & Medsos",
+      href: "/admin/marketing",
       icon: Share2,
+      isLocked: isStarter || tier === "PRO",
     },
     {
       title: "QR Meja & Standee",

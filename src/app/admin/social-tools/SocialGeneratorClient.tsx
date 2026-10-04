@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Copy, Check, Share2, Sparkles, Smartphone, Instagram, Facebook } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 import { StoryCardGenerator } from "@/components/admin/StoryCardGenerator";
+import { AdvancePaywallCard } from "@/components/admin/AdvancePaywallCard";
 
 interface Product {
   id: string;
@@ -27,6 +28,8 @@ export function SocialGeneratorClient({
   store?: any;
   products: Product[];
 }) {
+  const isAdvance = store?.tier === "ADVANCE" || store?.planId === "ADVANCE";
+
   const [selectedProductId, setSelectedProductId] = useState<string>(products[0]?.id || "");
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
@@ -36,6 +39,28 @@ export function SocialGeneratorClient({
     navigator.clipboard.writeText(text);
     setCopiedType(type);
     setTimeout(() => setCopiedType(null), 2000);
+  }
+
+  if (!isAdvance) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            Generator Media &amp; Caption Medsos
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Generate caption teks Facebook Marketplace / Instagram serta poster grafis Story 9:16 siap posting.
+          </p>
+        </div>
+
+        <AdvancePaywallCard
+          currentTier={store?.tier || "STARTER"}
+          storeName={store?.name}
+          featureTitle="Generator Konten Story 9:16 & Poster Promosi"
+          featureDescription="Fitur Eksklusif Paket Advance: Generator Konten Story 9:16 & Subdomain Khusus Cabang hanya tersedia untuk pengguna paket Advance. Tingkatkan paket Anda untuk membuka fitur otomatisasi promosi dan multi-cabang tanpa batas."
+        />
+      </div>
+    );
   }
 
   if (!product) {

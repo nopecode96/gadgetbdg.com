@@ -7,6 +7,7 @@ import { resolveHexColor } from "@/lib/pwa-utils";
 
 interface CustomDomainPageProps {
   params: Promise<{ domain: string }> | { domain: string };
+  searchParams?: Promise<{ branch?: string }> | { branch?: string };
 }
 
 export const revalidate = 0;
@@ -82,9 +83,11 @@ export async function generateMetadata({ params }: CustomDomainPageProps): Promi
   };
 }
 
-export default async function CustomDomainPage({ params }: CustomDomainPageProps) {
+export default async function CustomDomainPage({ params, searchParams }: CustomDomainPageProps) {
   const resolvedParams = await Promise.resolve(params);
+  const resolvedSearchParams = await Promise.resolve(searchParams || {});
   const customDomain = (resolvedParams?.domain || "").trim();
+  const requestedBranchSlug = (resolvedSearchParams?.branch || "").trim().toLowerCase();
 
   if (!customDomain) {
     notFound();
@@ -115,7 +118,9 @@ export default async function CustomDomainPage({ params }: CustomDomainPageProps
             select: {
               id: true,
               name: true,
+              slug: true,
               address: true,
+              whatsapp: true,
               phone: true,
               mapsUrl: true,
               isMain: true,
@@ -133,15 +138,29 @@ export default async function CustomDomainPage({ params }: CustomDomainPageProps
     notFound();
   }
 
+  // Branch matching for Advance tier
+  const isAdvanceTier = rawStore.tier === "ADVANCE" || rawStore.planId === "ADVANCE";
+  const matchedBranch = requestedBranchSlug && isAdvanceTier
+    ? (rawStore.branches || []).find((b) => (b.slug || "").toLowerCase() === requestedBranchSlug)
+    : null;
+
+  const activeWhatsapp = matchedBranch?.whatsapp || matchedBranch?.phone || rawStore.whatsapp || "";
+  const activeAddress = matchedBranch?.address || rawStore.address;
+  const activeMapsUrl = matchedBranch?.mapsUrl || rawStore.mapsUrl;
+
+  const filteredRawProducts = matchedBranch
+    ? (rawStore.products || []).filter((p) => p.branchId === matchedBranch.id)
+    : rawStore.products || [];
+
   // Deep plain-object sanitization for Client Components boundary
   const storeData = {
     id: String(rawStore.id),
-    name: String(rawStore.name),
+    name: matchedBranch ? `${rawStore.name} (${matchedBranch.name})` : String(rawStore.name),
     slug: String(rawStore.slug),
-    whatsapp: String(rawStore.whatsapp || ""),
-    address: rawStore.address ? String(rawStore.address) : null,
+    whatsapp: String(activeWhatsapp),
+    address: activeAddress ? String(activeAddress) : null,
     storeImage: rawStore.storeImage ? String(rawStore.storeImage) : null,
-    mapsUrl: rawStore.mapsUrl ? String(rawStore.mapsUrl) : null,
+    mapsUrl: activeMapsUrl ? String(activeMapsUrl) : null,
     operationalHours: rawStore.operationalHours ? String(rawStore.operationalHours) : "Setiap Hari: 10:00 - 20:30 WIB",
     warrantyPolicy: rawStore.warrantyPolicy ? String(rawStore.warrantyPolicy) : "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.",
     verifiedBadge: Boolean(rawStore.verifiedBadge),
@@ -154,7 +173,9 @@ export default async function CustomDomainPage({ params }: CustomDomainPageProps
     branches: (rawStore.branches || []).map((b) => ({
       id: String(b.id),
       name: String(b.name),
+      slug: b.slug ? String(b.slug) : "",
       address: String(b.address),
+      whatsapp: b.whatsapp || b.phone || "",
       phone: b.phone ? String(b.phone) : null,
       mapsUrl: b.mapsUrl ? String(b.mapsUrl) : null,
       isMain: Boolean(b.isMain),
@@ -169,7 +190,7 @@ export default async function CustomDomainPage({ params }: CustomDomainPageProps
     })),
   };
 
-  const productsData = (rawStore.products || []).map((p) => ({
+  const productsData = (filteredRawProducts || []).map((p) => ({
     id: String(p.id),
     name: String(p.title || p.name || ""),
     title: String(p.title || p.name || ""),

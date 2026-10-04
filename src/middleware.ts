@@ -209,6 +209,44 @@ export default async function middleware(req: NextRequest) {
       });
     }
 
+    // 2d. Branch Path Handling on Store Subdomain: /[slug].gadgetbdg.com/cabang/[branch-slug]
+    if (pathname.startsWith("/cabang/")) {
+      const branchSlug = pathname.replace("/cabang/", "").split("/")[0].toLowerCase().trim();
+      if (branchSlug) {
+        requestHeaders.set("x-branch-slug", branchSlug);
+        // Forward with query param branch=[branchSlug]
+        const remainingPath = pathname.replace(`/cabang/${branchSlug}`, "") || "";
+        const targetSearch = new URLSearchParams(searchParams);
+        targetSearch.set("branch", branchSlug);
+        const storefrontTarget = `/${subdomain}${remainingPath}?${targetSearch.toString()}`;
+        return NextResponse.rewrite(new URL(storefrontTarget, req.url), {
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+    }
+
+    // 2e. Multi-level Subdomain: [branch-slug].[store-slug].gadgetbdg.com or [branch-slug].[store-slug].localhost
+    if (subdomain.includes(".")) {
+      const parts = subdomain.split(".");
+      if (parts.length === 2) {
+        const [branchSlug, storeSlug] = parts;
+        if (!isReservedSlug(storeSlug) && !isReservedSlug(branchSlug)) {
+          requestHeaders.set("x-store-slug", storeSlug);
+          requestHeaders.set("x-branch-slug", branchSlug);
+          const targetSearch = new URLSearchParams(searchParams);
+          targetSearch.set("branch", branchSlug);
+          const storefrontTarget = `/${storeSlug}${pathname}?${targetSearch.toString()}`;
+          return NextResponse.rewrite(new URL(storefrontTarget, req.url), {
+            request: {
+              headers: requestHeaders,
+            },
+          });
+        }
+      }
+    }
+
     // Default tenant root & pages -> rewrite to storefront (/[store-slug]/...)
     const storefrontTarget = `/${subdomain}${path}`;
     return NextResponse.rewrite(new URL(storefrontTarget, req.url), {
@@ -219,10 +257,56 @@ export default async function middleware(req: NextRequest) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // STEP 3: Custom Domain (e.g. tokoberkahbandung.com)
+  // STEP 3: Custom Domain & Branch Subdomain on Custom Domain
   // ─────────────────────────────────────────────────────────────────────────
   if (isReservedAppPath(pathname)) {
     return NextResponse.next();
+  }
+
+  // 3a. Branch Subdomain on Custom Domain: [branch-slug].[customDomain]
+  // e.g. bec.berkahgadget.com -> root domain berkahgadget.com with branch bec
+  const domainParts = currentHost.split(".");
+  if (domainParts.length >= 3) {
+    const branchSlugCandidate = domainParts[0].toLowerCase();
+    const parentCustomDomain = domainParts.slice(1).join(".").toLowerCase();
+
+    // Check that parentCustomDomain is not a platform domain
+    if (parentCustomDomain !== mainDomain && !isReservedSlug(branchSlugCandidate)) {
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set("x-branch-slug", branchSlugCandidate);
+      const targetSearch = new URLSearchParams(searchParams);
+      targetSearch.set("branch", branchSlugCandidate);
+
+      return NextResponse.rewrite(
+        new URL(`/custom-domain/${parentCustomDomain}${pathname}?${targetSearch.toString()}`, req.url),
+        {
+          request: {
+            headers: requestHeaders,
+          },
+        }
+      );
+    }
+  }
+
+  // 3b. Branch Path on Custom Domain: customdomain.com/cabang/[branch-slug]
+  if (pathname.startsWith("/cabang/")) {
+    const branchSlug = pathname.replace("/cabang/", "").split("/")[0].toLowerCase().trim();
+    if (branchSlug) {
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set("x-branch-slug", branchSlug);
+      const remainingPath = pathname.replace(`/cabang/${branchSlug}`, "") || "";
+      const targetSearch = new URLSearchParams(searchParams);
+      targetSearch.set("branch", branchSlug);
+
+      return NextResponse.rewrite(
+        new URL(`/custom-domain/${currentHost}${remainingPath}?${targetSearch.toString()}`, req.url),
+        {
+          request: {
+            headers: requestHeaders,
+          },
+        }
+      );
+    }
   }
 
   // Rewrite to custom-domain dynamic route: /custom-domain/[domain]/...

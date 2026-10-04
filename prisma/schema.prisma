@@ -125,25 +125,32 @@ model StoreReview {
 }
 
 model Branch {
-  id          String        @id @default(cuid())
-  storeId     String
-  store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  id              String        @id @default(cuid())
+  storeId         String
+  store           Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
   
-  name        String        // Contoh: "Cabang BEC Lantai 1"
-  slug        String        // Contoh: "bec" (untuk subdomain: bec.domainanda.com atau /cabang/bec)
-  address     String        // Alamat lengkap rute fisik
-  whatsapp    String        // No WhatsApp hotline kasir/admin cabang
-  phone       String?       // Backward compatibility field
-  mapsUrl     String?       // Link Google Maps cabang
-  isMain      Boolean       @default(false)
+  name            String        // Contoh: "Cabang BEC Lantai 1"
+  slug            String        // Contoh: "bec" (untuk subdomain: bec.domainanda.com atau /cabang/bec)
+  address         String        // Alamat lengkap rute fisik
+  whatsapp        String        // No WhatsApp hotline kasir/admin cabang
+  phone           String?       // Backward compatibility field
+  mapsUrl         String?       // Backward compatibility field
+  isMain          Boolean       @default(false)
+
+  // Field Profil & Identitas Fisik Cabang (Setara Store)
+  image           String?       // Foto fisik konter gerai (Rasio 16:9 hasil upload)
+  googleMapsUrl   String?       // URL Petunjuk Arah Google Maps
+  googleReviewUrl String?       // URL Ulasan Google Bisnis
+  businessHours   String?       // Contoh: "Setiap Hari: 10:00 - 21:00 WIB"
+  warrantyInfo    String?       // Ketentuan garansi & layanan cabang
 
   // Relasi ke Data Lain
-  products    Product[]     // Unit HP yang dialokasikan di cabang ini
-  users       User[]        // Staf/Kasir yang bertugas di cabang ini
-  tradeIns    TradeInLead[] // Leads tukar tambah yang dialokasikan ke cabang ini
+  products        Product[]     // Unit HP yang dialokasikan di cabang ini
+  users           User[]        // Staf/Kasir yang bertugas di cabang ini
+  tradeIns        TradeInLead[] // Leads tukar tambah yang dialokasikan ke cabang ini
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@unique([storeId, slug])
   @@index([storeId])

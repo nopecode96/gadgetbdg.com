@@ -146,7 +146,11 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
 
   const activeWhatsapp = matchedBranch?.whatsapp || matchedBranch?.phone || rawStore.whatsapp || "";
   const activeAddress = matchedBranch?.address || rawStore.address;
-  const activeMapsUrl = matchedBranch?.mapsUrl || rawStore.mapsUrl;
+  const activeMapsUrl = matchedBranch?.googleMapsUrl || matchedBranch?.mapsUrl || rawStore.mapsUrl;
+  const activeImage = matchedBranch?.image || rawStore.storeImage || rawStore.bannerUrl || null;
+  const activeOperationalHours = matchedBranch?.businessHours || rawStore.operationalHours || "Setiap Hari: 10:00 - 20:30 WIB";
+  const activeWarrantyPolicy = matchedBranch?.warrantyInfo || rawStore.warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.";
+  const activeGoogleReviewUrl = matchedBranch?.googleReviewUrl || rawStore.googleReviewUrl || null;
 
   const filteredRawProducts = matchedBranch
     ? (rawStore.products || []).filter((p) => p.branchId === matchedBranch.id)
@@ -159,10 +163,11 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
     slug: String(rawStore.slug),
     whatsapp: String(activeWhatsapp),
     address: activeAddress ? String(activeAddress) : null,
-    storeImage: rawStore.storeImage ? String(rawStore.storeImage) : null,
+    storeImage: activeImage ? String(activeImage) : null,
     mapsUrl: activeMapsUrl ? String(activeMapsUrl) : null,
-    operationalHours: rawStore.operationalHours ? String(rawStore.operationalHours) : "Setiap Hari: 10:00 - 20:30 WIB",
-    warrantyPolicy: rawStore.warrantyPolicy ? String(rawStore.warrantyPolicy) : "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.",
+    googleReviewUrl: activeGoogleReviewUrl ? String(activeGoogleReviewUrl) : null,
+    operationalHours: String(activeOperationalHours),
+    warrantyPolicy: String(activeWarrantyPolicy),
     verifiedBadge: Boolean(rawStore.verifiedBadge),
     primaryColor: String(rawStore.primaryColor || "#2563eb"),
     bannerUrl: rawStore.bannerUrl ? String(rawStore.bannerUrl) : null,
@@ -177,7 +182,8 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
       address: String(b.address),
       whatsapp: b.whatsapp || b.phone || "",
       phone: b.phone ? String(b.phone) : null,
-      mapsUrl: b.mapsUrl ? String(b.mapsUrl) : null,
+      mapsUrl: b.googleMapsUrl || b.mapsUrl ? String(b.googleMapsUrl || b.mapsUrl) : null,
+      image: b.image ? String(b.image) : null,
       isMain: Boolean(b.isMain),
     })),
     reviews: (rawStore.reviews || []).map((r) => ({

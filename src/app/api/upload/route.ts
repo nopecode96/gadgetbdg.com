@@ -103,7 +103,55 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, url: `/uploads/receipts/${filename}` });
     }
 
-    // 2. Upload gambar produk katalog oleh toko
+    // 2. Upload Foto Profil Fisik Toko / Cabang / Logo (Store Profile & Branch Profile)
+    if (type === "store-profile" || type === "branch-profile" || type === "store-logo") {
+      const file = formData.get("file") as File | null;
+      if (!file) {
+        return NextResponse.json({ error: "File gambar tidak ditemukan." }, { status: 400 });
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json({ error: "Ukuran file maksimal 5MB." }, { status: 400 });
+      }
+
+      const bytes = await file.arrayBuffer();
+      const inputBuffer = Buffer.from(bytes);
+
+      // Inisialisasi sharp pipeline dengan EXIF auto-rotate
+      let imagePipeline = sharp(inputBuffer).rotate();
+
+      if (type === "store-logo") {
+        imagePipeline = imagePipeline.resize({
+          width: 500,
+          height: 500,
+          fit: "cover",
+          withoutEnlargement: true,
+        });
+      } else {
+        // Rasio 16:9 untuk foto storefront fisik gerai konter
+        imagePipeline = imagePipeline.resize({
+          width: 1280,
+          height: 720,
+          fit: "cover",
+          withoutEnlargement: true,
+        });
+      }
+
+      const outputBuffer = await imagePipeline.webp({ quality: 85 }).toBuffer();
+      const subFolder = type === "branch-profile" ? "branches" : "stores";
+      const uploadDir = path.join(process.cwd(), "public", "uploads", subFolder);
+      await mkdir(uploadDir, { recursive: true });
+
+      const filename = `${type}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
+      await writeFile(path.join(uploadDir, filename), outputBuffer);
+
+      return NextResponse.json({
+        success: true,
+        url: `/uploads/${subFolder}/${filename}`,
+      });
+    }
+
+    // 3. Upload gambar produk katalog oleh toko
     const store = await prisma.store.findUnique({
       where: { id: user.storeId },
       select: {

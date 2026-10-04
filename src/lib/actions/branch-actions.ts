@@ -14,6 +14,11 @@ export interface BranchData {
   phone: string | null;
   mapsUrl: string | null;
   isMain: boolean;
+  image?: string | null;
+  googleMapsUrl?: string | null;
+  googleReviewUrl?: string | null;
+  businessHours?: string | null;
+  warrantyInfo?: string | null;
   createdAt: string;
   updatedAt: string;
   _count?: {
@@ -32,8 +37,13 @@ function serializeBranch(b: any): BranchData {
     address: b.address,
     whatsapp: b.whatsapp || b.phone || "",
     phone: b.phone ?? null,
-    mapsUrl: b.mapsUrl ?? null,
+    mapsUrl: b.mapsUrl || b.googleMapsUrl || null,
     isMain: Boolean(b.isMain),
+    image: b.image ?? null,
+    googleMapsUrl: b.googleMapsUrl || b.mapsUrl || null,
+    googleReviewUrl: b.googleReviewUrl ?? null,
+    businessHours: b.businessHours ?? null,
+    warrantyInfo: b.warrantyInfo ?? null,
     createdAt: b.createdAt instanceof Date ? b.createdAt.toISOString() : b.createdAt,
     updatedAt: b.updatedAt instanceof Date ? b.updatedAt.toISOString() : b.updatedAt,
     _count: b._count
@@ -88,6 +98,11 @@ export async function createBranchAction(data: {
   phone?: string;
   mapsUrl?: string;
   isMain?: boolean;
+  image?: string | null;
+  googleMapsUrl?: string | null;
+  googleReviewUrl?: string | null;
+  businessHours?: string | null;
+  warrantyInfo?: string | null;
 }) {
   try {
     const ctx = await requireStoreOwnerOrStaff();
@@ -176,7 +191,12 @@ export async function createBranchAction(data: {
           address,
           whatsapp: cleanWa,
           phone: cleanWa,
-          mapsUrl,
+          mapsUrl: data.googleMapsUrl?.trim() || mapsUrl,
+          googleMapsUrl: data.googleMapsUrl?.trim() || mapsUrl,
+          image: data.image?.trim() || null,
+          googleReviewUrl: data.googleReviewUrl?.trim() || null,
+          businessHours: data.businessHours?.trim() || null,
+          warrantyInfo: data.warrantyInfo?.trim() || null,
           isMain: shouldBeMain,
         },
       });
@@ -208,6 +228,11 @@ export async function updateBranchAction(
     phone?: string;
     mapsUrl?: string;
     isMain?: boolean;
+    image?: string | null;
+    googleMapsUrl?: string | null;
+    googleReviewUrl?: string | null;
+    businessHours?: string | null;
+    warrantyInfo?: string | null;
   }
 ) {
   try {
@@ -236,7 +261,7 @@ export async function updateBranchAction(
     const name = data.name?.trim();
     const address = data.address?.trim();
     let whatsappInput = (data.whatsapp || data.phone || existing.whatsapp || existing.phone || "").trim();
-    const mapsUrl = data.mapsUrl?.trim() || null;
+    const mapsUrl = data.googleMapsUrl?.trim() || data.mapsUrl?.trim() || null;
     const isMain = Boolean(data.isMain);
 
     if (!name || !address) {
@@ -290,6 +315,11 @@ export async function updateBranchAction(
           whatsapp: cleanWa,
           phone: cleanWa,
           mapsUrl,
+          googleMapsUrl: mapsUrl,
+          ...(data.image !== undefined ? { image: data.image?.trim() || null } : {}),
+          ...(data.googleReviewUrl !== undefined ? { googleReviewUrl: data.googleReviewUrl?.trim() || null } : {}),
+          ...(data.businessHours !== undefined ? { businessHours: data.businessHours?.trim() || null } : {}),
+          ...(data.warrantyInfo !== undefined ? { warrantyInfo: data.warrantyInfo?.trim() || null } : {}),
           ...(isMain ? { isMain: true } : {}),
         },
       });

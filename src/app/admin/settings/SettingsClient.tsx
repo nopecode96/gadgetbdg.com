@@ -20,6 +20,7 @@ import Link from "next/link";
 import { updateStoreSettingsAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier, TEMPLATE_REGISTRY } from "@/lib/constants/templates";
 import { DomainSettingsSection } from "./DomainSettingsSection";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 interface SettingsClientProps {
   store?: any;
@@ -187,7 +188,7 @@ export function SettingsClient({ store }: SettingsClientProps) {
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="block font-medium text-slate-700">
-                  Foto Fisik Konter / Storefront (Rasio 16:9)
+                  Foto Fisik Konter / Storefront Gerai (Rasio 16:9)
                 </label>
                 {!isProOrAdvance && (
                   <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 flex items-center gap-1">
@@ -196,27 +197,36 @@ export function SettingsClient({ store }: SettingsClientProps) {
                   </span>
                 )}
               </div>
-              <input
-                type="url"
-                name="storeImage"
-                defaultValue={store.storeImage || ""}
-                disabled={!isProOrAdvance}
-                placeholder={
-                  isProOrAdvance
-                    ? "https://... (URL foto konter toko di BEC/ITC)"
-                    : "Upgrade ke Pro untuk upload foto toko fisik dan aktifkan ulasan pembeli."
-                }
-                className={`w-full px-3 py-2 rounded-xl focus:outline-none text-xs border ${
-                  isProOrAdvance
-                    ? "bg-slate-50 border-slate-200 focus:ring-2 focus:ring-blue-500"
-                    : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
-                }`}
-              />
-              {!isProOrAdvance && (
-                <p className="text-[10.5px] text-amber-700 font-medium">
-                  Upgrade ke Pro untuk upload foto toko fisik dan aktifkan ulasan pembeli.
-                </p>
+              {isProOrAdvance ? (
+                <ImageUpload
+                  name="storeImage"
+                  value={store.storeImage || null}
+                  aspectRatio="16:9"
+                  uploadType="store-profile"
+                  description="Foto fisik etalase atau tampak depan konter di BEC/ITC/Mall. Ditampilkan sebagai header profil gerai di website."
+                />
+              ) : (
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-xs text-center space-y-1">
+                  <p className="font-bold text-slate-600">Upload Foto Toko Terkunci</p>
+                  <p className="text-[11px] text-amber-700">
+                    Upgrade ke paket Pro atau Advance untuk upload foto fisik toko dan mengaktifkan ulasan pembeli.
+                  </p>
+                </div>
               )}
+            </div>
+
+            {/* Logo Toko */}
+            <div className="space-y-1 pt-1">
+              <label className="block font-medium text-slate-700">
+                Logo Toko (Rasio 1:1)
+              </label>
+              <ImageUpload
+                name="logoUrl"
+                value={store.logoUrl || null}
+                aspectRatio="1:1"
+                uploadType="store-logo"
+                description="Logo ikon toko untuk avatar, favicon, dan identitas header storefront."
+              />
             </div>
 
             <div>

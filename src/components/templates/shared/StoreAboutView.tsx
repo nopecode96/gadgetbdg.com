@@ -218,8 +218,15 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
               return (
                 <div
                   key={b.id}
-                  className={`rounded-3xl p-4 border space-y-2.5 shadow-xs ${colors.cardBg} ${colors.cardBorder} ${colors.textPrimary}`}
+                  className={`rounded-3xl p-4 border space-y-2.5 shadow-xs overflow-hidden ${colors.cardBg} ${colors.cardBorder} ${colors.textPrimary}`}
                 >
+                  {/* Foto Gerai Cabang jika ada */}
+                  {b.image && (
+                    <div className="w-full aspect-16/9 rounded-2xl overflow-hidden bg-slate-800 -mt-1 mb-2 border border-slate-700/50">
+                      <img src={b.image} alt={b.name} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <div className="font-black text-xs flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
@@ -234,7 +241,14 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
 
                   <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : colors.textSecondary}`}>{b.address}</p>
 
-                  <div className="flex items-center gap-2 pt-1">
+                  {b.businessHours && (
+                    <p className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-emerald-500" />
+                      <span>{b.businessHours}</span>
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-2 pt-1 flex-wrap">
                     <a
                       href={isMockup ? "#" : bMaps}
                       target="_blank"
@@ -242,11 +256,26 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
                       onClick={(e) => {
                         if (isMockup) e.preventDefault();
                       }}
-                      className="flex-1 py-2 rounded-2xl font-bold text-[11px] flex items-center justify-center gap-1.5 transition bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
+                      className="flex-1 py-2 rounded-2xl font-bold text-[11px] flex items-center justify-center gap-1.5 transition bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 min-w-[120px]"
                     >
                       <ExternalLink className="w-3 h-3" />
                       <span>Petunjuk Arah</span>
                     </a>
+
+                    {b.googleReviewUrl && (
+                      <a
+                        href={isMockup ? "#" : b.googleReviewUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => {
+                          if (isMockup) e.preventDefault();
+                        }}
+                        className="py-2 px-3 rounded-2xl font-bold text-[11px] flex items-center justify-center gap-1.5 transition bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"
+                      >
+                        <Star className="w-3 h-3 text-amber-500 fill-current" />
+                        <span>Ulasan</span>
+                      </a>
+                    )}
 
                     <a
                       href={

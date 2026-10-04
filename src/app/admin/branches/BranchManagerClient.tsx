@@ -27,6 +27,7 @@ import {
   deleteBranchAction,
   BranchData,
 } from "@/lib/actions/branch-actions";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 interface BranchManagerClientProps {
   store: {
@@ -52,6 +53,10 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
   const [whatsapp, setWhatsapp] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");
   const [isMain, setIsMain] = useState(false);
+  const [image, setImage] = useState<string | null>(null);
+  const [googleReviewUrl, setGoogleReviewUrl] = useState("");
+  const [businessHours, setBusinessHours] = useState("");
+  const [warrantyInfo, setWarrantyInfo] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -67,6 +72,10 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
     setAddress("");
     setWhatsapp("");
     setMapsUrl("");
+    setImage(null);
+    setGoogleReviewUrl("");
+    setBusinessHours("");
+    setWarrantyInfo("");
     setIsMain(branches.length === 0);
     setErrorMsg(null);
     setShowModal(true);
@@ -78,7 +87,11 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
     setSlug(branch.slug || "");
     setAddress(branch.address);
     setWhatsapp(branch.whatsapp || branch.phone || "");
-    setMapsUrl(branch.mapsUrl || "");
+    setMapsUrl(branch.googleMapsUrl || branch.mapsUrl || "");
+    setImage(branch.image || null);
+    setGoogleReviewUrl(branch.googleReviewUrl || "");
+    setBusinessHours(branch.businessHours || "");
+    setWarrantyInfo(branch.warrantyInfo || "");
     setIsMain(branch.isMain);
     setErrorMsg(null);
     setShowModal(true);
@@ -122,6 +135,10 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
         whatsapp: whatsapp || undefined,
         phone: whatsapp || undefined,
         mapsUrl: mapsUrl || undefined,
+        image: image || null,
+        googleReviewUrl: googleReviewUrl || undefined,
+        businessHours: businessHours || undefined,
+        warrantyInfo: warrantyInfo || undefined,
         isMain,
       });
 
@@ -151,6 +168,10 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
         whatsapp: whatsapp || undefined,
         phone: whatsapp || undefined,
         mapsUrl: mapsUrl || undefined,
+        image: image || null,
+        googleReviewUrl: googleReviewUrl || undefined,
+        businessHours: businessHours || undefined,
+        warrantyInfo: warrantyInfo || undefined,
         isMain,
       });
 
@@ -525,7 +546,7 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    URL Google Maps (Opsional)
+                    URL Google Maps Petunjuk Arah
                   </label>
                   <input
                     type="url"
@@ -535,6 +556,61 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
                   />
                 </div>
+              </div>
+
+              {/* Upload Foto Fisik Konter Cabang (Rasio 16:9) */}
+              <div className="space-y-1">
+                <label className="block font-bold text-slate-700 mb-1">
+                  Foto Fisik Konter Gerai Cabang (Rasio 16:9)
+                </label>
+                <ImageUpload
+                  name="branchImage"
+                  value={image}
+                  onChange={(url) => setImage(url)}
+                  aspectRatio="16:9"
+                  uploadType="branch-profile"
+                  description="Foto fisik tampak depan konter gerai cabang. Ditampilkan saat pengunjung mengakses subdomain/link cabang."
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Jam Operasional Cabang
+                  </label>
+                  <input
+                    type="text"
+                    value={businessHours}
+                    onChange={(e) => setBusinessHours(e.target.value)}
+                    placeholder="Setiap Hari: 10:00 - 21:00 WIB"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Link Ulasan Google Review Cabang
+                  </label>
+                  <input
+                    type="url"
+                    value={googleReviewUrl}
+                    onChange={(e) => setGoogleReviewUrl(e.target.value)}
+                    placeholder="https://g.page/r/.../review"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Ketentuan &amp; Garansi Khusus Cabang (Opsional)
+                </label>
+                <input
+                  type="text"
+                  value={warrantyInfo}
+                  onChange={(e) => setWarrantyInfo(e.target.value)}
+                  placeholder="Kosongkan jika menggunakan ketentuan garansi pusat"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-xs"
+                />
               </div>
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">

@@ -110,7 +110,8 @@ export async function updateStoreSettings(formData: FormData) {
     let cleanWa = whatsapp.replace(/\D/g, "");
     if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
 
-    const storeImage = formData.get("storeImage") as string;
+    const storeImage = formData.get("storeImage") as string | null;
+    const logoUrl = formData.get("logoUrl") as string | null;
     const operationalHours = formData.get("operationalHours") as string;
     const warrantyPolicy = formData.get("warrantyPolicy") as string;
 
@@ -125,7 +126,8 @@ export async function updateStoreSettings(formData: FormData) {
         address: address || null,
         mapsUrl: mapsUrl || null,
         googleReviewUrl: googleReviewUrl || null,
-        ...(canCustom && storeImage !== undefined ? { storeImage: storeImage || null } : {}),
+        ...(logoUrl !== null && logoUrl !== undefined ? { logoUrl: logoUrl || null } : {}),
+        ...(canCustom && storeImage !== null && storeImage !== undefined ? { storeImage: storeImage || null } : {}),
         operationalHours: operationalHours !== undefined ? (operationalHours || "Setiap Hari: 10:00 - 20:30 WIB") : currentStore.operationalHours,
         warrantyPolicy: warrantyPolicy !== undefined ? (warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.") : currentStore.warrantyPolicy,
         primaryColor: primaryColor || currentStore.primaryColor,

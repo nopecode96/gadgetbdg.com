@@ -3,7 +3,13 @@ export interface BranchData {
   name: string;
   address: string;
   phone?: string | null;
+  whatsapp?: string | null;
   mapsUrl?: string | null;
+  googleMapsUrl?: string | null;
+  image?: string | null;
+  googleReviewUrl?: string | null;
+  businessHours?: string | null;
+  warrantyInfo?: string | null;
   isMain?: boolean;
 }
 

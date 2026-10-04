@@ -43,10 +43,31 @@ export function StoreHomeView({
   const isDark = colors.isDark;
 
   const displayProducts = Array.isArray(products) ? products : [];
+  const availableProducts = displayProducts.filter((p) => p.status === "AVAILABLE");
 
-  // Best deal picks & flash drop highlight
-  const heroHighlight = displayProducts[0];
-  const bestDeals = displayProducts.slice(1, 7);
+  // 1. Featured Products ("Unit Pilihan Minggu Ini"):
+  // Prioritas produk dengan flag isFeatured = true. Fallback ke 4 unit AVAILABLE teratas jika belum ada flag.
+  const explicitFeatured = availableProducts.filter((p) => p.isFeatured);
+  const featuredProducts = explicitFeatured.length > 0 ? explicitFeatured : availableProducts.slice(0, 4);
+
+  // 2. COD Ready Products ("Rekomendasi Siap COD Hari Ini"):
+  // Produk dengan flag isReadyCod = true (atau default true)
+  const codProducts = availableProducts.filter((p) => p.isReadyCod !== false);
+
+  // Hero banner configurations
+  const isPromoActive = store.promoBannerActive !== false;
+  const promoBadge = store.promoBannerBadge || "PROMO SPESIAL";
+  const promoTitle = store.promoBannerTitle || store.name;
+  const promoSubtitle =
+    store.promoBannerSubtitle ||
+    "Katalog resmi unit second berkualitas & teruji. Transaksi aman langsung ke kasir toko.";
+  const promoImage = store.promoBannerImage || featuredProducts[0]?.images?.[0] || displayProducts[0]?.images?.[0] || null;
+  const promoCtaText = store.promoBannerCtaText || "Lihat Katalog";
+  const promoCtaLink = store.promoBannerCtaLink || null;
+
+  // Trust badge dynamic cashier store name
+  const currentBranchName = store.branches?.find((b) => b.isMain)?.name || store.branches?.[0]?.name || null;
+  const supportStoreName = currentBranchName || store.name || "Toko";
 
   // Smart Preset Filters (Opsi 1): ALL | IPHONE | ANDROID | GAMING | BUDGET | LIKENEW
   const [activeFilter, setActiveFilter] = React.useState<
@@ -54,7 +75,9 @@ export function StoreHomeView({
   >("ALL");
 
   const smartFilteredProducts = React.useMemo(() => {
-    return displayProducts.filter((p) => {
+    // When filter is "ALL", display codProducts (Rekomendasi Siap COD Hari Ini)
+    const baseList = activeFilter === "ALL" ? (codProducts.length > 0 ? codProducts : displayProducts) : displayProducts;
+    return baseList.filter((p) => {
       if (activeFilter === "ALL") return true;
       const brandLower = (p.brand || "").toLowerCase();
       const nameLower = (p.name || "").toLowerCase();
@@ -91,7 +114,7 @@ export function StoreHomeView({
       }
       return true;
     });
-  }, [displayProducts, activeFilter]);
+  }, [displayProducts, codProducts, activeFilter]);
 
   const smartPills = [
     { id: "ALL" as const, label: "Semua Unit", icon: "📱", desc: "Semua Stok" },
@@ -105,61 +128,80 @@ export function StoreHomeView({
   return (
     <div className="space-y-6 p-4 animate-fade-in text-xs font-sans pb-10">
       {/* ── 1. HERO PROMO CARD (Pilar B: Rounded-3xl + Floating Device) ── */}
-      <div className="relative rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-800 p-5 sm:p-6">
-        {/* Glow ambient background effects */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-blue-600/10 rounded-full blur-2xl pointer-events-none" />
+      {isPromoActive && (
+        <div className="relative rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-800 p-5 sm:p-6">
+          {/* Glow ambient background effects */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-blue-600/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          <div className="space-y-2 max-w-[200px] sm:max-w-xs text-left">
-            {/* Promo Pill Badge */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-wide uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30 backdrop-blur-md">
-              <Sparkles className="w-2.5 h-2.5 text-amber-300 shrink-0" />
-              <span>PROMO SPESIAL GAJIAN</span>
-            </div>
+          <div className="relative z-10 flex items-center justify-between gap-4">
+            <div className="space-y-2 max-w-[200px] sm:max-w-xs text-left">
+              {/* Promo Pill Badge */}
+              {promoBadge && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-wide uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30 backdrop-blur-md">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-300 shrink-0" />
+                  <span>{promoBadge}</span>
+                </div>
+              )}
 
-            {/* Main Title */}
-            <h2 className="text-base sm:text-xl font-black text-white tracking-tight leading-tight drop-shadow-sm">
-              {store.name}
-            </h2>
+              {/* Main Title */}
+              <h2 className="text-base sm:text-xl font-black text-white tracking-tight leading-tight drop-shadow-sm">
+                {promoTitle}
+              </h2>
 
-            {/* Subtitle */}
-            <p className="text-[11px] leading-relaxed text-slate-300 font-medium">
-              Katalog resmi unit second berkualitas &amp; teruji. Transaksi aman langsung ke kasir toko.
-            </p>
+              {/* Subtitle */}
+              {promoSubtitle && (
+                <p className="text-[11px] leading-relaxed text-slate-300 font-medium">
+                  {promoSubtitle}
+                </p>
+              )}
 
-            {/* CTA Button */}
-            <div className="pt-1.5">
-              <button
-                onClick={() => onNavigateTab("list")}
-                className="px-4 py-2 rounded-full font-black text-xs transition-all duration-200 flex items-center gap-1.5 bg-white text-slate-950 hover:bg-slate-100 shadow-lg shadow-white/10 active:scale-95 shrink-0"
-              >
-                <span>Lihat Katalog</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Physical Product Preview with Depth Shadow */}
-          {heroHighlight?.images?.[0] && (
-            <div
-              onClick={() => onNavigateTab("list")}
-              className="relative shrink-0 cursor-pointer group select-none"
-            >
-              <div className="w-24 sm:w-32 aspect-square rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-2 flex flex-col items-center justify-center relative shadow-2xl transition-transform duration-300 group-hover:scale-105">
-                <img
-                  src={heroHighlight.images[0]}
-                  alt={heroHighlight.name}
-                  className="w-full h-full object-contain drop-shadow-2xl"
-                />
-                <span className="absolute -bottom-2 bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full shadow-md">
-                  READY
-                </span>
+              {/* CTA Button */}
+              <div className="pt-1.5">
+                {promoCtaLink ? (
+                  <a
+                    href={promoCtaLink}
+                    className="inline-flex px-4 py-2 rounded-full font-black text-xs transition-all duration-200 items-center gap-1.5 bg-white text-slate-950 hover:bg-slate-100 shadow-lg shadow-white/10 active:scale-95 shrink-0"
+                  >
+                    <span>{promoCtaText}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => onNavigateTab("list")}
+                    className="px-4 py-2 rounded-full font-black text-xs transition-all duration-200 flex items-center gap-1.5 bg-white text-slate-950 hover:bg-slate-100 shadow-lg shadow-white/10 active:scale-95 shrink-0"
+                  >
+                    <span>{promoCtaText}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
-          )}
+
+            {/* Physical Product Preview with Depth Shadow */}
+            {promoImage && (
+              <div
+                onClick={() => {
+                  if (promoCtaLink) window.location.href = promoCtaLink;
+                  else onNavigateTab("list");
+                }}
+                className="relative shrink-0 cursor-pointer group select-none"
+              >
+                <div className="w-24 sm:w-32 aspect-square rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-2 flex flex-col items-center justify-center relative shadow-2xl transition-transform duration-300 group-hover:scale-105">
+                  <img
+                    src={promoImage}
+                    alt={promoTitle}
+                    className="w-full h-full object-contain drop-shadow-2xl"
+                  />
+                  <span className="absolute -bottom-2 bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full shadow-md">
+                    PROMO
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── 2. SMART PRESET FILTERS (Filter Cepat Katalog Real-Time) ── */}
       <div className="space-y-2">
@@ -267,13 +309,15 @@ export function StoreHomeView({
           <div className="w-7 h-7 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center mx-auto">
             <RefreshCw className="w-4 h-4" />
           </div>
-          <div className="font-extrabold text-[11px] leading-tight">Free Pindah Data</div>
-          <div className="text-[9px] text-slate-400">Didampingi Kasir</div>
+          <div className="font-extrabold text-[11px] leading-tight">Dukungan Kasir</div>
+          <div className="text-[9px] text-slate-400 truncate font-semibold" title={supportStoreName}>
+            {supportStoreName}
+          </div>
         </div>
       </div>
 
       {/* ── 3.5. UNIT PILIHAN MINGGU INI (Horizontal Snap Slider dengan Foto Luas & Badge BH) ── */}
-      {displayProducts.length > 0 && (
+      {featuredProducts.length > 0 && (
         <div className="space-y-2.5">
           <div className="flex items-center justify-between text-xs px-0.5">
             <div className="flex items-center gap-1.5 font-black">
@@ -288,7 +332,7 @@ export function StoreHomeView({
           </div>
 
           <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-1">
-            {displayProducts.slice(0, 5).map((item) => {
+            {featuredProducts.map((item) => {
               let cleanWa = (store.whatsapp || "").replace(/\D/g, "");
               if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
               const waHref = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(

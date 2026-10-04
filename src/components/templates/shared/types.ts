@@ -43,6 +43,13 @@ export interface StoreData {
   tier: string;
   templateId: string;
   hasWatermark?: boolean;
+  promoBannerActive?: boolean;
+  promoBannerBadge?: string | null;
+  promoBannerTitle?: string | null;
+  promoBannerSubtitle?: string | null;
+  promoBannerImage?: string | null;
+  promoBannerCtaText?: string | null;
+  promoBannerCtaLink?: string | null;
   branches?: BranchData[];
   reviews?: ReviewData[];
 }
@@ -69,6 +76,8 @@ export interface ProductData {
   thumbnail?: string | null;
   minusNotes: string | null;
   status: string;
+  isFeatured?: boolean;
+  isReadyCod?: boolean;
   images: string[];
   branchId?: string | null;
   branch?: BranchData | null;

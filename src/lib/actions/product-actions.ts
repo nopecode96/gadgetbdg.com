@@ -29,6 +29,8 @@ function serializeProduct(p: any) {
     conditionNotes: p.conditionNotes || p.minusNotes || null,
     minusNotes: p.conditionNotes || p.minusNotes || null,
     ramRom: p.ram && p.storage ? `${p.ram} / ${p.storage}` : p.ramRom || p.storage || p.ram || "",
+    isFeatured: Boolean(p.isFeatured),
+    isReadyCod: p.isReadyCod !== undefined ? Boolean(p.isReadyCod) : true,
     createdAt: p.createdAt instanceof Date ? p.createdAt.toISOString() : p.createdAt,
     updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : p.updatedAt,
     branch: p.branch
@@ -103,6 +105,8 @@ export async function createProductAction(input: FormData | Record<string, any>)
 
     let warrantyBonus: string | null = null;
     let thumbnail: string | null = null;
+    let isFeatured = false;
+    let isReadyCod = true;
 
     if (input instanceof FormData) {
       title = ((input.get("title") as string) || (input.get("name") as string) || "").trim();
@@ -117,6 +121,10 @@ export async function createProductAction(input: FormData | Record<string, any>)
       conditionNotes = (input.get("conditionNotes") as string) || (input.get("minusNotes") as string) || null;
       description = (input.get("description") as string) || null;
       warrantyBonus = (input.get("warrantyBonus") as string) || (input.get("description") as string) || null;
+      const isFeaturedRaw = input.get("isFeatured");
+      if (isFeaturedRaw !== null) isFeatured = isFeaturedRaw === "true" || isFeaturedRaw === "on";
+      const isReadyCodRaw = input.get("isReadyCod");
+      if (isReadyCodRaw !== null) isReadyCod = isReadyCodRaw === "true" || isReadyCodRaw === "on";
       const statusRaw = input.get("status") as string;
       if (statusRaw === "BOOKED" || statusRaw === "SOLD") {
         status = statusRaw;
@@ -160,6 +168,8 @@ export async function createProductAction(input: FormData | Record<string, any>)
       branchId = input.branchId || null;
       imeiStatus = input.imeiStatus || null;
       thumbnail = input.thumbnail || null;
+      if (input.isFeatured !== undefined) isFeatured = Boolean(input.isFeatured);
+      if (input.isReadyCod !== undefined) isReadyCod = Boolean(input.isReadyCod);
       if (Array.isArray(input.images)) {
         images = input.images.filter((url: any) => typeof url === "string" && url.trim().length > 0);
       }
@@ -224,6 +234,8 @@ export async function createProductAction(input: FormData | Record<string, any>)
         status,
         images,
         ramRom,
+        isFeatured,
+        isReadyCod,
         condition: grade || "Mulus",
         minusNotes: conditionNotes,
         imeiStatus: imeiStatus || "Resmi Terdaftar",
@@ -296,6 +308,8 @@ export async function updateProductAction(
     let branchId = existing.branchId;
     let images = existing.images;
     let imeiStatus = existing.imeiStatus || null;
+    let isFeatured = existing.isFeatured;
+    let isReadyCod = existing.isReadyCod;
 
     if (input instanceof FormData) {
       if (input.has("title") || input.has("name")) {
@@ -326,6 +340,14 @@ export async function updateProductAction(
       }
       if (input.has("branchId")) branchId = (input.get("branchId") as string) || null;
       if (input.has("imeiStatus")) imeiStatus = (input.get("imeiStatus") as string) || null;
+      if (input.has("isFeatured")) {
+        const feat = input.get("isFeatured");
+        isFeatured = feat === "true" || feat === "on";
+      }
+      if (input.has("isReadyCod")) {
+        const cod = input.get("isReadyCod");
+        isReadyCod = cod === "true" || cod === "on";
+      }
 
       if (input.has("images")) {
         const imagesJson = input.get("images") as string | null;
@@ -361,6 +383,8 @@ export async function updateProductAction(
       }
       if (input.branchId !== undefined) branchId = input.branchId || null;
       if (input.imeiStatus !== undefined) imeiStatus = input.imeiStatus || null;
+      if (input.isFeatured !== undefined) isFeatured = Boolean(input.isFeatured);
+      if (input.isReadyCod !== undefined) isReadyCod = Boolean(input.isReadyCod);
       if (Array.isArray(input.images)) {
         images = input.images.filter((url: any) => typeof url === "string" && url.trim().length > 0);
       }
@@ -413,6 +437,8 @@ export async function updateProductAction(
         images,
         branchId: validBranchId,
         ramRom,
+        isFeatured,
+        isReadyCod,
         condition: grade || "Mulus",
         minusNotes: conditionNotes,
         imeiStatus: imeiStatus || "Resmi Terdaftar",
@@ -439,6 +465,37 @@ export async function updateProductAction(
   } catch (error: any) {
     console.error("updateProductAction error:", error);
     return { success: false, error: error?.message || "Gagal memperbarui produk." };
+  }
+}
+
+// ─── 3.5. toggleProductFeaturedAction ─────────────────────────────
+export async function toggleProductFeaturedAction(productId: string) {
+  try {
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store } = ctx;
+
+    const existing = await prisma.product.findUnique({
+      where: { id: productId, storeId: store.id },
+    });
+
+    if (!existing) {
+      return { success: false, error: "Produk tidak ditemukan." };
+    }
+
+    const updated = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        isFeatured: !existing.isFeatured,
+      },
+    });
+
+    revalidatePath("/admin/products");
+    revalidatePath(`/${store.slug}`);
+
+    return { success: true, isFeatured: updated.isFeatured, product: serializeProduct(updated) };
+  } catch (error: any) {
+    console.error("toggleProductFeaturedAction error:", error);
+    return { success: false, error: error?.message || "Gagal mengubah status featured produk." };
   }
 }
 

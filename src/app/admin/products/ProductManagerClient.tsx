@@ -15,9 +15,10 @@ import {
   Pencil,
   ChevronRight,
   Sparkles,
+  Star,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
-import { toggleProductStatus, deleteProductAction } from "@/lib/actions";
+import { toggleProductStatus, deleteProductAction, toggleProductFeaturedAction } from "@/lib/actions";
 import { ProductForm } from "@/components/admin/ProductForm";
 import {
   ProductDetailDrawer,
@@ -44,6 +45,7 @@ export function ProductManagerClient({
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+  const [featuredUpdatingId, setFeaturedUpdatingId] = useState<string | null>(null);
 
   // Master-Detail Drawer state
   const [selectedProduct, setSelectedProduct] = useState<ProductDetailItem | null>(null);
@@ -105,6 +107,28 @@ export function ProductManagerClient({
       }
     } else {
       alert(res.error || "Gagal memperbarui status unit.");
+    }
+  }
+
+  async function handleToggleFeatured(e: React.MouseEvent, productId: string) {
+    e.stopPropagation();
+    setFeaturedUpdatingId(productId);
+    const res = await toggleProductFeaturedAction(productId);
+    setFeaturedUpdatingId(null);
+
+    if (res.success && res.product) {
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === productId ? { ...item, ...(res.product as any) } : item
+        )
+      );
+      if (selectedProduct?.id === productId) {
+        setSelectedProduct((prev) =>
+          prev ? { ...prev, ...(res.product as any) } : null
+        );
+      }
+    } else {
+      alert(res.error || "Gagal mengubah status unit pilihan.");
     }
   }
 
@@ -338,10 +362,21 @@ export function ProductManagerClient({
                     </div>
 
                     <div className="space-y-1 min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                           {p.brand}
                         </span>
+                        {p.isFeatured && (
+                          <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
+                            Pilihan
+                          </span>
+                        )}
+                        {p.isReadyCod === false && (
+                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                            Non-COD
+                          </span>
+                        )}
                         <h3 className="font-bold text-sm text-slate-900 truncate group-hover:text-blue-600 transition">
                           {p.title || p.name}
                         </h3>
@@ -411,6 +446,23 @@ export function ProductManagerClient({
                       ) : (
                         <><CheckCheck className="w-3.5 h-3.5" /> Terjual</>
                       )}
+                    </button>
+
+                    {/* Quick Featured Toggle */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleFeatured(e, p.id)}
+                      disabled={featuredUpdatingId === p.id}
+                      title={p.isFeatured ? "Unit Pilihan Aktif (Klik untuk matikan)" : "Jadikan Unit Pilihan Minggu Ini"}
+                      className={`p-2 rounded-lg transition ${
+                        featuredUpdatingId === p.id
+                          ? "text-slate-300 cursor-wait"
+                          : p.isFeatured
+                          ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+                          : "text-slate-300 hover:text-amber-500 hover:bg-amber-50"
+                      }`}
+                    >
+                      <Star className={`w-4 h-4 ${p.isFeatured ? "fill-amber-400" : ""}`} />
                     </button>
 
                     {/* Quick Edit */}

@@ -84,6 +84,7 @@ import {
   updateProductAction as guardedUpdateProduct,
   updateProductStatusAction as guardedUpdateProductStatus,
   deleteProductAction as guardedDeleteProduct,
+  toggleProductFeaturedAction as guardedToggleProductFeatured,
 } from "./actions/product-actions";
 
 import {
@@ -227,6 +228,10 @@ export async function toggleProductStatus(
 /** Alias used by ProductManagerClient */
 export async function createProductAction(input: FormData | Record<string, any>) {
   return guardedCreateProduct(input);
+}
+
+export async function toggleProductFeaturedAction(productId: string) {
+  return guardedToggleProductFeatured(productId);
 }
 
 export async function updateProduct(productId: string, input: any) {

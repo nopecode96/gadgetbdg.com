@@ -83,6 +83,15 @@ model Store {
   lastTemplateChangeAt DateTime?
   isActive        Boolean       @default(false)
   isDemo          Boolean       @default(false)
+
+  // Konfigurasi Hero Banner Promosi Beranda
+  promoBannerActive   Boolean   @default(true)
+  promoBannerBadge    String?   @default("PROMO SPESIAL")
+  promoBannerTitle    String?   @default("Diskon Unit Pilihan Siap COD")
+  promoBannerSubtitle String?   @default("Garansi replace unit dan jaminan IMEI aman seumur hidup.")
+  promoBannerImage    String?   // File upload atau URL gambar unit banner
+  promoBannerCtaText  String?   @default("Lihat Promo")
+  promoBannerCtaLink  String?   @default("/katalog")
   subscriptionStartedAt DateTime? @default(now())
   subscriptionExpiresAt DateTime?
   salesUserId     String?
@@ -216,9 +225,11 @@ model Product {
   conditionNotes  String?        // Contoh: "Ada dent halus di bezel kanan atas, TrueTone ON, 3uTools hijau semua"
   description     String?        // Keterangan tambahan garansi toko / bonus case
   
-  // Status Stok
+  // Status Stok & Home Flags
   status          ProductStatus  @default(AVAILABLE) // AVAILABLE, BOOKED, SOLD
   clickCount      Int            @default(0)
+  isFeatured      Boolean        @default(false) // Unit Pilihan Minggu Ini
+  isReadyCod      Boolean        @default(true)  // Rekomendasi Siap COD Hari Ini
 
   // Backward compatibility fields
   name            String?

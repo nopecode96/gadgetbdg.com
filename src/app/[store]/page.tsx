@@ -198,6 +198,13 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     tier: String(rawStore.tier || "STARTER"),
     templateId: String(rawStore.templateId || "minimal-clean"),
     hasWatermark: Boolean(rawStore.hasWatermark || rawStore.tier !== "STARTER"),
+    promoBannerActive: rawStore.promoBannerActive !== false,
+    promoBannerBadge: rawStore.promoBannerBadge ? String(rawStore.promoBannerBadge) : null,
+    promoBannerTitle: rawStore.promoBannerTitle ? String(rawStore.promoBannerTitle) : null,
+    promoBannerSubtitle: rawStore.promoBannerSubtitle ? String(rawStore.promoBannerSubtitle) : null,
+    promoBannerImage: rawStore.promoBannerImage ? String(rawStore.promoBannerImage) : null,
+    promoBannerCtaText: rawStore.promoBannerCtaText ? String(rawStore.promoBannerCtaText) : null,
+    promoBannerCtaLink: rawStore.promoBannerCtaLink ? String(rawStore.promoBannerCtaLink) : null,
     branches: (rawStore.branches || []).map((b) => ({
       id: String(b.id),
       name: String(b.name),
@@ -245,6 +252,8 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     minusNotes: p.conditionNotes ? String(p.conditionNotes) : (p.minusNotes ? String(p.minusNotes) : null),
     description: p.description ? String(p.description) : null,
     status: String(p.status || "AVAILABLE"),
+    isFeatured: Boolean(p.isFeatured),
+    isReadyCod: p.isReadyCod !== undefined ? Boolean(p.isReadyCod) : true,
     images: Array.isArray(p.images) ? p.images.map(String) : [],
     branchId: p.branchId ? String(p.branchId) : null,
     branch: p.branch

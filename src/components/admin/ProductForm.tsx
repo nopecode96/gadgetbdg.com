@@ -124,6 +124,12 @@ export function ProductForm({
   const [imeiStatus, setImeiStatus] = useState(
     initialData?.imeiStatus || "Resmi Terdaftar"
   );
+  const [isFeatured, setIsFeatured] = useState<boolean>(
+    Boolean(initialData?.isFeatured)
+  );
+  const [isReadyCod, setIsReadyCod] = useState<boolean>(
+    initialData?.isReadyCod !== undefined ? Boolean(initialData.isReadyCod) : true
+  );
 
   // Gallery multi-images
   const [images, setImages] = useState<string[]>(
@@ -242,6 +248,8 @@ export function ProductForm({
         branchId: branchId ? branchId : null,
         images,
         imeiStatus: imeiStatus.trim() || null,
+        isFeatured,
+        isReadyCod,
       };
 
       let res;
@@ -462,6 +470,49 @@ export function ProductForm({
                   {st === "AVAILABLE" ? "Tersedia" : st === "BOOKED" ? "Di-Booked" : "Terjual (Sold)"}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Interactive Flags untuk Home Sections */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                  <span>🌟</span> Tampilkan di Unit Pilihan Minggu Ini
+                </span>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Sorot di slider utama &quot;Unit Pilihan Minggu Ini&quot; pada beranda storefront.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={isFeatured}
+                  onChange={(e) => setIsFeatured(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-slate-200/60 pt-2.5">
+              <div>
+                <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                  <span>🛵</span> Tampilkan di Rekomendasi Siap COD Hari Ini
+                </span>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Tampilkan di grid &quot;Rekomendasi Siap COD Hari Ini&quot; halaman Home.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={isReadyCod}
+                  onChange={(e) => setIsReadyCod(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+              </label>
             </div>
           </div>
 

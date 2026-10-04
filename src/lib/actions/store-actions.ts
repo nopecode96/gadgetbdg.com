@@ -115,6 +115,16 @@ export async function updateStoreSettings(formData: FormData) {
     const operationalHours = formData.get("operationalHours") as string;
     const warrantyPolicy = formData.get("warrantyPolicy") as string;
 
+    // Promo banner fields
+    const promoBannerActiveRaw = formData.get("promoBannerActive");
+    const promoBannerActive = promoBannerActiveRaw !== null ? promoBannerActiveRaw === "true" || promoBannerActiveRaw === "on" : undefined;
+    const promoBannerBadge = formData.get("promoBannerBadge") as string | null;
+    const promoBannerTitle = formData.get("promoBannerTitle") as string | null;
+    const promoBannerSubtitle = formData.get("promoBannerSubtitle") as string | null;
+    const promoBannerImage = formData.get("promoBannerImage") as string | null;
+    const promoBannerCtaText = formData.get("promoBannerCtaText") as string | null;
+    const promoBannerCtaLink = formData.get("promoBannerCtaLink") as string | null;
+
     // Guard canCustomProfile (Starter tidak boleh custom storeImage, dsb jika ada perubahan)
     const canCustom = currentStore.tier !== "STARTER";
 
@@ -128,13 +138,20 @@ export async function updateStoreSettings(formData: FormData) {
         googleReviewUrl: googleReviewUrl || null,
         ...(logoUrl !== null && logoUrl !== undefined ? { logoUrl: logoUrl || null } : {}),
         ...(canCustom && storeImage !== null && storeImage !== undefined ? { storeImage: storeImage || null } : {}),
-        operationalHours: operationalHours !== undefined ? (operationalHours || "Setiap Hari: 10:00 - 20:30 WIB") : currentStore.operationalHours,
-        warrantyPolicy: warrantyPolicy !== undefined ? (warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.") : currentStore.warrantyPolicy,
+        operationalHours: operationalHours !== undefined ? (operationalHours || null) : currentStore.operationalHours,
+        warrantyPolicy: warrantyPolicy !== undefined ? (warrantyPolicy || null) : currentStore.warrantyPolicy,
         primaryColor: primaryColor || currentStore.primaryColor,
         templateId: templateId || currentStore.templateId,
         template: templateId || currentStore.templateId,
         ...(shouldUpdateLastChange ? { lastTemplateChangeAt: new Date() } : {}),
         customDomain: customDomain || null,
+        ...(promoBannerActive !== undefined ? { promoBannerActive } : {}),
+        ...(promoBannerBadge !== null && promoBannerBadge !== undefined ? { promoBannerBadge: promoBannerBadge || null } : {}),
+        ...(promoBannerTitle !== null && promoBannerTitle !== undefined ? { promoBannerTitle: promoBannerTitle || null } : {}),
+        ...(promoBannerSubtitle !== null && promoBannerSubtitle !== undefined ? { promoBannerSubtitle: promoBannerSubtitle || null } : {}),
+        ...(promoBannerImage !== null && promoBannerImage !== undefined ? { promoBannerImage: promoBannerImage || null } : {}),
+        ...(promoBannerCtaText !== null && promoBannerCtaText !== undefined ? { promoBannerCtaText: promoBannerCtaText || null } : {}),
+        ...(promoBannerCtaLink !== null && promoBannerCtaLink !== undefined ? { promoBannerCtaLink: promoBannerCtaLink || null } : {}),
       },
     });
 

@@ -266,6 +266,8 @@ async function main() {
       conditionNotes: "Ex Garansi Resmi iBox, fisik mulus 99% tanpa lecet/dent. TrueTone & Face ID normal.",
       description: "Unit primadona garansi resmi Indonesia. Sudah terpasang tempered glass premium.",
       status: "AVAILABLE",
+      isFeatured: true,
+      isReadyCod: true,
     },
     {
       title: "iPhone 13 128GB Midnight",
@@ -285,6 +287,8 @@ async function main() {
       conditionNotes: "Kamera jernih cinematic mode aktif, layar original tanpa shadow.",
       description: "Pilihan terbaik value-for-money. Kamera stabil dan baterai awet seharian.",
       status: "AVAILABLE",
+      isFeatured: true,
+      isReadyCod: true,
     },
     {
       title: "Samsung Galaxy S24 Ultra 512GB Grey",
@@ -303,6 +307,8 @@ async function main() {
       conditionNotes: "Unit baru belum aktif garansi resmi Samsung Indonesia 1 tahun penuh.",
       description: "Flagship Galaxy AI tercanggih dengan kamera 200MP dan S-Pen bawaan.",
       status: "AVAILABLE",
+      isFeatured: false,
+      isReadyCod: true,
     },
     {
       title: "iPhone 11 128GB White",
@@ -321,6 +327,8 @@ async function main() {
       conditionNotes: "Ada goresan halus tipis pemakaian case di bezel, fungsi 100% normal lancar.",
       description: "Unit terlaris konter, sudah laku terjual (SOLD) sebagai contoh rekap omset toko.",
       status: "SOLD",
+      isFeatured: false,
+      isReadyCod: false,
     },
   ];
 
@@ -405,6 +413,8 @@ async function main() {
             conditionNotes: item.conditionNotes,
             description: item.description,
             status: item.status,
+            isFeatured: Boolean(item.isFeatured),
+            isReadyCod: item.isReadyCod !== undefined ? Boolean(item.isReadyCod) : true,
           },
         });
       } else {
@@ -425,6 +435,8 @@ async function main() {
             conditionNotes: item.conditionNotes,
             description: item.description,
             status: item.status,
+            isFeatured: Boolean(item.isFeatured),
+            isReadyCod: item.isReadyCod !== undefined ? Boolean(item.isReadyCod) : true,
           },
         });
       }

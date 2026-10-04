@@ -12,69 +12,17 @@ import {
   BatteryCharging,
   AlertCircle,
   PackageX,
-  Zap,
-  Camera,
   Pencil,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 import { toggleProductStatus, deleteProductAction } from "@/lib/actions";
 import { ProductForm } from "@/components/admin/ProductForm";
-
-interface Product {
-  id: string;
-  storeId: string;
-  branchId?: string | null;
-  name: string;
-  title?: string;
-  category?: string;
-  brand: string;
-  price: number;
-  grade?: string | null;
-  ram?: string | null;
-  storage?: string | null;
-  ramRom: string;
-  batteryHealth: string | number | null;
-  imeiStatus: string;
-  completeness: string;
-  condition: string;
-  conditionNotes?: string | null;
-  description?: string | null;
-  minusNotes: string | null;
-  status: string;
-  images: string[];
-  clickCount?: number;
-  branch?: {
-    id: string;
-    name: string;
-    address: string;
-    isMain: boolean;
-  } | null;
-}
-
-interface BranchItem {
-  id: string;
-  name: string;
-  address?: string;
-  isMain?: boolean;
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  AVAILABLE: "bg-emerald-600 text-white",
-  BOOKED: "bg-amber-500 text-white",
-  SOLD: "bg-slate-700 text-white",
-};
-
-const STATUS_NEXT: Record<string, "AVAILABLE" | "BOOKED" | "SOLD"> = {
-  AVAILABLE: "BOOKED",
-  BOOKED: "SOLD",
-  SOLD: "AVAILABLE",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  AVAILABLE: "Tersedia",
-  BOOKED: "Booked",
-  SOLD: "Terjual",
-};
+import {
+  ProductDetailDrawer,
+  ProductDetailItem,
+} from "@/components/admin/ProductDetailDrawer";
 
 export function ProductManagerClient({
   store,
@@ -85,19 +33,23 @@ export function ProductManagerClient({
   activeProductCount = 0,
 }: {
   store?: any;
-  initialProducts: Product[];
-  branches?: BranchItem[];
+  initialProducts: ProductDetailItem[];
+  branches?: Array<{ id: string; name: string; address?: string }>;
   canAddProduct?: boolean;
   maxActiveProducts?: number;
   activeProductCount?: number;
 }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<ProductDetailItem[]>(initialProducts);
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
 
-  // Live active count based on current local state
+  // Master-Detail Drawer state
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetailItem | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Live active count based on current local state (AVAILABLE + BOOKED)
   const liveActiveCount = products.filter(
     (p) => p.status === "AVAILABLE" || p.status === "BOOKED"
   ).length;
@@ -108,35 +60,84 @@ export function ProductManagerClient({
   const filtered = products.filter((p) => {
     const matchStatus = filterStatus === "ALL" || p.status === filterStatus;
     const matchSearch =
-      (p.title || p.name).toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase());
+      (p.title || p.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (p.brand || "").toLowerCase().includes(search.toLowerCase()) ||
+      (p.category || "").toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
 
-  async function handleToggleStatus(productId: string, currentStatus: string) {
-    const nextStatus = STATUS_NEXT[currentStatus] ?? "AVAILABLE";
+  const handleOpenDetail = (product: ProductDetailItem) => {
+    setSelectedProduct(product);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDrawerOpen(false);
+  };
+
+  async function handleToggleStatus(
+    e: React.MouseEvent,
+    productId: string,
+    currentStatus: string
+  ) {
+    e.stopPropagation(); // Prevent row click from opening drawer
+    const nextStatus =
+      currentStatus === "AVAILABLE"
+        ? "BOOKED"
+        : currentStatus === "BOOKED"
+        ? "SOLD"
+        : "AVAILABLE";
+
     setStatusUpdatingId(productId);
     const res = await toggleProductStatus(productId, nextStatus);
     setStatusUpdatingId(null);
 
     if (res.success && res.product) {
       setProducts((prev) =>
-        prev.map((item) => (item.id === productId ? { ...item, ...(res.product as any) } : item))
+        prev.map((item) =>
+          item.id === productId ? { ...item, ...(res.product as any), status: nextStatus } : item
+        )
       );
+      if (selectedProduct?.id === productId) {
+        setSelectedProduct((prev) =>
+          prev ? { ...prev, ...(res.product as any), status: nextStatus } : null
+        );
+      }
     } else {
       alert(res.error || "Gagal memperbarui status unit.");
     }
   }
 
-  async function handleDelete(productId: string) {
+  async function handleDelete(e: React.MouseEvent, productId: string) {
+    e.stopPropagation(); // Prevent row click from opening drawer
     if (!confirm("Yakin ingin menghapus unit HP ini dari katalog?")) return;
     const res = await deleteProductAction(productId);
     if (res.success) {
       setProducts((prev) => prev.filter((p) => p.id !== productId));
+      if (selectedProduct?.id === productId) {
+        setIsDrawerOpen(false);
+        setSelectedProduct(null);
+      }
     } else {
       alert(res.error || "Gagal menghapus unit.");
     }
   }
+
+  // Callbacks for drawer sync
+  const handleProductUpdated = (updated: ProductDetailItem) => {
+    setProducts((prev) =>
+      prev.map((item) => (item.id === updated.id ? { ...item, ...updated } : item))
+    );
+    setSelectedProduct((prev) => (prev?.id === updated.id ? { ...prev, ...updated } : prev));
+  };
+
+  const handleProductDeleted = (deletedId: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== deletedId));
+    if (selectedProduct?.id === deletedId) {
+      setSelectedProduct(null);
+      setIsDrawerOpen(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -153,7 +154,7 @@ export function ProductManagerClient({
             <div className="flex items-center justify-between text-[11px] font-semibold mb-1">
               <span className="text-slate-500">
                 Stok Aktif:{" "}
-                <span className={isQuotaFull ? "text-red-600" : "text-slate-800"}>
+                <span className={isQuotaFull ? "text-red-600 font-bold" : "text-slate-800"}>
                   {liveActiveCount}
                 </span>
                 {quotaMax !== null && (
@@ -254,14 +255,14 @@ export function ProductManagerClient({
       )}
 
       {/* ── Filter & Search Bar ── */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="relative w-full sm:w-64">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari unit atau brand..."
+            placeholder="Cari nama, brand, atau kategori..."
             className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -295,124 +296,165 @@ export function ProductManagerClient({
         </div>
       </div>
 
-      {/* ── Products List ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* ── Products List (Master View) ── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="divide-y divide-slate-100">
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-slate-400 text-xs">
               Belum ada data unit yang sesuai filter.
             </div>
           ) : (
-            filtered.map((p) => (
-              <div
-                key={p.id}
-                className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/80 transition"
-              >
-                {/* Product Info */}
-                <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                  <div className="relative w-16 h-16 rounded-xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200">
-                    {p.images && p.images.length > 0 ? (
-                      <>
-                        <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
-                        {p.images.length > 1 && (
-                          <span className="absolute bottom-1 right-1 bg-black/75 text-white text-[9px] font-bold px-1 rounded">
-                            {p.images.length} 📷
+            filtered.map((p) => {
+              const displayImage =
+                p.images && p.images.length > 0 ? p.images[0] : p.thumbnail || null;
+
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => handleOpenDetail(p)}
+                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-blue-50/40 cursor-pointer transition group"
+                >
+                  {/* Product Info */}
+                  <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+                    <div className="relative w-16 h-16 rounded-xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200">
+                      {displayImage ? (
+                        <>
+                          <img
+                            src={displayImage}
+                            alt={p.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {p.images && p.images.length > 1 && (
+                            <span className="absolute bottom-1 right-1 bg-black/75 text-white text-[9px] font-bold px-1 rounded">
+                              {p.images.length} 📷
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300 text-[10px]">
+                          No Pic
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                          {p.brand}
+                        </span>
+                        <h3 className="font-bold text-sm text-slate-900 truncate group-hover:text-blue-600 transition">
+                          {p.title || p.name}
+                        </h3>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                        <span className="font-extrabold text-blue-600 text-sm">
+                          {formatRupiah(p.price)}
+                        </span>
+                        <span>•</span>
+                        <span>{p.ramRom || (p.storage ? `${p.ram || ""} ${p.storage}` : "-")}</span>
+                        <span>•</span>
+                        <span className="font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded text-[10px] flex items-center gap-0.5">
+                          <Sparkles className="w-2.5 h-2.5" />
+                          {p.grade || p.condition || "Grade A"}
+                        </span>
+                        {p.batteryHealth !== null && p.batteryHealth !== "" && (
+                          <span className="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
+                            <BatteryCharging className="w-3 h-3" /> BH {p.batteryHealth}
                           </span>
                         )}
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-300 text-[10px]">
-                        No Pic
+                        {p.imeiStatus && (
+                          <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                            {p.imeiStatus}
+                          </span>
+                        )}
+                        {p.branch && (
+                          <span className="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">
+                            🏢 {p.branch.name}
+                          </span>
+                        )}
                       </div>
-                    )}
+
+                      {(p.conditionNotes || p.minusNotes) && (
+                        <p className="text-[11px] text-slate-500 italic flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3 text-amber-500 shrink-0" />
+                          <span className="truncate">{p.conditionNotes || p.minusNotes}</span>
+                        </p>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                        {p.brand}
-                      </span>
-                      <h3 className="font-bold text-sm text-slate-900 truncate">{p.name}</h3>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                      <span className="font-extrabold text-blue-600 text-sm">{formatRupiah(p.price)}</span>
-                      <span>•</span>
-                      <span>{p.ramRom}</span>
-                      <span>•</span>
-                      <span className="font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded text-[10px]">
-                        {p.grade || p.condition}
-                      </span>
-                      {p.batteryHealth !== null && p.batteryHealth !== "" && (
-                        <span className="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
-                          <BatteryCharging className="w-3 h-3" /> BH {p.batteryHealth}
-                        </span>
+                  {/* Actions & Status */}
+                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                    {/* Status Badge Toggle */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleStatus(e, p.id, p.status)}
+                      disabled={statusUpdatingId === p.id}
+                      title={`Status: ${p.status}. Klik untuk ubah cepat.`}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs ${
+                        statusUpdatingId === p.id
+                          ? "bg-slate-200 text-slate-500 cursor-wait"
+                          : p.status === "AVAILABLE"
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          : p.status === "BOOKED"
+                          ? "bg-amber-500 hover:bg-amber-600 text-white"
+                          : "bg-slate-700 hover:bg-slate-800 text-white"
+                      }`}
+                    >
+                      {statusUpdatingId === p.id ? (
+                        "..."
+                      ) : p.status === "AVAILABLE" ? (
+                        <><CheckCircle className="w-3.5 h-3.5" /> Tersedia</>
+                      ) : p.status === "BOOKED" ? (
+                        <><Clock className="w-3.5 h-3.5" /> Booked</>
+                      ) : (
+                        <><CheckCheck className="w-3.5 h-3.5" /> Terjual</>
                       )}
-                      {p.branch && (
-                        <span className="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">
-                          🏢 {p.branch.name}
-                        </span>
-                      )}
-                      {p.clickCount && p.clickCount > 0 ? (
-                        <span className="inline-flex items-center gap-1 font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 text-[10px]">
-                          {p.clickCount}× minat WA
-                        </span>
-                      ) : null}
-                    </div>
+                    </button>
 
-                    {(p.conditionNotes || p.minusNotes) && (
-                      <p className="text-[11px] text-slate-500 italic flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3 text-amber-500 shrink-0" />
-                        <span className="truncate">{p.conditionNotes || p.minusNotes}</span>
-                      </p>
-                    )}
+                    {/* Quick Edit */}
+                    <Link
+                      href={`/admin/products/${p.id}/edit`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                      title="Edit Spesifikasi & Galeri"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Link>
+
+                    {/* Quick Delete */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleDelete(e, p.id)}
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                      title="Hapus Unit"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+
+                    {/* Chevron to indicate detail drawer clickability */}
+                    <div className="text-slate-300 group-hover:text-blue-500 transition pl-1">
+                      <ChevronRight className="w-5 h-5" />
+                    </div>
                   </div>
                 </div>
-
-                {/* Quick Toggle + Edit + Delete */}
-                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                  <button
-                    onClick={() => handleToggleStatus(p.id, p.status)}
-                    disabled={statusUpdatingId === p.id}
-                    title={`Status saat ini: ${STATUS_LABELS[p.status]}. Klik untuk ubah ke ${STATUS_LABELS[STATUS_NEXT[p.status]]}.`}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
-                      statusUpdatingId === p.id
-                        ? "bg-slate-200 text-slate-500 cursor-wait"
-                        : STATUS_COLORS[p.status] ?? "bg-slate-700 text-white"
-                    }`}
-                  >
-                    {statusUpdatingId === p.id ? (
-                      "..."
-                    ) : p.status === "AVAILABLE" ? (
-                      <><CheckCircle className="w-3.5 h-3.5" /> Tersedia</>
-                    ) : p.status === "BOOKED" ? (
-                      <><Clock className="w-3.5 h-3.5" /> Booked</>
-                    ) : (
-                      <><CheckCheck className="w-3.5 h-3.5" /> Terjual</>
-                    )}
-                  </button>
-
-                  <Link
-                    href={`/admin/products/${p.id}/edit`}
-                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                    title="Edit Spesifikasi & Galeri Foto"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Link>
-
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                    title="Hapus Unit dari Katalog"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
+
+      {/* ── Master-Detail Slide-Over Drawer ── */}
+      <ProductDetailDrawer
+        product={selectedProduct}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDetail}
+        storeSlug={store?.slug || ""}
+        branches={branches}
+        onProductUpdated={handleProductUpdated}
+        onProductDeleted={handleProductDeleted}
+      />
     </div>
   );
 }

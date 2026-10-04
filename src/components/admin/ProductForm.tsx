@@ -41,7 +41,7 @@ export interface ProductFormProps {
     grade?: string | null;
     ram?: string | null;
     storage?: string | null;
-    batteryHealth?: string | null;
+    batteryHealth?: string | number | null;
     completeness?: string | null;
     conditionNotes?: string | null;
     description?: string | null;
@@ -105,7 +105,11 @@ export function ProductForm({
   const [grade, setGrade] = useState(initialData?.grade || "");
   const [ram, setRam] = useState(initialData?.ram || "");
   const [storage, setStorage] = useState(initialData?.storage || "");
-  const [batteryHealth, setBatteryHealth] = useState(initialData?.batteryHealth || "");
+  const [batteryHealth, setBatteryHealth] = useState<string>(
+    initialData?.batteryHealth !== undefined && initialData?.batteryHealth !== null
+      ? String(initialData.batteryHealth)
+      : ""
+  );
   const [completeness, setCompleteness] = useState(
     initialData?.completeness || "Fullset Original Box & Kabel"
   );

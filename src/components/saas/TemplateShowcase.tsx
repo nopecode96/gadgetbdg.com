@@ -106,6 +106,19 @@ export function getDemoSlug(templateId: string): string {
   return DEMO_STORE_SLUGS[templateId] || "demo1";
 }
 
+export function getDemoStoreUrl(slug: string): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.host;
+    // Jika berjalan di localhost (pengembangan)
+    if (host.includes("localhost")) {
+      const port = window.location.port ? `:${window.location.port}` : "";
+      return `http://${slug}.localhost${port}`;
+    }
+  }
+  // Default production
+  return `https://${slug}.gadgetbdg.com`;
+}
+
 // Helper generator mockStore taking activeTemplate
 function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
   const isGaming = activeTemplate.id === "dark-gaming";
@@ -387,7 +400,7 @@ export function TemplateShowcase() {
                   </div>
 
                   <a
-                    href={`/${activeDemoSlug}`}
+                    href={getDemoStoreUrl(activeDemoSlug)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-sm hover:opacity-90 transition shadow-sm"
@@ -480,7 +493,7 @@ export function TemplateShowcase() {
 
                       <div className="flex items-center gap-2.5">
                         <a
-                          href={`/${demoSlug}`}
+                          href={getDemoStoreUrl(demoSlug)}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}

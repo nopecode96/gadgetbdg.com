@@ -11,6 +11,16 @@ export default async function AdminTradeInsPage() {
   const [leads, offers] = await Promise.all([
     prisma.tradeInLead.findMany({
       where: { storeId: store.id },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            isMain: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     }),
     prisma.tradeInOffer.findMany({
@@ -24,6 +34,8 @@ export default async function AdminTradeInsPage() {
     ...leads.map((l) => ({
       id: l.id,
       storeId: l.storeId,
+      branchId: l.branchId,
+      branch: l.branch ? { id: l.branch.id, name: l.branch.name, slug: l.branch.slug } : null,
       type: l.type as "TRADE_IN" | "SELL_ONLY",
       customerName: l.customerName,
       customerPhone: l.customerPhone,

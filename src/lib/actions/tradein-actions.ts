@@ -166,6 +166,7 @@ export async function updateTradeInStatusAction(offerId: string, newStatus: Trad
 // ============================================================
 export interface SubmitTradeInLeadInput {
   storeId: string;
+  branchId?: string | null;
   type: "TRADE_IN" | "SELL_ONLY";
   customerName: string;
   customerPhone: string;
@@ -185,6 +186,7 @@ export async function submitTradeInLeadAction(formData: FormData | SubmitTradeIn
 
     if (formData instanceof FormData) {
       const storeId = (formData.get("storeId") as string)?.trim();
+      const branchId = (formData.get("branchId") as string)?.trim() || null;
       const type = ((formData.get("type") as string)?.trim() || "TRADE_IN") as "TRADE_IN" | "SELL_ONLY";
       const customerName = (formData.get("customerName") as string)?.trim();
       const customerPhone = (formData.get("customerPhone") as string || formData.get("customerWa") as string)?.trim();
@@ -200,6 +202,7 @@ export async function submitTradeInLeadAction(formData: FormData | SubmitTradeIn
 
       data = {
         storeId,
+        branchId,
         type,
         customerName,
         customerPhone,
@@ -246,10 +249,24 @@ export async function submitTradeInLeadAction(formData: FormData | SubmitTradeIn
       cleanCustomerPhone = "62" + cleanCustomerPhone.slice(1);
     }
 
+    // Verify branchId if supplied
+    let validBranchId: string | null = null;
+    let branchWa: string | null = null;
+    if (data.branchId) {
+      const branch = await prisma.branch.findFirst({
+        where: { id: data.branchId, storeId: store.id },
+      });
+      if (branch) {
+        validBranchId = branch.id;
+        branchWa = branch.whatsapp || branch.phone || null;
+      }
+    }
+
     // Insert to PostgreSQL
     const lead = await prisma.tradeInLead.create({
       data: {
         storeId: store.id,
+        branchId: validBranchId,
         type: data.type,
         customerName: data.customerName,
         customerPhone: cleanCustomerPhone,
@@ -265,8 +282,8 @@ export async function submitTradeInLeadAction(formData: FormData | SubmitTradeIn
       },
     });
 
-    // Format clean WhatsApp redirection message
-    let cleanStoreWa = (store.whatsapp || "").replace(/\D/g, "");
+    // Format clean WhatsApp redirection message (use branchWa if allocated)
+    let cleanStoreWa = (branchWa || store.whatsapp || "").replace(/\D/g, "");
     if (cleanStoreWa.startsWith("0")) {
       cleanStoreWa = "62" + cleanStoreWa.slice(1);
     }

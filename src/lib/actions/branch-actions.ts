@@ -8,7 +8,9 @@ export interface BranchData {
   id: string;
   storeId: string;
   name: string;
+  slug: string;
   address: string;
+  whatsapp: string;
   phone: string | null;
   mapsUrl: string | null;
   isMain: boolean;
@@ -17,6 +19,7 @@ export interface BranchData {
   _count?: {
     products: number;
     users: number;
+    tradeIns?: number;
   };
 }
 
@@ -25,7 +28,9 @@ function serializeBranch(b: any): BranchData {
     id: b.id,
     storeId: b.storeId,
     name: b.name,
+    slug: b.slug,
     address: b.address,
+    whatsapp: b.whatsapp || b.phone || "",
     phone: b.phone ?? null,
     mapsUrl: b.mapsUrl ?? null,
     isMain: Boolean(b.isMain),
@@ -35,6 +40,7 @@ function serializeBranch(b: any): BranchData {
       ? {
           products: Number(b._count.products || 0),
           users: Number(b._count.users || 0),
+          tradeIns: Number(b._count.tradeIns || 0),
         }
       : undefined,
   };
@@ -76,7 +82,9 @@ export async function getStoreBranchesAction() {
  */
 export async function createBranchAction(data: {
   name: string;
+  slug?: string;
   address: string;
+  whatsapp?: string;
   phone?: string;
   mapsUrl?: string;
   isMain?: boolean;
@@ -98,7 +106,7 @@ export async function createBranchAction(data: {
 
     const name = data.name?.trim();
     const address = data.address?.trim();
-    let phone = data.phone?.trim() || null;
+    let whatsappInput = (data.whatsapp || data.phone || "").trim();
     const mapsUrl = data.mapsUrl?.trim() || null;
     const isMain = Boolean(data.isMain);
 
@@ -106,12 +114,49 @@ export async function createBranchAction(data: {
       return { success: false, error: "Nama cabang dan alamat wajib diisi." };
     }
 
-    if (phone) {
-      phone = phone.replace(/\D/g, "");
-      if (phone.startsWith("0")) phone = "62" + phone.slice(1);
+    // Format WhatsApp
+    let cleanWa = whatsappInput.replace(/\D/g, "");
+    if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
+    if (!cleanWa) {
+      cleanWa = store.whatsapp.replace(/\D/g, "");
+      if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
     }
 
+    // Format Slug
+    let baseSlug = (data.slug || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    if (!baseSlug) {
+      baseSlug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+    if (!baseSlug) baseSlug = "cabang";
+
     const branch = await prisma.$transaction(async (tx) => {
+      // Check slug uniqueness per store
+      let finalSlug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const existingWithSlug = await tx.branch.findUnique({
+          where: {
+            storeId_slug: {
+              storeId: store.id,
+              slug: finalSlug,
+            },
+          },
+        });
+        if (!existingWithSlug) break;
+        counter++;
+        finalSlug = `${baseSlug}-${counter}`;
+      }
+
       // Jika cabang pertama atau diset isMain, perbarui cabang lain jika isMain: true
       const branchCount = await tx.branch.count({ where: { storeId: store.id } });
       const shouldBeMain = isMain || branchCount === 0;
@@ -127,8 +172,10 @@ export async function createBranchAction(data: {
         data: {
           storeId: store.id,
           name,
+          slug: finalSlug,
           address,
-          phone,
+          whatsapp: cleanWa,
+          phone: cleanWa,
           mapsUrl,
           isMain: shouldBeMain,
         },
@@ -138,6 +185,7 @@ export async function createBranchAction(data: {
     revalidatePath("/admin/branches");
     revalidatePath("/admin/team");
     revalidatePath("/admin/products");
+    revalidatePath("/admin/marketing/qr-stands");
     revalidatePath(`/${store.slug}`);
 
     return { success: true, branch: serializeBranch(branch) };
@@ -154,7 +202,9 @@ export async function updateBranchAction(
   branchId: string,
   data: {
     name: string;
+    slug?: string;
     address: string;
+    whatsapp?: string;
     phone?: string;
     mapsUrl?: string;
     isMain?: boolean;
@@ -185,7 +235,7 @@ export async function updateBranchAction(
 
     const name = data.name?.trim();
     const address = data.address?.trim();
-    let phone = data.phone?.trim() || null;
+    let whatsappInput = (data.whatsapp || data.phone || existing.whatsapp || existing.phone || "").trim();
     const mapsUrl = data.mapsUrl?.trim() || null;
     const isMain = Boolean(data.isMain);
 
@@ -193,9 +243,34 @@ export async function updateBranchAction(
       return { success: false, error: "Nama cabang dan alamat wajib diisi." };
     }
 
-    if (phone) {
-      phone = phone.replace(/\D/g, "");
-      if (phone.startsWith("0")) phone = "62" + phone.slice(1);
+    // Format WhatsApp
+    let cleanWa = whatsappInput.replace(/\D/g, "");
+    if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
+    if (!cleanWa) cleanWa = existing.whatsapp || "6281234567890";
+
+    // Format Slug jika diubah
+    let newSlug = existing.slug;
+    if (data.slug && data.slug.trim()) {
+      const formattedSlug = data.slug
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      
+      if (formattedSlug && formattedSlug !== existing.slug) {
+        const slugConflict = await prisma.branch.findFirst({
+          where: {
+            storeId: store.id,
+            slug: formattedSlug,
+            id: { not: branchId },
+          },
+        });
+        if (slugConflict) {
+          return { success: false, error: `Subdomain slug "${formattedSlug}" sudah digunakan oleh cabang lain.` };
+        }
+        newSlug = formattedSlug;
+      }
     }
 
     const updated = await prisma.$transaction(async (tx) => {
@@ -210,8 +285,10 @@ export async function updateBranchAction(
         where: { id: branchId },
         data: {
           name,
+          slug: newSlug,
           address,
-          phone,
+          whatsapp: cleanWa,
+          phone: cleanWa,
           mapsUrl,
           ...(isMain ? { isMain: true } : {}),
         },
@@ -221,6 +298,7 @@ export async function updateBranchAction(
     revalidatePath("/admin/branches");
     revalidatePath("/admin/team");
     revalidatePath("/admin/products");
+    revalidatePath("/admin/marketing/qr-stands");
     revalidatePath(`/${store.slug}`);
 
     return { success: true, branch: serializeBranch(updated) };

@@ -37,27 +37,49 @@ interface StoreProps {
   logoUrl: string | null;
 }
 
-export function QrStandsClient({ store }: { store: StoreProps }) {
+interface BranchOption {
+  id: string;
+  name: string;
+  slug: string;
+  address?: string | null;
+  whatsapp?: string | null;
+  mapsUrl?: string | null;
+  isMain?: boolean;
+}
+
+interface QrStandsClientProps {
+  store: StoreProps;
+  branches?: BranchOption[];
+}
+
+export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
   const [activeTab, setActiveTab] = useState<"website" | "google_review">("website");
   const [paperSize, setPaperSize] = useState<"A6" | "A5">("A6");
+  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
+
+  const activeBranch = branches.find((b) => b.id === selectedBranchId) || null;
 
   // Google Maps Review URL state & saving
-  const [reviewUrlInput, setReviewUrlInput] = useState(
+  const defaultReviewUrl =
+    activeBranch?.mapsUrl ||
     store.googleReviewUrl ||
-      store.mapsUrl ||
-      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        store.name + " " + (store.address || "Bandung")
-      )}`
-  );
+    store.mapsUrl ||
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      store.name + " " + (activeBranch?.address || store.address || "Bandung")
+    )}`;
+
+  const [reviewUrlInput, setReviewUrlInput] = useState(defaultReviewUrl);
   const [isSavingReviewUrl, setIsSavingReviewUrl] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // URLs
   const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";
-  const websiteUrl = store.customDomain
-    ? `https://${store.customDomain}`
-    : `https://${store.slug}.${mainDomain}`;
+  
+  // Hitung website URL (jika cabang dipilih, arahkan ke subdomain cabang atau query cabang)
+  let websiteUrl = store.customDomain
+    ? (activeBranch ? `https://${activeBranch.slug}.${store.customDomain}` : `https://${store.customDomain}`)
+    : (activeBranch ? `https://${store.slug}.${mainDomain}?branch=${activeBranch.slug}` : `https://${store.slug}.${mainDomain}`);
 
   const currentQrTarget = activeTab === "website" ? websiteUrl : reviewUrlInput;
 
@@ -251,6 +273,55 @@ export function QrStandsClient({ store }: { store: StoreProps }) {
         </div>
       </div>
 
+      {/* ── 2.5 SELECTOR CABANG LOKASI (JIKA ADA CABANG TERDAFTAR) ── */}
+      {branches.length > 0 && (
+        <div className="no-print bg-white rounded-3xl p-4 sm:p-5 border border-indigo-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black shrink-0">
+              📍
+            </div>
+            <div>
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900">
+                Pilih Cabang untuk QR Meja &amp; Standee
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Cetak QR khusus per konter agar pembeli langsung membuka katalog cabang &amp; hotline WA cabang tersebut.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedBranchId}
+              onChange={(e) => {
+                const bId = e.target.value;
+                setSelectedBranchId(bId);
+                const chosen = branches.find((b) => b.id === bId);
+                if (chosen?.mapsUrl) {
+                  setReviewUrlInput(chosen.mapsUrl);
+                } else {
+                  setReviewUrlInput(
+                    store.googleReviewUrl ||
+                      store.mapsUrl ||
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        store.name + " " + (chosen?.address || store.address || "Bandung")
+                      )}`
+                  );
+                }
+              }}
+              className="px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Semua Cabang / Toko Pusat (Default)</option>
+              {branches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name} {b.isMain ? "(Pusat)" : ""} — /{b.slug}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       {/* ── 3. INPUT FIELD GOOGLE MAPS REVIEW URL (JIKA TAB REVIEW AKTIF & PRO/ADVANCE) ── */}
       {activeTab === "google_review" && store.hasQrGoogleReview && (
         <div className="no-print bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-3 animate-fade-in">
@@ -258,7 +329,7 @@ export function QrStandsClient({ store }: { store: StoreProps }) {
             <div>
               <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-rose-500" />
-                Link Profil Google Maps Toko
+                Link Profil Google Maps Toko {activeBranch ? `(${activeBranch.name})` : ""}
               </h3>
               <p className="text-xs text-slate-500 font-medium">
                 Masukkan tautan langsung ulasan Google Bisnisku toko Anda agar pelanggan langsung diarahkan ke form bintang 5.
@@ -321,17 +392,17 @@ export function QrStandsClient({ store }: { store: StoreProps }) {
             <div className="w-full space-y-1.5">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-300 text-[10px] font-black uppercase tracking-wider text-slate-700">
                 <Globe className="w-3 h-3 text-blue-600" />
-                <span>OFFICIAL STOREFRONT</span>
+                <span>{activeBranch ? `CABANG: ${activeBranch.name.toUpperCase()}` : "OFFICIAL STOREFRONT"}</span>
               </div>
               <h2 className="text-2xl font-black text-slate-950 tracking-tight uppercase leading-snug">
                 {store.name}
               </h2>
               <p className="text-xs text-slate-500 font-mono font-bold tracking-tight">
-                {store.customDomain || `${store.slug}.${mainDomain}`}
+                {websiteUrl.replace(/^https?:\/\//, "")}
               </p>
-              {store.address && (
+              {(activeBranch?.address || store.address) && (
                 <p className="text-[11px] text-slate-400 font-medium truncate max-w-xs mx-auto">
-                  📍 {store.address.split(",")[0]}
+                  📍 {(activeBranch?.address || store.address || "").split(",")[0]}
                 </p>
               )}
             </div>

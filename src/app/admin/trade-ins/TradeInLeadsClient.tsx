@@ -44,6 +44,12 @@ export interface TradeInLeadItem {
   expectedPrice?: number | null;
   targetProductId?: string | null;
   targetProductTitle?: string | null;
+  branchId?: string | null;
+  branch?: {
+    id: string;
+    name: string;
+    slug?: string;
+  } | null;
   status: string; // PENDING, FOLLOW_UP, DEAL, CANCELLED, CONTACTED, REJECTED
   adminNotes?: string | null;
   createdAt: string;

@@ -31,7 +31,9 @@ export default async function AdminBranchesPage() {
     id: b.id,
     storeId: b.storeId,
     name: b.name,
+    slug: b.slug,
     address: b.address,
+    whatsapp: b.whatsapp || b.phone || "",
     phone: b.phone ?? null,
     mapsUrl: b.mapsUrl ?? null,
     isMain: Boolean(b.isMain),
@@ -47,6 +49,7 @@ export default async function AdminBranchesPage() {
     id: store.id,
     name: store.name,
     slug: store.slug,
+    customDomain: store.customDomain,
     tier: store.tier,
     address: store.address,
   };

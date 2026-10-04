@@ -125,20 +125,27 @@ model StoreReview {
 }
 
 model Branch {
-  id          String    @id @default(cuid())
+  id          String        @id @default(cuid())
   storeId     String
-  name        String    // Contoh: "BEC Lantai 1 Blok C-05"
-  address     String    // Alamat lengkap rute fisik
-  phone       String?   // No WA spesifik cabang
-  mapsUrl     String?   // Link Google Maps cabang
-  isMain      Boolean   @default(false) // Cabang pusat
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  name        String        // Contoh: "Cabang BEC Lantai 1"
+  slug        String        // Contoh: "bec" (untuk subdomain: bec.domainanda.com atau /cabang/bec)
+  address     String        // Alamat lengkap rute fisik
+  whatsapp    String        // No WhatsApp hotline kasir/admin cabang
+  phone       String?       // Backward compatibility field
+  mapsUrl     String?       // Link Google Maps cabang
+  isMain      Boolean       @default(false)
 
-  store       Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  products    Product[]
-  users       User[]
+  // Relasi ke Data Lain
+  products    Product[]     // Unit HP yang dialokasikan di cabang ini
+  users       User[]        // Staf/Kasir yang bertugas di cabang ini
+  tradeIns    TradeInLead[] // Leads tukar tambah yang dialokasikan ke cabang ini
 
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([storeId, slug])
   @@index([storeId])
 }
 
@@ -276,10 +283,15 @@ model TradeInLead {
   status             String   @default("PENDING")
   adminNotes         String?  // Catatan internal kasir/admin toko
   
+  // Cabang tujuan trade-in/cek fisik
+  branchId           String?
+  branch             Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@index([storeId])
+  @@index([branchId])
   @@index([status])
   @@index([type])
 }

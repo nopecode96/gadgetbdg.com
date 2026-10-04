@@ -13,7 +13,10 @@ import {
   ExternalLink,
   ShieldCheck,
   Lock,
+  Building2,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { updateStoreSettingsAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier, TEMPLATE_REGISTRY } from "@/lib/constants/templates";
 import { DomainSettingsSection } from "./DomainSettingsSection";
@@ -74,6 +77,8 @@ export function SettingsClient({ store }: SettingsClientProps) {
     }
   }
 
+  const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";
+
   return (
     <div className="space-y-6">
       <div>
@@ -81,6 +86,42 @@ export function SettingsClient({ store }: SettingsClientProps) {
         <p className="text-xs text-slate-500 mt-1">
           Kustomisasi identitas toko, nomor kontak WhatsApp, tema storefront, dan konfigurasi domain pribadi.
         </p>
+      </div>
+
+      {/* ── Banner Edukasi Multi-Cabang & Subdomain ── */}
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/80 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+            <Building2 className="w-5 h-5" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>💡 Fitur Multi-Cabang &amp; Subdomain Tersendiri</span>
+              <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full uppercase">
+                Advance
+              </span>
+            </h2>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Setiap cabang memiliki tautan katalog mandiri. Pada domain sendiri (misal:{" "}
+              <code className="text-blue-700 bg-blue-100/60 px-1 py-0.5 rounded font-mono font-bold">
+                {store.customDomain || `${store.slug}.com`}
+              </code>
+              ), cabang dapat diakses via subdomain seperti{" "}
+              <code className="text-purple-700 bg-purple-100/60 px-1 py-0.5 rounded font-mono font-bold">
+                bec.{store.customDomain || `${store.slug}.com`}
+              </code>
+              . Pembeli yang masuk melalui link cabang otomatis hanya melihat stok unit cabang tersebut dan langsung terhubung ke WhatsApp kasir konter terkait.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/admin/branches"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shrink-0 self-start sm:self-auto shadow-sm"
+        >
+          <span>Kelola Cabang</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {success && (

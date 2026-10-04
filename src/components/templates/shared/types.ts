@@ -31,6 +31,13 @@ export interface StoreData {
   slug: string;
   whatsapp: string;
   address: string | null;
+  city?: string | null;
+  description?: string | null;
+  socialMedia?: string | null;
+  bankName?: string | null;
+  bankAccount?: string | null;
+  bankHolder?: string | null;
+  qrisUrl?: string | null;
   storeImage?: string | null;
   mapsUrl: string | null;
   googleReviewUrl?: string | null;

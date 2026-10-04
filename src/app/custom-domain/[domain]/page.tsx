@@ -8,7 +8,7 @@ import { generateProductSlug } from "@/lib/product-slug";
 
 interface CustomDomainPageProps {
   params: Promise<{ domain: string }> | { domain: string };
-  searchParams?: Promise<{ branch?: string }> | { branch?: string };
+  searchParams?: Promise<{ branch?: string; tab?: string; [key: string]: any }> | { branch?: string; tab?: string; [key: string]: any };
 }
 
 export const revalidate = 0;
@@ -174,6 +174,13 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
     slug: String(rawStore.slug),
     whatsapp: String(activeWhatsapp),
     address: activeAddress ? String(activeAddress) : null,
+    city: (rawStore as any).city ? String((rawStore as any).city) : "Bandung",
+    description: (rawStore as any).description ? String((rawStore as any).description) : null,
+    socialMedia: (rawStore as any).socialMedia ? String((rawStore as any).socialMedia) : null,
+    bankName: (rawStore as any).bankName ? String((rawStore as any).bankName) : null,
+    bankAccount: (rawStore as any).bankAccount ? String((rawStore as any).bankAccount) : null,
+    bankHolder: (rawStore as any).bankHolder ? String((rawStore as any).bankHolder) : null,
+    qrisUrl: (rawStore as any).qrisUrl ? String((rawStore as any).qrisUrl) : null,
     storeImage: activeImage ? String(activeImage) : null,
     mapsUrl: activeMapsUrl ? String(activeMapsUrl) : null,
     googleReviewUrl: activeGoogleReviewUrl ? String(activeGoogleReviewUrl) : null,
@@ -258,5 +265,15 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
       : null,
   }));
 
-  return <TemplateRenderer store={storeData} products={productsData} />;
+  const tabParam = String(resolvedSearchParams?.tab || "").toLowerCase();
+  const initialTab: "home" | "list" | "trade-in" | "about" =
+    tabParam === "about" || tabParam === "boutique" || tabParam === "butik" || tabParam === "profil"
+      ? "about"
+      : tabParam === "list" || tabParam === "katalog" || tabParam === "catalog" || tabParam === "koleksi"
+      ? "list"
+      : tabParam === "trade-in" || tabParam === "tradein" || tabParam === "tukar-tambah"
+      ? "trade-in"
+      : "home";
+
+  return <TemplateRenderer store={storeData} products={productsData} initialTab={initialTab} />;
 }

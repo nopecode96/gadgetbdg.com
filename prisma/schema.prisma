@@ -66,6 +66,13 @@ model Store {
   customDomainDnsType    String?   @default("CNAME") // CNAME atau A
   whatsapp     String
   address      String?
+  city         String?       @default("Bandung")
+  description  String?
+  socialMedia  String?
+  bankName     String?
+  bankAccount  String?
+  bankHolder   String?
+  qrisUrl      String?
   storeImage      String?
   mapsUrl         String?
   googleReviewUrl String?

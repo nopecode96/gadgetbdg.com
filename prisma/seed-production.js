@@ -215,6 +215,13 @@ async function main() {
       templateId: "midnight-gold",
       primaryColor: "#f59e0b",
       desc: "VIP luxury store hitam obsidian & emas.",
+      description: "Butik kurasi smartphone flagship second premium bersertifikasi. Standar inspeksi 30 titik, garansi replace 30 hari, dan layanan private concierge di BEC Bandung.",
+      city: "Bandung",
+      socialMedia: "@midnightgold.gadget",
+      bankName: "Bank Central Asia (BCA)",
+      bankAccount: "8470192831",
+      bankHolder: "Midnight Gold Official",
+      mapsUrl: "https://maps.google.com/?q=Bandung+Electronic+Center",
     },
     {
       slug: "demo4",
@@ -346,6 +353,13 @@ async function main() {
         isActive: true,
         whatsapp: "62895389974414",
         address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Bandung",
+        city: demoConfig.city || "Bandung",
+        description: demoConfig.description || "Penyedia smartphone flagship & second bergaransi resmi.",
+        socialMedia: demoConfig.socialMedia || "@gadgetbdg.official",
+        bankName: demoConfig.bankName || "Bank Central Asia (BCA)",
+        bankAccount: demoConfig.bankAccount || "8470192831",
+        bankHolder: demoConfig.bankHolder || demoConfig.name,
+        mapsUrl: demoConfig.mapsUrl || "https://maps.google.com/?q=Bandung+Electronic+Center",
         operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
         warrantyPolicy: "Garansi Resmi & Garansi Personal Toko 30 Hari Replace Unit Bebas Blokir IMEI.",
         verifiedBadge: true,
@@ -365,6 +379,13 @@ async function main() {
         isActive: true,
         whatsapp: "62895389974414",
         address: "Bandung Electronic Center (BEC) Lantai 1 Blok C-08, Bandung",
+        city: demoConfig.city || "Bandung",
+        description: demoConfig.description || "Penyedia smartphone flagship & second bergaransi resmi.",
+        socialMedia: demoConfig.socialMedia || "@gadgetbdg.official",
+        bankName: demoConfig.bankName || "Bank Central Asia (BCA)",
+        bankAccount: demoConfig.bankAccount || "8470192831",
+        bankHolder: demoConfig.bankHolder || demoConfig.name,
+        mapsUrl: demoConfig.mapsUrl || "https://maps.google.com/?q=Bandung+Electronic+Center",
         operationalHours: "Setiap Hari: 10:00 - 21:00 WIB",
         warrantyPolicy: "Garansi Resmi & Garansi Personal Toko 30 Hari Replace Unit Bebas Blokir IMEI.",
         verifiedBadge: true,
@@ -443,6 +464,41 @@ async function main() {
           },
         });
       }
+    }
+
+    // Seed verified reviews if empty
+    const existingReviewsCount = await prisma.storeReview.count({
+      where: { storeId: store.id },
+    });
+    if (existingReviewsCount === 0) {
+      await prisma.storeReview.createMany({
+        data: [
+          {
+            storeId: store.id,
+            customerName: "Darmawan Santoso",
+            rating: 5,
+            purchasedUnit: "iPhone 15 Pro Max 256GB Natural Titanium",
+            comment: "Pelayanan sangat berkelas dan profesional. Unit mulus 100% seperti baru, BH 100%, IMEI terdaftar Kemenperin resmi. Diberikan garansi 30 hari replace unit dan dibantu migrasi data sampai selesai. Sangat recommended!",
+            isApproved: true,
+          },
+          {
+            storeId: store.id,
+            customerName: "Stephanie Wijaya",
+            rating: 5,
+            purchasedUnit: "iPhone 14 Pro 128GB Deep Purple",
+            comment: "Awalnya ragu transaksi online, tapi setelah cek fisik langsung ke gerai dan verifikasi rekening resmi toko, semuanya aman dan transparan. Unit no minus dan dapet bonus hydrogel original.",
+            isApproved: true,
+          },
+          {
+            storeId: store.id,
+            customerName: "Reza Pratama",
+            rating: 5,
+            purchasedUnit: "Samsung Galaxy S24 Ultra 512GB Titanium Gray",
+            comment: "Proses Trade-In unit lama saya dihargai sangat fair dan transparan dibanding konter lain. Langsung bawa pulang S24 Ultra dalam waktu 30 menit. Mantap layanannya!",
+            isApproved: true,
+          },
+        ],
+      });
     }
 
     console.log(`✅ Demo store ${demoConfig.slug} (${demoConfig.name}) provisioned with 4 products.`);

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { StoreData, ProductData } from "./shared/types";
+import { StoreData, ProductData, StoreTabType } from "./shared/types";
 import { getTemplateConfig } from "@/lib/constants/templates";
 import { MinimalCleanLayout } from "./minimal-clean/MinimalCleanLayout";
 import { DarkGamingLayout } from "./dark-gaming/DarkGamingLayout";
@@ -9,17 +9,15 @@ import { KeynoteObsidianLayout as KeynoteObsidianLayoutNew } from "./keynote-obs
 import { TokyoStreetLayout } from "./tokyo-street/TokyoStreetLayout";
 import { CyberHudLayout } from "./cyber-hud/CyberHudLayout";
 import { MidnightGoldLayout as MidnightGoldLayoutNew } from "./midnight-gold/MidnightGoldLayout";
-import { KeynoteObsidianLayout } from "./archetypes/KeynoteObsidianLayout";
-import { TokyoEditorialLayout } from "./archetypes/TokyoEditorialLayout";
 import { LiveDropLayout } from "./archetypes/LiveDropLayout";
-import { MidnightGoldLayout } from "./archetypes/MidnightGoldLayout";
 
 interface TemplateRendererProps {
   store: StoreData;
   products: ProductData[];
+  initialTab?: StoreTabType;
 }
 
-export function TemplateRenderer({ store, products }: TemplateRendererProps) {
+export function TemplateRenderer({ store, products, initialTab }: TemplateRendererProps) {
   const currentConfig = getTemplateConfig(store.templateId);
   const archetype = currentConfig.archetype || "minimal-clean";
 
@@ -44,7 +42,7 @@ export function TemplateRenderer({ store, products }: TemplateRendererProps) {
       return <LiveDropLayout store={store} products={products} />;
 
     case "midnight-gold":
-      return <MidnightGoldLayoutNew store={store} products={products} isMockup={false} />;
+      return <MidnightGoldLayoutNew store={store} products={products} isMockup={false} initialTab={initialTab} />;
 
     case "clean-ledger":
     default:

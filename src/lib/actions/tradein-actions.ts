@@ -148,6 +148,17 @@ export async function submitTradeInOfferAction(
 
 export async function updateTradeInStatusAction(offerId: string, newStatus: TradeInStatus) {
   try {
+    const { requireStoreOwnerOrStaff } = await import("@/lib/auth/session");
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store } = ctx;
+
+    const existing = await prisma.tradeInOffer.findUnique({
+      where: { id: offerId, storeId: store.id },
+    });
+    if (!existing) {
+      return { success: false, error: "Penawaran tidak ditemukan atau bukan milik toko Anda." };
+    }
+
     const updated = await prisma.tradeInOffer.update({
       where: { id: offerId },
       data: { status: newStatus },
@@ -357,6 +368,26 @@ export async function updateTradeInLeadStatusAction(
   adminNotes?: string
 ) {
   try {
+    const { requireStoreOwnerOrStaff } = await import("@/lib/auth/session");
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store, user } = ctx;
+
+    const existing = await prisma.tradeInLead.findUnique({
+      where: { id: leadId, storeId: store.id },
+    });
+    if (!existing) {
+      return { success: false, error: "Lead tidak ditemukan atau bukan milik toko Anda." };
+    }
+
+    if (user.role === "STORE_STAFF" && user.branchId) {
+      if (existing.branchId && existing.branchId !== user.branchId) {
+        return {
+          success: false,
+          error: "FORBIDDEN: Anda hanya dapat memproses leads pada cabang yang ditugaskan.",
+        };
+      }
+    }
+
     const dataToUpdate: any = { status: newStatus };
     if (adminNotes !== undefined) {
       dataToUpdate.adminNotes = adminNotes;
@@ -379,6 +410,26 @@ export async function updateTradeInLeadStatusAction(
 
 export async function deleteTradeInLeadAction(leadId: string) {
   try {
+    const { requireStoreOwnerOrStaff } = await import("@/lib/auth/session");
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store, user } = ctx;
+
+    const existing = await prisma.tradeInLead.findUnique({
+      where: { id: leadId, storeId: store.id },
+    });
+    if (!existing) {
+      return { success: false, error: "Lead tidak ditemukan atau bukan milik toko Anda." };
+    }
+
+    if (user.role === "STORE_STAFF" && user.branchId) {
+      if (existing.branchId && existing.branchId !== user.branchId) {
+        return {
+          success: false,
+          error: "FORBIDDEN: Anda hanya dapat menghapus leads pada cabang yang ditugaskan.",
+        };
+      }
+    }
+
     await prisma.tradeInLead.delete({
       where: { id: leadId },
     });

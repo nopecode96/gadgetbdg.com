@@ -90,6 +90,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     phone: user.phone,
     role: user.role,
     storeId: user.storeId,
+    branchId: user.branchId,
     store: user.store
       ? {
           ...user.store,
@@ -178,7 +179,15 @@ export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
     throw new Error("403: Akses ditolak. Hanya Store Owner dan Staff yang dapat mengakses merchant panel.");
   }
 
-  // Check if store resolution was found (Priority 1: from session; Priority 2: fallback dev store on localhost)
+  // ── Strict Multi-Tenant Host/Subdomain Isolation Check ──
+  const headerSlug = headerList.get("x-store-slug");
+  if (headerSlug && (user.role === "STORE_OWNER" || user.role === "STORE_STAFF")) {
+    if (user.store && user.store.slug !== headerSlug) {
+      throw new Error(`403: Akses ditolak. Akun Anda (${user.store.slug}) tidak memiliki izin mengakses panel toko ${headerSlug}.`);
+    }
+  }
+
+  // Check if store resolution was found (Priority 1: from session; Priority 2: fallback dev store on localhost for dev)
   if (!effectiveStoreId || !effectiveStore) {
     if (isLocalhost) {
       const fallbackDevStore = await prisma.store.findFirst({

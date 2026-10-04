@@ -186,6 +186,12 @@ export async function createStaffUserAction(formData: FormData) {
       return { success: false, error: "Password minimal 6 karakter." };
     }
 
+    const { requireStoreAccess } = await import("@/lib/auth/tenant-guard");
+    const sessionUser = await requireStoreAccess(storeId);
+    if (sessionUser.role !== "STORE_OWNER" && sessionUser.role !== "SUPER_ADMIN" && sessionUser.role !== "ADMIN_SAAS") {
+      return { success: false, error: "FORBIDDEN: Hanya pemilik toko yang dapat mengelola staf." };
+    }
+
     const store = await prisma.store.findUnique({
       where: { id: storeId },
       include: { _count: { select: { users: true } } },
@@ -252,9 +258,19 @@ export async function createStaffUserAction(formData: FormData) {
 // ---------------------------------------------------------------
 export async function deleteStaffUserAction(userId: string) {
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return { success: false, error: "User tidak ditemukan." };
-    if (user.role === "STORE_OWNER") {
+    const { requireStoreOwnerOrStaff } = await import("@/lib/auth/session");
+    const ctx = await requireStoreOwnerOrStaff();
+    const { store, user: currentUser } = ctx;
+
+    if (currentUser.role !== "STORE_OWNER" && currentUser.role !== "SUPER_ADMIN" && currentUser.role !== "ADMIN_SAAS") {
+      return { success: false, error: "FORBIDDEN: Hanya pemilik toko yang dapat menghapus staf." };
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId, storeId: store.id },
+    });
+    if (!targetUser) return { success: false, error: "User tidak ditemukan atau bukan bagian toko Anda." };
+    if (targetUser.role === "STORE_OWNER") {
       return { success: false, error: "Tidak bisa menghapus akun pemilik toko utama." };
     }
 

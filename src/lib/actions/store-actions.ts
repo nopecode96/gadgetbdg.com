@@ -7,6 +7,9 @@ import { assertCanChangeTemplate } from "@/lib/guards/plan-guard";
 
 export async function changeStoreTemplate(storeId: string, newTemplateId: string) {
   try {
+    const { requireStoreAccess } = await import("@/lib/auth/tenant-guard");
+    await requireStoreAccess(storeId);
+
     const store = await prisma.store.findUnique({
       where: { id: storeId },
     });
@@ -62,6 +65,9 @@ export async function updateStoreSettings(formData: FormData) {
     if (!storeId || !name || !whatsapp) {
       return { success: false, error: "Nama toko dan WhatsApp wajib diisi." };
     }
+
+    const { requireStoreAccess } = await import("@/lib/auth/tenant-guard");
+    await requireStoreAccess(storeId);
 
     const currentStore = await prisma.store.findUnique({
       where: { id: storeId },

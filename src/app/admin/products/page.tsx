@@ -8,9 +8,17 @@ export default async function AdminProductsPage() {
   const ctx = await requireStoreOwnerOrStaff();
   const { store, limits, usage, permissions } = ctx;
 
+  const productWhere: any = { storeId: store.id };
+  const branchWhere: any = { storeId: store.id };
+
+  if (ctx.user.role === "STORE_STAFF" && ctx.user.branchId) {
+    productWhere.branchId = ctx.user.branchId;
+    branchWhere.id = ctx.user.branchId;
+  }
+
   const [products, branches] = await Promise.all([
     prisma.product.findMany({
-      where: { storeId: store.id },
+      where: productWhere,
       include: {
         branch: {
           select: {
@@ -26,7 +34,7 @@ export default async function AdminProductsPage() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.branch.findMany({
-      where: { storeId: store.id },
+      where: branchWhere,
       orderBy: [{ isMain: "desc" }, { name: "asc" }],
       select: {
         id: true,

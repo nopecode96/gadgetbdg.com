@@ -47,10 +47,16 @@ function serializeProduct(p: any) {
 // ─── 1. getStoreProductsAction ────────────────────────────────────
 export async function getStoreProductsAction() {
   const ctx = await requireStoreOwnerOrStaff();
-  const { store } = ctx;
+  const { store, user } = ctx;
+
+  // Filter khusus staf cabang: Jika role STORE_STAFF dan ditugaskan ke cabang, hanya tampilkan produk cabangnya
+  const whereClause: any = { storeId: store.id };
+  if (user.role === "STORE_STAFF" && user.branchId) {
+    whereClause.branchId = user.branchId;
+  }
 
   const products = await prisma.product.findMany({
-    where: { storeId: store.id },
+    where: whereClause,
     include: {
       branch: {
         select: {
@@ -176,9 +182,13 @@ export async function createProductAction(input: FormData | Record<string, any>)
       };
     }
 
-    // Validasi branchId jika ada
+    // Validasi branchId jika ada & pembatasan peran STORE_STAFF
     let validBranchId: string | null = null;
-    if (branchId && branchId.trim()) {
+
+    if (ctx.user.role === "STORE_STAFF" && ctx.user.branchId) {
+      // Staf otomatis diikat ke cabangnya sendiri
+      validBranchId = ctx.user.branchId;
+    } else if (branchId && branchId.trim()) {
       const branchExists = await prisma.branch.findFirst({
         where: { id: branchId.trim(), storeId: store.id },
       });
@@ -259,6 +269,16 @@ export async function updateProductAction(
 
     if (!existing) {
       return { success: false, error: "Produk tidak ditemukan atau bukan milik toko Anda." };
+    }
+
+    // Verifikasi penugasan cabang untuk staf
+    if (ctx.user.role === "STORE_STAFF" && ctx.user.branchId) {
+      if (existing.branchId && existing.branchId !== ctx.user.branchId) {
+        return {
+          success: false,
+          error: "FORBIDDEN: Anda hanya dapat mengubah produk pada cabang yang ditugaskan.",
+        };
+      }
     }
 
     let title = existing.title || existing.name || "";
@@ -439,6 +459,15 @@ export async function updateProductStatusAction(
       return { success: false, error: "Produk tidak ditemukan atau bukan milik toko Anda." };
     }
 
+    if (ctx.user.role === "STORE_STAFF" && ctx.user.branchId) {
+      if (existing.branchId && existing.branchId !== ctx.user.branchId) {
+        return {
+          success: false,
+          error: "FORBIDDEN: Anda hanya dapat mengubah status produk pada cabang yang ditugaskan.",
+        };
+      }
+    }
+
     if (existing.status === "SOLD" && (newStatus === "AVAILABLE" || newStatus === "BOOKED")) {
       const guardCheck = await assertCanAddProduct(store.id);
       if (!guardCheck.allowed) {
@@ -477,6 +506,15 @@ export async function deleteProductAction(productId: string) {
 
     if (!existing) {
       return { success: false, error: "Produk tidak ditemukan atau bukan milik toko Anda." };
+    }
+
+    if (ctx.user.role === "STORE_STAFF" && ctx.user.branchId) {
+      if (existing.branchId && existing.branchId !== ctx.user.branchId) {
+        return {
+          success: false,
+          error: "FORBIDDEN: Anda hanya dapat menghapus produk pada cabang yang ditugaskan.",
+        };
+      }
     }
 
     await prisma.product.delete({ where: { id: productId } });

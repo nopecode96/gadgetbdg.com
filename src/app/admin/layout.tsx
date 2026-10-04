@@ -24,6 +24,10 @@ export default async function AdminLayout({
   // This will redirect if not authenticated / store not active
   const ctx = await requireStoreOwnerOrStaff();
 
+  // Explicit multi-tenant access verification
+  const { requireStoreAccess } = await import("@/lib/auth/tenant-guard");
+  await requireStoreAccess(ctx.store.id);
+
   // Query pending trade-in offers count for the badge in sidebar
   const tradeInPendingCount = await prisma.tradeInOffer.count({
     where: {

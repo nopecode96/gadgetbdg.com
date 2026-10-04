@@ -8,9 +8,18 @@ export default async function AdminTradeInsPage() {
   const ctx = await requireStoreOwnerOrStaff();
   const { store } = ctx;
 
+  const leadWhere: any = { storeId: store.id };
+  const offerWhere: any = { storeId: store.id };
+
+  if (ctx.user.role === "STORE_STAFF" && ctx.user.branchId) {
+    leadWhere.branchId = ctx.user.branchId;
+    // legacy offers don't have branchId, so hide them from staff assigned to specific branches
+    offerWhere.id = "none";
+  }
+
   const [leads, offers] = await Promise.all([
     prisma.tradeInLead.findMany({
-      where: { storeId: store.id },
+      where: leadWhere,
       include: {
         branch: {
           select: {
@@ -24,7 +33,7 @@ export default async function AdminTradeInsPage() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.tradeInOffer.findMany({
-      where: { storeId: store.id },
+      where: offerWhere,
       orderBy: { createdAt: "desc" },
     }),
   ]);

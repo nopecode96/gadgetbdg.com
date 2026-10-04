@@ -68,6 +68,7 @@ export interface SessionUser {
   phone: string | null;
   role: Role;
   storeId: string | null;
+  branchId?: string | null;
   store: SerializedStore | null;
 }
 

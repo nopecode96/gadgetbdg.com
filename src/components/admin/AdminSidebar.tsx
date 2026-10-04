@@ -17,6 +17,8 @@ import {
   X,
   Building2,
   Sparkles,
+  CreditCard,
+  Lock,
 } from "lucide-react";
 import { useAdminSidebar } from "./AdminSidebarContext";
 import { merchantLogoutAction } from "@/lib/actions/login-actions";
@@ -29,6 +31,8 @@ interface AdminSidebarProps {
   role?: Role;
   tier?: StoreTier;
   tradeInPendingCount?: number;
+  staffCount?: number;
+  maxStaff?: number;
 }
 
 export function AdminSidebar({
@@ -38,11 +42,15 @@ export function AdminSidebar({
   role,
   tier = "STARTER",
   tradeInPendingCount = 0,
+  staffCount,
+  maxStaff,
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isCollapsed, toggleCollapse, isMobileOpen, setIsMobileOpen } = useAdminSidebar();
 
   const isOwner = role === "STORE_OWNER";
+  const isStarter = tier === "STARTER";
+  const staffBadge = isStarter ? "Lock" : staffCount !== undefined && maxStaff !== undefined ? `${staffCount}/${maxStaff}` : null;
 
   const navigationItems = [
     {
@@ -60,7 +68,7 @@ export function AdminSidebar({
       title: "Inbox Tukar Tambah",
       href: "/admin/trade-in",
       icon: Repeat,
-      badge: tradeInPendingCount > 0 ? tradeInPendingCount : null,
+      badge: tradeInPendingCount > 0 ? String(tradeInPendingCount) : null,
     },
     {
       title: "Generator Medsos",
@@ -78,11 +86,18 @@ export function AdminSidebar({
             title: "Tim & Staf Toko",
             href: "/admin/team",
             icon: Users,
+            badge: staffBadge,
+            isLocked: isStarter,
           },
           {
             title: "Kelola Cabang",
             href: "/admin/branches",
             icon: Building2,
+          },
+          {
+            title: "Paket & Billing",
+            href: "/admin/subscription",
+            icon: CreditCard,
           },
           {
             title: "Pengaturan Toko",
@@ -223,9 +238,16 @@ export function AdminSidebar({
                   )}
 
                   {!isCollapsed && item.badge && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-black rounded-full bg-blue-600 text-white shrink-0 animate-pulse">
-                      {item.badge}
-                    </span>
+                    item.badge === "Lock" ? (
+                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-0.5 shrink-0" title="Paket Starter (Maks 1 Akun)">
+                        <Lock className="w-2.5 h-2.5" />
+                        <span>1/1</span>
+                      </span>
+                    ) : (
+                      <span className="px-1.5 py-0.5 text-[10px] font-black rounded-full bg-blue-100 text-blue-700 border border-blue-200 shrink-0">
+                        {item.badge}
+                      </span>
+                    )
                   )}
 
                   {/* Active Indicator Bar on Left */}
@@ -241,7 +263,7 @@ export function AdminSidebar({
                       <span>{item.title}</span>
                       {item.badge && (
                         <span className="px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-blue-500 text-white">
-                          {item.badge}
+                          {item.badge === "Lock" ? "1/1" : item.badge}
                         </span>
                       )}
                     </div>

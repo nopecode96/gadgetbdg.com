@@ -124,17 +124,21 @@ export async function updateStoreSettings(formData: FormData) {
         warrantyPolicy: warrantyPolicy !== undefined ? (warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.") : currentStore.warrantyPolicy,
         primaryColor: primaryColor || currentStore.primaryColor,
         templateId: templateId || currentStore.templateId,
+        template: templateId || currentStore.templateId,
         ...(shouldUpdateLastChange ? { lastTemplateChangeAt: new Date() } : {}),
         customDomain: customDomain || null,
       },
     });
 
+    revalidatePath("/", "layout");
     revalidatePath("/admin/settings");
     revalidatePath("/admin/qr-kit");
     revalidatePath("/admin/marketing/qr-stands");
     revalidatePath("/admin");
+    revalidatePath(`/${updated.slug}`, "layout");
     revalidatePath(`/${updated.slug}`);
     if (updated.customDomain) {
+      revalidatePath(`/custom-domain/${updated.customDomain}`, "layout");
       revalidatePath(`/custom-domain/${updated.customDomain}`);
     }
 

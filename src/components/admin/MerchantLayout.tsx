@@ -14,6 +14,8 @@ interface MerchantLayoutProps {
   role?: Role;
   tier?: StoreTier;
   tradeInPendingCount?: number;
+  staffCount?: number;
+  maxStaff?: number;
 }
 
 function MerchantLayoutInner({
@@ -24,6 +26,8 @@ function MerchantLayoutInner({
   role,
   tier,
   tradeInPendingCount,
+  staffCount,
+  maxStaff,
 }: MerchantLayoutProps) {
   const { isCollapsed } = useAdminSidebar();
 
@@ -37,6 +41,8 @@ function MerchantLayoutInner({
         role={role}
         tier={tier}
         tradeInPendingCount={tradeInPendingCount}
+        staffCount={staffCount}
+        maxStaff={maxStaff}
       />
 
       {/* 2. Main Content Wrapper with dynamic responsive margin */}

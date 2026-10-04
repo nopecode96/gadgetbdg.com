@@ -40,6 +40,8 @@ export default async function AdminLayout({
       role={ctx.user.role}
       tier={ctx.store.tier}
       tradeInPendingCount={tradeInPendingCount}
+      staffCount={ctx.usage.staffCount}
+      maxStaff={ctx.limits.maxAdmins}
     >
       {children}
     </MerchantLayout>

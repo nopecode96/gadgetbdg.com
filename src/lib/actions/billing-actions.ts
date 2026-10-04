@@ -313,3 +313,91 @@ export async function rejectSubscriptionPaymentAction(paymentId: string, rejectR
     return { success: false as const, error: error?.message || "Gagal menolak pembayaran." };
   }
 }
+
+// ---------------------------------------------------------------
+// d. MERCHANT STORE SUBSCRIPTION STATUS (SSoT from PostgreSQL)
+// ---------------------------------------------------------------
+export async function getStoreSubscriptionStatusAction(storeId: string) {
+  try {
+    const [store, platformSetting, allPlans] = await Promise.all([
+      prisma.store.findUnique({
+        where: { id: storeId },
+        include: {
+          plan: true,
+          _count: {
+            select: {
+              products: true,
+              users: true,
+              branches: true,
+            },
+          },
+        },
+      }),
+      prisma.platformSetting.findUnique({
+        where: { id: "GLOBAL" },
+      }),
+      prisma.subscriptionPlan.findMany({
+        orderBy: { price: "asc" },
+      }),
+    ]);
+
+    if (!store) {
+      return { success: false, error: "Toko tidak ditemukan." };
+    }
+
+    const activeProductCount = await prisma.product.count({
+      where: {
+        storeId,
+        status: { in: ["AVAILABLE", "BOOKED"] },
+      },
+    });
+
+    return {
+      success: true,
+      store: {
+        id: store.id,
+        name: store.name,
+        slug: store.slug,
+        tier: store.tier,
+        planId: store.planId,
+        isActive: store.isActive,
+        hasWatermark: store.hasWatermark,
+        subscriptionStartedAt: store.subscriptionStartedAt ? store.subscriptionStartedAt.toISOString() : null,
+        subscriptionExpiresAt: store.subscriptionExpiresAt ? store.subscriptionExpiresAt.toISOString() : null,
+        plan: store.plan
+          ? {
+              ...store.plan,
+              price: Number(store.plan.price),
+              originalPrice: Number(store.plan.originalPrice),
+            }
+          : null,
+      },
+      usage: {
+        activeProductCount,
+        totalProducts: store._count.products,
+        staffCount: store._count.users,
+        branchCount: store._count.branches,
+      },
+      plans: allPlans.map((p) => ({
+        ...p,
+        price: Number(p.price),
+        originalPrice: Number(p.originalPrice),
+      })),
+      platformSetting: platformSetting
+        ? {
+            supportWhatsapp: platformSetting.supportWhatsapp,
+            enableBankTransfer: Boolean(platformSetting.enableBankTransfer),
+            bankName: platformSetting.bankName,
+            bankAccountNumber: platformSetting.bankAccountNumber,
+            bankAccountHolder: platformSetting.bankAccountHolder,
+            qrisImageUrl: platformSetting.qrisImageUrl,
+            qrisNmid: platformSetting.qrisNmid,
+          }
+        : null,
+    };
+  } catch (error: any) {
+    console.error("Error getStoreSubscriptionStatusAction:", error);
+    return { success: false, error: error?.message || "Gagal memuat status langganan." };
+  }
+}
+

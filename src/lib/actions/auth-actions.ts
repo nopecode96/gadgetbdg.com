@@ -70,17 +70,17 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
 
     // Cek referral code sales jika diisi
     let salesUserId: string | null = null;
+    let referredBySalesId: string | null = null;
     if (refCode) {
-      const salesUser = await prisma.user.findFirst({
-        where: {
-          role: "SALES_AGENT",
-          referralCode: { equals: refCode, mode: "insensitive" },
-        },
-        select: { id: true },
+      const partner = await prisma.salesPartner.findFirst({
+        where: { code: { equals: refCode, mode: "insensitive" }, isActive: true },
+        select: { id: true, userId: true },
       });
-      if (salesUser) {
-        salesUserId = salesUser.id;
+      if (!partner) {
+        return { success: false, error: "Kode referral sales tidak valid atau tidak aktif." };
       }
+      referredBySalesId = partner.id;
+      salesUserId = partner.userId;
     }
 
     // Hash password
@@ -106,6 +106,7 @@ export async function registerStoreWithPaymentAction(formData: FormData) {
           lastTemplateChangeAt: new Date(),
           isActive: false, // aktif setelah pembayaran diverifikasi
           salesUserId,
+          referredBySalesId,
         },
       });
 

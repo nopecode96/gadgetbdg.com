@@ -316,7 +316,7 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
                               </span>
                               {store.salesPartner ? (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
-                                  <TrendingUp className="w-2.5 h-2.5" /> Closing: {store.salesPartner.code}
+                                  <TrendingUp className="w-2.5 h-2.5" /> Sales: {store.salesPartner.name} ({store.salesPartner.code})
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">

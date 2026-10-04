@@ -889,38 +889,44 @@ export function MidnightGoldLayout({
             ============================================================ */}
         {activeTab === "about" && (
           <div className="p-3.5 sm:p-5 space-y-5 max-w-3xl mx-auto w-full">
-            {/* PHYSICAL NODE BEC BANNER */}
+            {/* PHYSICAL NODE BANNER */}
             <div className={`${styles.luxuryHero} rounded-2xl p-5 border border-amber-500/35 relative space-y-3`}>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                  <Crown className="w-3 h-3 text-amber-400" />
-                  CERTIFIED LUXURY MERCHANT BANDUNG
-                </span>
-              </div>
+              {store.verifiedBadge && (
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    <Crown className="w-3 h-3 text-amber-400" />
+                    CERTIFIED MERCHANT
+                  </span>
+                </div>
+              )}
               <h2 className="text-amber-50 font-black text-xl leading-tight">
                 {store.name}
               </h2>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-slate-300 font-medium">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>{store.address || "Bandung Electronic Center (BEC) Lantai LG Blok Z-08"}</span>
+              {store.address && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-slate-300 font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>{store.address}</span>
+                  </div>
+                  {store.mapsUrl && (
+                    <a
+                      href={store.mapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 font-bold underline"
+                    >
+                      <span>Buka Google Maps</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                 </div>
-                {store.mapsUrl && (
-                  <a
-                    href={store.mapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 font-bold underline"
-                  >
-                    <span>Buka Google Maps</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-amber-300 font-medium">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
-                <span>{store.operationalHours || "Setiap Hari: 10:00 - 21:00 WIB"}</span>
-              </div>
+              )}
+              {store.operationalHours && (
+                <div className="flex items-center gap-2 text-xs text-amber-300 font-medium">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{store.operationalHours}</span>
+                </div>
+              )}
             </div>
 
             {/* THREE PILLARS OF LUXURY WARRANTY */}

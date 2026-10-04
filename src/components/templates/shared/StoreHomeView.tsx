@@ -120,12 +120,12 @@ export function StoreHomeView({
 
             {/* Main Title */}
             <h2 className="text-base sm:text-xl font-black text-white tracking-tight leading-tight drop-shadow-sm">
-              Diskon Unit Flagship Siap COD
+              {store.name}
             </h2>
 
             {/* Subtitle */}
             <p className="text-[11px] leading-relaxed text-slate-300 font-medium">
-              Lolos 30 titik uji kelayakan. Garansi replace 30 hari &amp; IMEI aman seumur hidup.
+              Katalog resmi unit second berkualitas &amp; teruji. Transaksi aman langsung ke kasir toko.
             </p>
 
             {/* CTA Button */}
@@ -134,36 +134,30 @@ export function StoreHomeView({
                 onClick={() => onNavigateTab("list")}
                 className="px-4 py-2 rounded-full font-black text-xs transition-all duration-200 flex items-center gap-1.5 bg-white text-slate-950 hover:bg-slate-100 shadow-lg shadow-white/10 active:scale-95 shrink-0"
               >
-                <span>Lihat Promo</span>
+                <span>Lihat Katalog</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Floating Physical Product Preview with Depth Shadow */}
-          <div
-            onClick={() => onNavigateTab("list")}
-            className="relative shrink-0 cursor-pointer group select-none"
-          >
-            <div className="w-24 sm:w-32 aspect-square rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-2 flex flex-col items-center justify-center relative shadow-2xl transition-transform duration-300 group-hover:scale-105">
-              {heroHighlight?.images?.[0] ? (
+          {/* Physical Product Preview with Depth Shadow */}
+          {heroHighlight?.images?.[0] && (
+            <div
+              onClick={() => onNavigateTab("list")}
+              className="relative shrink-0 cursor-pointer group select-none"
+            >
+              <div className="w-24 sm:w-32 aspect-square rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-2 flex flex-col items-center justify-center relative shadow-2xl transition-transform duration-300 group-hover:scale-105">
                 <img
                   src={heroHighlight.images[0]}
                   alt={heroHighlight.name}
                   className="w-full h-full object-contain drop-shadow-2xl"
                 />
-              ) : (
-                <img
-                  src="/images/items/iphone-15-pro.png"
-                  alt="Flagship Phone"
-                  className="w-full h-full object-contain drop-shadow-2xl"
-                />
-              )}
-              <span className="absolute -bottom-2 bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full shadow-md">
-                HOT DEAL
-              </span>
+                <span className="absolute -bottom-2 bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full shadow-md">
+                  READY
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -274,7 +268,7 @@ export function StoreHomeView({
             <RefreshCw className="w-4 h-4" />
           </div>
           <div className="font-extrabold text-[11px] leading-tight">Free Pindah Data</div>
-          <div className="text-[9px] text-slate-400">Dukungan Kasir BEC</div>
+          <div className="text-[9px] text-slate-400">Didampingi Kasir</div>
         </div>
       </div>
 

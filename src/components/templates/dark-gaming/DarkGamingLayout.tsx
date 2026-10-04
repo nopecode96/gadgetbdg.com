@@ -251,15 +251,11 @@ export function DarkGamingLayout({
                     </div>
 
                     <h2 className="text-base sm:text-xl font-black text-white tracking-tight leading-tight">
-                      MAX PERFORMANCE{" "}
-                      <span className={styles.neonTextEmerald}>
-                        FLAGSHIP READY
-                      </span>
+                      {store.name}
                     </h2>
 
                     <p className="text-[11px] leading-relaxed text-slate-400 font-medium">
-                      Unit gaming & flagship second teruji. Benchmark nyata,
-                      garansi toko 30 hari, IMEI aman Kemenperin.
+                      Katalog unit gaming &amp; flagship second teruji. Transaksi langsung dengan kasir toko.
                     </p>
 
                     <button
@@ -588,10 +584,12 @@ export function DarkGamingLayout({
                             </h3>
                           </Link>
                           <div className="flex items-center gap-1 text-[10px] text-slate-500 font-semibold truncate">
-                            <Star className="w-3 h-3 fill-emerald-500/50 text-emerald-400 shrink-0" />
-                            <span>4.9</span>
-                            <span>•</span>
-                            <span className="truncate">{product.condition}</span>
+                            {product.grade ? (
+                              <span className="px-1.5 py-0.5 rounded-md bg-emerald-950 text-emerald-400 border border-emerald-800 text-[9px] font-bold">
+                                {product.grade}
+                              </span>
+                            ) : null}
+                            <span className="truncate text-slate-400">{product.condition}</span>
                           </div>
                         </div>
 

@@ -536,10 +536,10 @@ export function ProductDetailView({
         <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-slate-900 dark:text-slate-100 space-y-1.5 shadow-xs">
           <div className="font-black flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-black uppercase tracking-wider">Jaminan Belanja Aman GadgetBDG</span>
+            <span className="text-xs font-black uppercase tracking-wider">Jaminan Belanja Aman {store.name}</span>
           </div>
           <p className="text-xs leading-relaxed font-medium text-slate-700 dark:text-slate-300">
-            Bisa COD dan cek fisik langsung sepuasnya di konter kami ({product.branch?.name || store.address || "BEC Bandung"}). Garansi personal toko penggantian unit atau servis jika ada kendala non-human error.
+            Bisa COD dan cek fisik langsung sepuasnya di konter kami ({product.branch?.name || store.address || "Toko Kami"}). Garansi personal toko penggantian unit atau servis jika ada kendala non-human error.
           </p>
         </div>
       </main>

@@ -894,31 +894,50 @@ export function CyberHudLayout({
             <div className="p-4 space-y-4">
               {/* Foto Physical Node */}
               <div className={`rounded-2xl overflow-hidden ${styles.hudCard} ${styles.hudCornerBracket}`}>
-                <div className="aspect-video w-full relative bg-slate-950">
-                  <img
-                    src={
-                      store.storeImage ||
-                      store.bannerUrl ||
-                      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80"
-                    }
-                    alt={store.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050914] via-black/40 to-transparent flex flex-col justify-end p-4">
-                    <span className="px-2 py-0.5 rounded bg-cyan-950/90 text-cyan-300 border border-cyan-500/40 font-mono text-[9px] font-bold uppercase inline-block self-start mb-1">
-                      VERIFIED PHYSICAL NODE BANDUNG // BEC LEVEL 1
-                    </span>
-                    <h2 className="text-lg font-mono font-black text-white">{store.name}</h2>
-                    <div className="flex items-center gap-2 text-xs font-mono text-slate-300 mt-0.5">
-                      <div className="flex items-center text-amber-400">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span className="font-bold ml-1 text-white">{averageRating}</span>
-                      </div>
-                      <span>•</span>
-                      <span>{totalReviews > 0 ? `${totalReviews} LOG REVIEWS` : "HIGH-FPS AUTHORIZED HUB"}</span>
+                {store.storeImage || store.bannerUrl ? (
+                  <div className="aspect-video w-full relative bg-slate-950">
+                    <img
+                      src={store.storeImage || store.bannerUrl || ""}
+                      alt={store.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050914] via-black/40 to-transparent flex flex-col justify-end p-4">
+                      {store.verifiedBadge && (
+                        <span className="px-2 py-0.5 rounded bg-cyan-950/90 text-cyan-300 border border-cyan-500/40 font-mono text-[9px] font-bold uppercase inline-block self-start mb-1">
+                          VERIFIED NODE // AUTHORIZED
+                        </span>
+                      )}
+                      <h2 className="text-lg font-mono font-black text-white">{store.name}</h2>
+                      {averageRating && (
+                        <div className="flex items-center gap-2 text-xs font-mono text-slate-300 mt-0.5">
+                          <div className="flex items-center text-amber-400">
+                            <Star className="w-3.5 h-3.5 fill-current" />
+                            <span className="font-bold ml-1 text-white">{averageRating}</span>
+                          </div>
+                          <span>•</span>
+                          <span>{totalReviews} LOG REVIEWS</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="p-5 bg-slate-950 text-white space-y-1.5 font-mono">
+                    <h2 className="text-lg font-black text-white">{store.name}</h2>
+                    {store.address && <p className="text-xs text-slate-400">{store.address}</p>}
+                    {averageRating ? (
+                      <div className="flex items-center gap-2 text-xs text-slate-300 mt-0.5">
+                        <div className="flex items-center text-amber-400">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          <span className="font-bold ml-1 text-white">{averageRating}</span>
+                        </div>
+                        <span>•</span>
+                        <span>{totalReviews} LOG REVIEWS</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-500">0 LOG REVIEWS</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Hotline WhatsApp Kasir */}

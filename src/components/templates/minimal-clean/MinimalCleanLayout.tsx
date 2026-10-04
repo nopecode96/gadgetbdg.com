@@ -541,9 +541,11 @@ export function MinimalCleanLayout({
                             </h3>
                           </Link>
                           <div className="flex items-center gap-1 text-[10px] text-slate-500 font-semibold truncate">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
-                            <span>4.9</span>
-                            <span>•</span>
+                            {product.grade ? (
+                              <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[9px] font-bold">
+                                {product.grade}
+                              </span>
+                            ) : null}
                             <span className="truncate">{product.condition}</span>
                           </div>
                         </div>

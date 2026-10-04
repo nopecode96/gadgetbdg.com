@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: CustomDomainProductPageProps)
   const image =
     Array.isArray(product.images) && product.images.length > 0
       ? String(product.images[0])
-      : store.bannerUrl || store.logoUrl || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80";
+      : store.bannerUrl || store.logoUrl || "/icons/icon-192.png";
 
   return {
     title,

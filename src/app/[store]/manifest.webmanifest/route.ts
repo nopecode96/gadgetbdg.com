@@ -58,7 +58,7 @@ export async function GET(request: Request, context: RouteContext) {
   const icon512Url = store.logoUrl || "/icons/icon-512.png";
 
   const manifest = {
-    name: `${store.name} - Spesialis HP Second`,
+    name: store.name,
     short_name: shortName,
     description: `Katalog unit HP second bergaransi & siap COD di ${store.name}`,
     start_url: `/${store.slug}?utm_source=pwa`,

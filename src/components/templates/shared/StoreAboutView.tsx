@@ -52,12 +52,14 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
 
   const branches = store.branches || [];
 
-  // Hitung rata-rata rating
+  // Hitung rata-rata rating murni dari ulasan database
   const totalReviews = reviews.length;
   const averageRating =
     totalReviews > 0
       ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
-      : "4.9";
+      : null;
+
+  const storeImageBanner = store.storeImage || store.bannerUrl || null;
 
   const allowCustomerReviews = store.tier !== "STARTER";
 
@@ -102,36 +104,72 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
     <div className="p-4 space-y-4 animate-fade-in text-xs font-sans pb-10">
       {/* ── 1. HEADER & COVER FISIK TOKO ── */}
       <div className={`rounded-3xl overflow-hidden relative border ${colors.borderContainer} shadow-lg`}>
-        <div className="aspect-16/9 w-full bg-slate-800 relative">
-          <img
-            src={
-              store.storeImage ||
-              store.bannerUrl ||
-              "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80"
-            }
-            alt={store.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5 text-white">
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 flex items-center gap-1 shadow-sm">
-                <ShieldCheck className="w-3 h-3" />
-                <span>Verified Merchant Bandung</span>
-              </span>
-            </div>
-            <h2 className="text-xl font-black leading-tight tracking-tight mt-0.5 text-white">{store.name}</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex items-center text-amber-400">
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <span className="font-black text-xs ml-1 text-white">{averageRating}</span>
-              </div>
-              <span className="text-slate-400">•</span>
-              <span className="text-xs text-slate-300 font-medium">
-                {totalReviews > 0 ? `${totalReviews} Ulasan Pembeli` : "Spesialis HP Second Original"}
-              </span>
+        {storeImageBanner ? (
+          <div className="aspect-16/9 w-full bg-slate-800 relative">
+            <img
+              src={storeImageBanner}
+              alt={store.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5 text-white">
+              {store.verifiedBadge && (
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 flex items-center gap-1 shadow-sm">
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>Verified Merchant</span>
+                  </span>
+                </div>
+              )}
+              <h2 className="text-xl font-black leading-tight tracking-tight mt-0.5 text-white">{store.name}</h2>
+              {averageRating && (
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center text-amber-400">
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <span className="font-black text-xs ml-1 text-white">{averageRating}</span>
+                  </div>
+                  <span className="text-slate-400">•</span>
+                  <span className="text-xs text-slate-300 font-medium">
+                    {totalReviews} Ulasan Pembeli
+                  </span>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className={`p-6 bg-gradient-to-br ${isDark ? "from-slate-900 via-slate-800 to-slate-900" : "from-slate-900 via-indigo-950 to-slate-900"} text-white space-y-2`}>
+            {store.verifiedBadge && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 inline-flex items-center gap-1 shadow-sm">
+                  <ShieldCheck className="w-3 h-3" />
+                  <span>Verified Merchant</span>
+                </span>
+              </div>
+            )}
+            <h2 className="text-xl font-black leading-tight tracking-tight text-white">{store.name}</h2>
+            {store.address && (
+              <p className="text-xs text-slate-300 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span>{store.address}</span>
+              </p>
+            )}
+            {averageRating ? (
+              <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center text-amber-400">
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <span className="font-black text-xs ml-1 text-white">{averageRating}</span>
+                </div>
+                <span className="text-slate-400">•</span>
+                <span className="text-xs text-slate-300 font-medium">
+                  {totalReviews} Ulasan Pembeli
+                </span>
+              </div>
+            ) : (
+              <div className="text-[11px] text-slate-400 font-medium pt-1">
+                Belum ada ulasan
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── 2. KONTAK CEPAT WHATSAPP ── */}
@@ -144,12 +182,12 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
             <span>Kontak &amp; Hotline Kasir</span>
           </div>
           <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-            Fast Response
+            Online
           </span>
         </div>
 
         <p className={`text-xs ${colors.textSecondary}`}>
-          Ingin cek stok fisik unit di etalase, minta video 3uTools, atau negosiasi sebelum mampir ke konter? Chat kami sekarang.
+          Hubungi kasir untuk konfirmasi unit etalase, cek fisik, atau janji temu di toko.
         </p>
 
         <a
@@ -158,7 +196,7 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
               ? "#"
               : `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                   store.name
-                )},%20saya%20ingin%20tanya%20stok%20HP%20second`
+                )},%20saya%20ingin%20tanya%20stok%20unit%20tersedia`
           }
           target="_blank"
           rel="noreferrer"
@@ -173,29 +211,28 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
       </div>
 
       {/* ── 3. JAM OPERASIONAL TOKO ── */}
-      <div
-        className={`rounded-3xl p-4 border space-y-3 shadow-xs ${colors.cardBg} ${colors.cardBorder} ${colors.textPrimary}`}
-      >
-        <div className={`flex items-center justify-between border-b pb-2.5 ${colors.cardBorder}`}>
-          <div className="flex items-center gap-2 font-black text-sm">
-            <Clock className={`w-4 h-4 ${colors.accentText}`} />
-            <span>Jam Operasional Toko</span>
+      {store.operationalHours && (
+        <div
+          className={`rounded-3xl p-4 border space-y-2.5 shadow-xs ${colors.cardBg} ${colors.cardBorder} ${colors.textPrimary}`}
+        >
+          <div className={`flex items-center justify-between border-b pb-2 ${colors.cardBorder}`}>
+            <div className="flex items-center gap-2 font-black text-sm">
+              <Clock className={`w-4 h-4 ${colors.accentText}`} />
+              <span>Jam Operasional Toko</span>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Aktif
+            </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Buka Sekarang
-          </span>
-        </div>
 
-        <div className={`text-xs ${colors.textSecondary}`}>
-          <p className="font-semibold text-slate-800 dark:text-slate-100">
-            {store.operationalHours || "Setiap Hari: 10:00 - 20:30 WIB"}
-          </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">
-            Melayani COD konter, tukar tambah, dan pengiriman kurir instan Bandung Raya.
-          </p>
+          <div className={`text-xs ${colors.textSecondary}`}>
+            <p className="font-semibold text-slate-800 dark:text-slate-100">
+              {store.operationalHours}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── 4. ALAMAT FISIK & PETUNJUK ARAH (GOOGLE MAPS) ── */}
       {branches.length > 0 ? (
@@ -301,64 +338,56 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
             })}
           </div>
         </div>
-      ) : (
+      ) : store.address ? (
         <div
           className={`rounded-3xl p-4 border space-y-3 shadow-xs ${colors.cardBg} ${colors.cardBorder} ${colors.textPrimary}`}
         >
           <div className={`flex items-center gap-2 font-black text-sm border-b pb-2.5 ${colors.cardBorder}`}>
             <MapPin className="w-4 h-4 text-rose-500" />
-            <span>Alamat Fisik Markas Toko</span>
+            <span>Alamat Fisik Toko</span>
           </div>
 
           <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : colors.textSecondary}`}>
-            {store.address || "Bandung Electronic Center (BEC) Lantai 1 Blok C-05, Jl. Purnawarman No. 13-15, Bandung"}
+            {store.address}
           </p>
 
-          <a
-            href={isMockup ? "#" : defaultMapsLink}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => {
-              if (isMockup) e.preventDefault();
-            }}
-            className="w-full py-2.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>Petunjuk Arah (Google Maps)</span>
-          </a>
+          {store.mapsUrl && (
+            <a
+              href={isMockup ? "#" : store.mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => {
+                if (isMockup) e.preventDefault();
+              }}
+              className="w-full py-2.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Petunjuk Arah (Google Maps)</span>
+            </a>
+          )}
         </div>
-      )}
+      ) : null}
 
       {/* ── 5. GARANSI & JAMINAN TRANSAKSI ── */}
-      <div
-        className={`rounded-3xl p-4 border space-y-3 shadow-xs ${colors.cardBg} ${colors.cardBorder} ${colors.textPrimary}`}
-      >
-        <div className="flex items-center gap-2 font-black text-sm">
-          <ShieldCheck className="w-4 h-4 text-blue-500" />
-          <span>Garansi &amp; Jaminan Transaksi</span>
-        </div>
+      {store.warrantyPolicy && (
+        <div
+          className={`rounded-3xl p-4 border space-y-3 shadow-xs ${colors.cardBg} ${colors.cardBorder} ${colors.textPrimary}`}
+        >
+          <div className="flex items-center gap-2 font-black text-sm">
+            <ShieldCheck className="w-4 h-4 text-blue-500" />
+            <span>Garansi &amp; Jaminan Toko</span>
+          </div>
 
-        <div className="space-y-2.5 text-xs">
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <p className={isDark ? "text-slate-300" : colors.textSecondary}>
-              <b className={colors.textPrimary}>Garansi Toko Resmi:</b> {store.warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup."}
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <p className={isDark ? "text-slate-300" : colors.textSecondary}>
-              <b className={colors.textPrimary}>Bebas Blokir IMEI Seumur Hidup:</b> Semua unit berstatus resmi iBox, SEIN, atau terdaftar Kemenperin/Bea Cukai.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <p className={isDark ? "text-slate-300" : colors.textSecondary}>
-              <b className={colors.textPrimary}>Gratis Pindah Data di Konter:</b> Didampingi kasir berpengalaman untuk transfer WhatsApp, foto, dan akun iCloud/Google.
-            </p>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <p className={isDark ? "text-slate-300" : colors.textSecondary}>
+                <b className={colors.textPrimary}>Ketentuan Garansi:</b> {store.warrantyPolicy}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── 6. SECTION REPUTASI & ULASAN PEMBELI ── */}
       <div
@@ -371,9 +400,15 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-amber-500 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
-              ★ {averageRating}
-            </span>
+            {averageRating ? (
+              <span className="text-xs font-black text-amber-500 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+                ★ {averageRating}
+              </span>
+            ) : (
+              <span className="text-[11px] text-slate-400 font-medium">
+                Belum ada rating
+              </span>
+            )}
 
             {allowCustomerReviews && (
               <button

@@ -178,7 +178,7 @@ export function KeynoteObsidianLayout({
   const totalReviews = reviews.length;
   const averageRating = totalReviews > 0
     ? (reviews.reduce((a, r) => a + r.rating, 0) / totalReviews).toFixed(1)
-    : "4.9";
+    : null;
 
   const mainBranch = store.branches?.find((b) => b.isMain) || store.branches?.[0];
   const defaultMapsUrl = store.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address || store.name + " Bandung")}`;
@@ -692,28 +692,47 @@ export function KeynoteObsidianLayout({
             <div className="p-4 space-y-4 pb-10">
               {/* Cover Foto Toko */}
               <div className={`rounded-3xl overflow-hidden border ${styles.goldDivider}`}>
-                <div className="aspect-video w-full relative">
-                  <img
-                    src={store.storeImage || store.bannerUrl || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80"}
-                    alt={store.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-5">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full text-zinc-950 flex items-center gap-1 ${styles.acquireButton}`}>
-                        <ShieldCheck className="w-3 h-3" />
-                        <span>Verified Premium Merchant</span>
-                      </span>
-                    </div>
-                    <h2 className="text-xl font-black text-white tracking-tight">{store.name}</h2>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span className="text-xs font-black text-white">{averageRating}</span>
-                      <span className="text-zinc-500">·</span>
-                      <span className="text-xs text-zinc-400">{totalReviews > 0 ? `${totalReviews} Ulasan` : "Premium Second Store"}</span>
+                {store.storeImage || store.bannerUrl ? (
+                  <div className="aspect-video w-full relative">
+                    <img
+                      src={store.storeImage || store.bannerUrl || ""}
+                      alt={store.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-5">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full text-zinc-950 flex items-center gap-1 ${styles.acquireButton}`}>
+                          <ShieldCheck className="w-3 h-3" />
+                          <span>Verified Merchant</span>
+                        </span>
+                      </div>
+                      <h2 className="text-xl font-black text-white tracking-tight">{store.name}</h2>
+                      {averageRating && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span className="text-xs font-black text-white">{averageRating}</span>
+                          <span className="text-zinc-500">·</span>
+                          <span className="text-xs text-zinc-400">{totalReviews} Ulasan</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="p-6 bg-zinc-950 text-white space-y-2">
+                    <h2 className="text-xl font-black text-white tracking-tight">{store.name}</h2>
+                    {store.address && <p className="text-xs text-zinc-400">{store.address}</p>}
+                    {averageRating ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <span className="text-xs font-black text-white">{averageRating}</span>
+                        <span className="text-zinc-500">·</span>
+                        <span className="text-xs text-zinc-400">{totalReviews} Ulasan</span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-zinc-500">Belum ada ulasan</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* WhatsApp CTA */}

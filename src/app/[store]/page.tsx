@@ -46,10 +46,10 @@ export async function generateMetadata({ params }: StorePageProps): Promise<Meta
 
   const title = `${store.name} - Katalog HP Bekas Resmi Bandung | GadgetBdg`;
   const productPreview = store.products.map((p) => p.title || p.name).join(", ");
-  const description = `Katalog HP second berkualitas di ${store.name}. Stok siap COD & kirim: ${
-    productPreview || "iPhone & Android teruji bergaransi"
-  }. WhatsApp langsung tanpa perantara.`;
-  const image = store.bannerUrl || store.logoUrl || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80";
+  const description = `Katalog HP second berkualitas di ${store.name}. ${
+    productPreview ? `Stok siap COD & kirim: ${productPreview}.` : ""
+  } Hubungi WhatsApp kami langsung tanpa perantara.`;
+  const image = store.bannerUrl || store.logoUrl || "/icons/icon-192.png";
 
   const themeConfig = getTemplateConfig(store.templateId || "clean-ledger");
   const themeColor = store.primaryColor?.startsWith("#")
@@ -165,8 +165,8 @@ export default async function StorePage({ params, searchParams }: StorePageProps
   const activeAddress = matchedBranch?.address || rawStore.address;
   const activeMapsUrl = matchedBranch?.googleMapsUrl || matchedBranch?.mapsUrl || rawStore.mapsUrl;
   const activeImage = matchedBranch?.image || rawStore.storeImage || rawStore.bannerUrl || null;
-  const activeOperationalHours = matchedBranch?.businessHours || rawStore.operationalHours || "Setiap Hari: 10:00 - 20:30 WIB";
-  const activeWarrantyPolicy = matchedBranch?.warrantyInfo || rawStore.warrantyPolicy || "Garansi Toko 30 Hari Replace Unit & Jaminan Bebas Blokir IMEI Seumur Hidup.";
+  const activeOperationalHours = matchedBranch?.businessHours || rawStore.operationalHours || null;
+  const activeWarrantyPolicy = matchedBranch?.warrantyInfo || rawStore.warrantyPolicy || null;
   const activeGoogleReviewUrl = matchedBranch?.googleReviewUrl || rawStore.googleReviewUrl || null;
 
   // Filter products if branch is active
@@ -189,8 +189,8 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     storeImage: activeImage ? String(activeImage) : null,
     mapsUrl: activeMapsUrl ? String(activeMapsUrl) : null,
     googleReviewUrl: activeGoogleReviewUrl ? String(activeGoogleReviewUrl) : null,
-    operationalHours: String(activeOperationalHours),
-    warrantyPolicy: String(activeWarrantyPolicy),
+    operationalHours: activeOperationalHours ? String(activeOperationalHours) : null,
+    warrantyPolicy: activeWarrantyPolicy ? String(activeWarrantyPolicy) : null,
     verifiedBadge: Boolean(rawStore.verifiedBadge),
     primaryColor: String(rawStore.primaryColor || "#2563eb"),
     bannerUrl: rawStore.bannerUrl ? String(rawStore.bannerUrl) : null,

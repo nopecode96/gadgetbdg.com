@@ -207,7 +207,7 @@ export function TokyoStreetLayout({
   const averageRating =
     totalReviews > 0
       ? (reviews.reduce((a, r) => a + r.rating, 0) / totalReviews).toFixed(1)
-      : "4.9";
+      : null;
 
   const mainBranch =
     store.branches?.find((b) => b.isMain) || store.branches?.[0];
@@ -886,31 +886,50 @@ export function TokyoStreetLayout({
             <div className="p-4 space-y-4">
               {/* Foto Toko Fisik */}
               <div className={`rounded-2xl overflow-hidden ${styles.boxCard}`}>
-                <div className="aspect-video w-full relative bg-neutral-900">
-                  <img
-                    src={
-                      store.storeImage ||
-                      store.bannerUrl ||
-                      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&auto=format&fit=crop&q=80"
-                    }
-                    alt={store.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4">
-                    <span className="px-2 py-0.5 rounded-md bg-white text-neutral-950 font-black text-[9px] uppercase tracking-wider inline-block self-start mb-1">
-                      VERIFIED MERCHANT BANDUNG
-                    </span>
-                    <h2 className="text-lg font-black text-white">{store.name}</h2>
-                    <div className="flex items-center gap-2 text-xs text-neutral-300 font-medium mt-0.5">
-                      <div className="flex items-center text-amber-400">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span className="font-black ml-1 text-white">{averageRating}</span>
-                      </div>
-                      <span>•</span>
-                      <span>{totalReviews > 0 ? `${totalReviews} Ulasan Pembeli` : "Spesialis HP Second Original"}</span>
+                {store.storeImage || store.bannerUrl ? (
+                  <div className="aspect-video w-full relative bg-neutral-900">
+                    <img
+                      src={store.storeImage || store.bannerUrl || ""}
+                      alt={store.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4">
+                      {store.verifiedBadge && (
+                        <span className="px-2 py-0.5 rounded-md bg-white text-neutral-950 font-black text-[9px] uppercase tracking-wider inline-block self-start mb-1">
+                          VERIFIED MERCHANT
+                        </span>
+                      )}
+                      <h2 className="text-lg font-black text-white">{store.name}</h2>
+                      {averageRating && (
+                        <div className="flex items-center gap-2 text-xs text-neutral-300 font-medium mt-0.5">
+                          <div className="flex items-center text-amber-400">
+                            <Star className="w-3.5 h-3.5 fill-current" />
+                            <span className="font-black ml-1 text-white">{averageRating}</span>
+                          </div>
+                          <span>•</span>
+                          <span>{totalReviews} Ulasan Pembeli</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="p-5 bg-neutral-900 text-white space-y-1.5">
+                    <h2 className="text-lg font-black text-white">{store.name}</h2>
+                    {store.address && <p className="text-xs text-neutral-400">{store.address}</p>}
+                    {averageRating ? (
+                      <div className="flex items-center gap-2 text-xs text-neutral-300 font-medium pt-1">
+                        <div className="flex items-center text-amber-400">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          <span className="font-black ml-1 text-white">{averageRating}</span>
+                        </div>
+                        <span>•</span>
+                        <span>{totalReviews} Ulasan Pembeli</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-neutral-500">Belum ada ulasan</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Kontak WhatsApp Kasir */}

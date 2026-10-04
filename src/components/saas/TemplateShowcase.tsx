@@ -89,20 +89,21 @@ const MOCK_PRODUCTS: ProductData[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Real Storefront Demo Slugs Mapping
+// Real Storefront Demo Slugs Mapping (demo1 - demo6)
 // ---------------------------------------------------------------------------
 export const DEMO_STORE_SLUGS: Record<string, string> = {
-  "minimal-clean": "berkahcell",
-  "dark-gaming": "gamersgadget",
-  "keynote-obsidian": "berkahcell",
-  "tokyo-street": "tokyostreet",
-  "tokyo-editorial": "tokyostreet",
-  "cyber-hud": "cybercell",
-  "midnight-gold": "goldcell",
+  "minimal-clean": "demo1",
+  "dark-gaming": "demo2",
+  "keynote-obsidian": "demo6",
+  "tokyo-street": "demo4",
+  "tokyo-editorial": "demo4",
+  "cyber-hud": "demo2",
+  "midnight-gold": "demo3",
+  "modern-retail": "demo5",
 };
 
 export function getDemoSlug(templateId: string): string {
-  return DEMO_STORE_SLUGS[templateId] || "berkahcell";
+  return DEMO_STORE_SLUGS[templateId] || "demo1";
 }
 
 // Helper generator mockStore taking activeTemplate
@@ -110,36 +111,36 @@ function createMockStore(activeTemplate: TemplateThemeConfig): StoreData {
   const isGaming = activeTemplate.id === "dark-gaming";
   const isKeynote = activeTemplate.id === "keynote-obsidian";
   const isTokyo = activeTemplate.id === "tokyo-editorial" || activeTemplate.id === "tokyo-street";
-  const isCyber = activeTemplate.id === "cyber-hud";
   const isGold = activeTemplate.id === "midnight-gold";
+  const isRetail = activeTemplate.id === "modern-retail";
   return {
     id: "mock-preview-store",
     name: isGaming
-      ? "Gamers Gadget Bandung"
+      ? "Demo 2: Gamers Cyber"
       : isKeynote
-      ? "Obsidian Premier"
+      ? "Demo 6: Official Store"
       : isTokyo
-      ? "Tokyo Street Cell"
-      : isCyber
-      ? "Cyber Telemetry Cell"
+      ? "Demo 4: Tokyo Street"
       : isGold
-      ? "Midnight Gold Concierge"
-      : "Berkah Cell Gadget",
+      ? "Demo 3: Midnight Gold"
+      : isRetail
+      ? "Demo 5: Modern Retail"
+      : "Demo 1: Minimal Clean",
     slug: isGaming
-      ? "gamersgadget"
+      ? "demo2"
       : isKeynote
-      ? "obsidianpremier"
+      ? "demo6"
       : isTokyo
-      ? "tokyostreet"
-      : isCyber
-      ? "cybercell"
+      ? "demo4"
       : isGold
-      ? "goldcell"
-      : "berkahcell",
+      ? "demo3"
+      : isRetail
+      ? "demo5"
+      : "demo1",
     address: isGold
       ? "Bandung Electronic Center (BEC) Lantai LG Blok Z-08"
       : "Bandung Electronic Center (BEC) Lantai 1 Blok C-05",
-    whatsapp: "628123456789",
+    whatsapp: "62895389974414",
     templateId: activeTemplate.id,
     tier: "ADVANCE",
     hasWatermark: true,

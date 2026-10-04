@@ -121,7 +121,7 @@ export function DomainSettingsSection({ store }: DomainSettingsSectionProps) {
                   name="customDomain"
                   value={domainInput}
                   onChange={(e) => setDomainInput(e.target.value)}
-                  placeholder="Contoh: berkahcell.id atau tokoberkah.com"
+                  placeholder="Contoh: tokosaya.com atau gadgetstore.id"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-slate-900 text-xs"
                 />
               </div>

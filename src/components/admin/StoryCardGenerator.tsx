@@ -40,10 +40,10 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
   const [rendered, setRendered] = useState(false);
   const [promoPreset, setPromoPreset] = useState<PromoPreset>("none");
 
-  const storeName = store?.name || "Berkah Cell Gadget";
-  const storeSlug = store?.slug || "berkahcell";
-  const storeAddress = store?.address || "BEC Lantai 1 Blok C-05 Bandung";
-  const storeWa = store?.whatsapp || "081234567890";
+  const storeName = store?.name || "Official Store GadgetBdg";
+  const storeSlug = store?.slug || "demo1";
+  const storeAddress = store?.address || "Bandung Electronic Center (BEC), Bandung";
+  const storeWa = store?.whatsapp || "62895389974414";
 
   // Cek hak watermark: aktif untuk paket PRO & ADVANCE atau jika hasWatermark === true
   const showWatermark = Boolean(store?.hasWatermark || (store?.tier && store.tier !== "STARTER"));

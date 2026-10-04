@@ -249,6 +249,7 @@ model Product {
   @@index([branchId])
   @@index([status])
   @@index([category])
+  @@index([slug])
 }
 
 model TradeInOffer {

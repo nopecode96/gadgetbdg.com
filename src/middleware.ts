@@ -181,6 +181,19 @@ export default async function middleware(req: NextRequest) {
     }
 
     // 2d. Store Tenant Subdomain ([slug].gadgetbdg.com / [slug].localhost)
+    // Normalization: Prevent duplicate store slug in pathname on tenant subdomain
+    // e.g. demo2.gadgetbdg.com/demo2/product/xyz -> redirect 301 to demo2.gadgetbdg.com/product/xyz
+    // or demo2.gadgetbdg.com/demo2 -> redirect 301 to demo2.gadgetbdg.com/
+    if (pathname === `/${subdomain}`) {
+      const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
+      return NextResponse.redirect(new URL(`/${targetQuery}`, req.url), 301);
+    }
+    if (pathname.startsWith(`/${subdomain}/`)) {
+      const cleanPath = pathname.slice(subdomain.length + 1) || "/";
+      const targetQuery = searchParams.length > 0 ? `?${searchParams}` : "";
+      return NextResponse.redirect(new URL(`${cleanPath}${targetQuery}`, req.url), 301);
+    }
+
     // Create new request headers with x-store-slug injected
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("x-store-slug", subdomain);

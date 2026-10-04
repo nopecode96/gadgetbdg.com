@@ -17,6 +17,7 @@ import {
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { trackWhatsAppClickAction } from "@/lib/actions";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface ArchetypeLayoutProps {
   store: StoreData;
@@ -195,7 +196,7 @@ export function TokyoEditorialLayout({ store, products }: ArchetypeLayoutProps) 
                   </div>
 
                   <Link
-                    href={`/${store.slug}/product/${products[0].id}`}
+                    href={getProductDetailUrl(store.slug, products[0], store.isTenantHost)}
                     className="w-full py-2.5 rounded-full font-black text-xs uppercase bg-[#1c1a17] text-white hover:bg-[#d94823] transition flex items-center justify-center gap-1 tracking-wider"
                   >
                     <span>Inspect Unit</span>
@@ -253,7 +254,7 @@ export function TokyoEditorialLayout({ store, products }: ArchetypeLayoutProps) 
 
                     <div className="pt-2 flex items-center gap-2 border-t border-[#dfd8cc]/60">
                       <Link
-                        href={`/${store.slug}/product/${p.id}`}
+                        href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                         className="flex-1 py-2 text-center rounded-full font-black text-[11px] uppercase bg-[#f4f1ea] hover:bg-[#1c1a17] hover:text-white transition tracking-wider"
                       >
                         Inspect
@@ -321,7 +322,7 @@ export function TokyoEditorialLayout({ store, products }: ArchetypeLayoutProps) 
                     <div className="text-sm font-black text-[#1c1a17] pt-0.5">{formatRupiah(p.price)}</div>
                   </div>
                   <Link
-                    href={`/${store.slug}/product/${p.id}`}
+                    href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                     className="px-3.5 py-1.5 rounded-full text-xs font-black uppercase bg-[#1c1a17] text-white hover:bg-[#d94823] transition shrink-0"
                   >
                     View

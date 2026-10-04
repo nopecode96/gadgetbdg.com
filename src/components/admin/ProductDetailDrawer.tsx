@@ -21,6 +21,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
+import { getProductDetailUrl } from "@/lib/product-slug";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { updateProductStatusAction, deleteProductAction } from "@/lib/actions/product-actions";
 
@@ -30,6 +31,7 @@ export interface ProductDetailItem {
   branchId?: string | null;
   name: string;
   title?: string;
+  slug?: string | null;
   category?: string;
   brand: string;
   price: number;
@@ -138,9 +140,7 @@ export function ProductDetailDrawer({
 
   const currentStatusConfig = STATUS_CONFIG[product.status] || STATUS_CONFIG.AVAILABLE;
   const productImages = product.images && product.images.length > 0 ? product.images : [];
-  const publicStoreUrl = storeSlug
-    ? `/${storeSlug}/product/${product.id}`
-    : `/product/${product.id}`;
+  const publicStoreUrl = getProductDetailUrl(storeSlug || "", product, !storeSlug);
 
   // Instant status toggle
   const handleQuickStatusChange = async (newStatus: "AVAILABLE" | "BOOKED" | "SOLD") => {

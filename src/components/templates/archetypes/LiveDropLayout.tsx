@@ -17,6 +17,7 @@ import {
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { trackWhatsAppClickAction } from "@/lib/actions";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface ArchetypeLayoutProps {
   store: StoreData;
@@ -150,7 +151,7 @@ export function LiveDropLayout({ store, products }: ArchetypeLayoutProps) {
                           {formatRupiah(p.price)}
                         </span>
                         <Link
-                          href={`/${store.slug}/product/${p.id}`}
+                          href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                           className="text-xs text-neutral-400 hover:text-white underline"
                         >
                           Cek Spek Lengkap →

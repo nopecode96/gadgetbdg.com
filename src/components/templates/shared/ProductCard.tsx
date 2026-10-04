@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
+import { getProductDetailUrl } from "@/lib/product-slug";
 import {
   Heart,
   ShieldCheck,
@@ -31,8 +32,9 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
   let cleanWa = (store.whatsapp || "").replace(/\D/g, "");
   if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
 
+  const detailUrl = getProductDetailUrl(store.slug, product, store.isTenantHost);
   const currentOrigin = typeof window !== "undefined" ? window.location.origin : "https://gadgetbdg.com";
-  const productUrl = `${currentOrigin}/${store.slug}/product/${product.id}`;
+  const productUrl = `${currentOrigin}${detailUrl}`;
   const waMessage = encodeURIComponent(
     `Halo ${store.name}, saya berminat dengan unit ini:\n\n` +
       `*${product.name}*\n` +
@@ -53,14 +55,6 @@ export function ProductCard({ product, store, themeConfig }: ProductCardProps) {
       console.error(err);
     }
   }
-
-  const isCustomDomain =
-    typeof window !== "undefined" &&
-    !window.location.pathname.startsWith(`/${store.slug}`) &&
-    !window.location.hostname.includes("localhost") &&
-    !window.location.hostname.includes("gadgetbdg.com");
-
-  const detailUrl = isCustomDomain ? `/product/${product.id}` : `/${store.slug}/product/${product.id}`;
 
   return (
     <div

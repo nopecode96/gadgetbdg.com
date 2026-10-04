@@ -19,6 +19,7 @@ import {
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { trackWhatsAppClickAction } from "@/lib/actions";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface ArchetypeLayoutProps {
   store: StoreData;
@@ -235,7 +236,7 @@ export function CyberHudLayout({ store, products }: ArchetypeLayoutProps) {
 
                       <div className="flex items-center gap-1.5">
                         <Link
-                          href={`/${store.slug}/product/${p.id}`}
+                          href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                           className="px-2.5 py-1.5 rounded bg-cyan-950 border border-cyan-700 text-cyan-300 hover:bg-cyan-900 text-xs font-bold transition"
                         >
                           SPEC
@@ -306,7 +307,7 @@ export function CyberHudLayout({ store, products }: ArchetypeLayoutProps) {
                     {p.ramRom} • {p.condition}
                   </div>
                   <Link
-                    href={`/${store.slug}/product/${p.id}`}
+                    href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                     className="block w-full text-center py-1.5 rounded bg-cyan-950 border border-cyan-800 hover:bg-cyan-900 text-cyan-300 text-xs font-bold uppercase transition"
                   >
                     VIEW HARDWARE DETAILS

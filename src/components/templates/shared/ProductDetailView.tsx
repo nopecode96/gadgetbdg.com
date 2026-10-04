@@ -25,6 +25,7 @@ import { StoreData, ProductData } from "./types";
 import { getTemplateConfig } from "@/lib/constants/templates";
 import { formatRupiah } from "@/lib/utils";
 import { trackWhatsAppClickAction } from "@/lib/actions";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface ProductDetailViewProps {
   store: StoreData;
@@ -64,7 +65,11 @@ export function ProductDetailView({
     ? `${store.name} (${product.branch.name})`
     : store.name;
 
-  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+  const canonicalPath = getProductDetailUrl(store.slug, product, store.isTenantHost);
+  const currentUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}${canonicalPath}`
+      : "";
 
   const spekDetails = [
     product.grade || product.condition ? `• Kondisi: ${product.grade || product.condition}` : "",
@@ -107,7 +112,8 @@ export function ProductDetailView({
 
   function handleCopyLink() {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
+      const urlToCopy = currentUrl || window.location.href;
+      navigator.clipboard.writeText(urlToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
@@ -121,7 +127,7 @@ export function ProductDetailView({
     }
   }
 
-  const returnLink = backUrl || `/${store.slug}`;
+  const returnLink = backUrl || (store.isTenantHost ? "/" : `/${store.slug}`);
 
   return (
     <div className={`min-h-screen ${colors.bgMain} flex flex-col font-sans transition-colors duration-300`}>

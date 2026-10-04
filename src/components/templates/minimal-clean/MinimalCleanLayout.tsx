@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
+import { getProductDetailUrl } from "@/lib/product-slug";
 import { StoreAboutView } from "../shared/StoreAboutView";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import {
@@ -377,7 +378,7 @@ export function MinimalCleanLayout({
 
                   <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-4 px-4 scroll-smooth">
                     {snapSliderProducts.map((p) => {
-                      const detailUrl = isMockup ? "#" : `/${store.slug}/product/${p.id}`;
+                      const detailUrl = isMockup ? "#" : getProductDetailUrl(store.slug, p, store.isTenantHost);
                       const buyWaUrl = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                         store.name
                       )},%20saya%20tertarik%20dengan%20unit%20*${encodeURIComponent(
@@ -485,7 +486,7 @@ export function MinimalCleanLayout({
 
                 <div className="grid grid-cols-2 gap-3">
                   {smartFilteredProducts.map((product) => {
-                    const detailUrl = isMockup ? "#" : `/${store.slug}/product/${product.id}`;
+                    const detailUrl = isMockup ? "#" : getProductDetailUrl(store.slug, product, store.isTenantHost);
                     const buyWaUrl = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                       store.name
                     )},%20saya%20tertarik%20dengan%20unit%20*${encodeURIComponent(
@@ -623,17 +624,9 @@ export function MinimalCleanLayout({
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
                 {smartFilteredProducts.map((p) => {
-                  const isCustomDomain =
-                    typeof window !== "undefined" &&
-                    !window.location.pathname.startsWith(`/${store.slug}`) &&
-                    !window.location.hostname.includes("localhost") &&
-                    !window.location.hostname.includes("gadgetbdg.com");
-
                   const detailUrl = isMockup
                     ? "#"
-                    : isCustomDomain
-                    ? `/product/${p.id}`
-                    : `/${store.slug}/product/${p.id}`;
+                    : getProductDetailUrl(store.slug, p, store.isTenantHost);
 
                   const buyWaUrl = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                     store.name

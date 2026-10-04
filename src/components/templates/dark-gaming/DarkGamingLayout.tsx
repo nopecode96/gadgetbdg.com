@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
+import { getProductDetailUrl } from "@/lib/product-slug";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { StoreAboutView } from "../shared/StoreAboutView";
 import {
@@ -408,7 +409,7 @@ export function DarkGamingLayout({
                     {snapSliderProducts.map((p) => {
                       const detailUrl = isMockup
                         ? "#"
-                        : `/${store.slug}/product/${p.id}`;
+                        : getProductDetailUrl(store.slug, p, store.isTenantHost);
                       const buyWaUrl = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                         store.name
                       )},%20saya%20tertarik%20unit%20*${encodeURIComponent(
@@ -525,7 +526,7 @@ export function DarkGamingLayout({
                   {gamingFilteredProducts.map((product) => {
                     const detailUrl = isMockup
                       ? "#"
-                      : `/${store.slug}/product/${product.id}`;
+                      : getProductDetailUrl(store.slug, product, store.isTenantHost);
                     const buyWaUrl = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                       store.name
                     )},%20saya%20tertarik%20unit%20*${encodeURIComponent(
@@ -673,17 +674,9 @@ export function DarkGamingLayout({
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
                   {gamingFilteredProducts.map((p) => {
-                    const isCustomDomain =
-                      typeof window !== "undefined" &&
-                      !window.location.pathname.startsWith(`/${store.slug}`) &&
-                      !window.location.hostname.includes("localhost") &&
-                      !window.location.hostname.includes("gadgetbdg.com");
-
                     const detailUrl = isMockup
                       ? "#"
-                      : isCustomDomain
-                      ? `/product/${p.id}`
-                      : `/${store.slug}/product/${p.id}`;
+                      : getProductDetailUrl(store.slug, p, store.isTenantHost);
 
                     const buyWaUrl = `https://wa.me/${cleanWa}?text=Halo%20${encodeURIComponent(
                       store.name

@@ -52,6 +52,7 @@ export interface StoreData {
   promoBannerCtaLink?: string | null;
   branches?: BranchData[];
   reviews?: ReviewData[];
+  isTenantHost?: boolean;
 }
 
 export interface ProductData {

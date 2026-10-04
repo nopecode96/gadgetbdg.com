@@ -17,6 +17,7 @@ import {
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { trackWhatsAppClickAction } from "@/lib/actions";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface ArchetypeLayoutProps {
   store: StoreData;
@@ -196,7 +197,7 @@ export function MidnightGoldLayout({ store, products }: ArchetypeLayoutProps) {
 
                     <div className="pt-3 border-t border-amber-950 flex items-center gap-2 font-sans">
                       <Link
-                        href={`/${store.slug}/product/${p.id}`}
+                        href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                         className="flex-1 py-2 rounded-xl text-center text-xs font-bold text-amber-200 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-800/60 transition"
                       >
                         Detail Unit
@@ -264,7 +265,7 @@ export function MidnightGoldLayout({ store, products }: ArchetypeLayoutProps) {
                     </div>
                   </div>
                   <Link
-                    href={`/${store.slug}/product/${p.id}`}
+                    href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                     className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-black hover:bg-amber-400 transition shrink-0"
                   >
                     Inspect

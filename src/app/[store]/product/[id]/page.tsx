@@ -1,7 +1,9 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { ProductDetailView } from "@/components/templates/shared/ProductDetailView";
+import { extractProductLookup, generateProductSlug, isTenantHost, getProductDetailUrl } from "@/lib/product-slug";
 
 interface ProductPageProps {
   params: Promise<{ store: string; id: string }> | { store: string; id: string };
@@ -22,7 +24,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       },
     },
     select: {
+      id: true,
       name: true,
+      slug: true,
       isActive: true,
       logoUrl: true,
       bannerUrl: true,
@@ -33,11 +37,29 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     return { title: "Toko Tidak Ditemukan - GadgetBdg" };
   }
 
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
+  const { rawId, shortId, slug } = extractProductLookup(productId);
+  const lookupOrConditions: any[] = [{ id: productId }];
+  if (rawId && rawId !== productId) {
+    lookupOrConditions.push({ id: rawId });
+  }
+  if (shortId) {
+    lookupOrConditions.push({ id: { startsWith: shortId } });
+  }
+  if (slug) {
+    lookupOrConditions.push({ slug });
+    lookupOrConditions.push({ slug: { equals: slug, mode: "insensitive" } });
+  }
+
+  const product = await prisma.product.findFirst({
+    where: {
+      storeId: store.id,
+      OR: lookupOrConditions,
+    },
     select: {
+      id: true,
       title: true,
       name: true,
+      slug: true,
       price: true,
       condition: true,
       grade: true,
@@ -60,9 +82,17 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       ? String(product.images[0])
       : store.bannerUrl || store.logoUrl || "/icons/icon-192.png";
 
+  const headersList = headers();
+  const host = headersList.get("host") || "";
+  const currentIsTenantHost = isTenantHost(host);
+  const canonicalUrl = getProductDetailUrl(store.slug, product, currentIsTenantHost);
+
   return {
     title,
     description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     icons: {
       icon: store.logoUrl || "/icon.png",
       apple: store.logoUrl || "/apple-icon.png",
@@ -70,6 +100,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     openGraph: {
       title,
       description,
+      url: canonicalUrl,
       images: [{ url: image, width: 1200, height: 630, alt: productName }],
       type: "website",
     },
@@ -104,10 +135,23 @@ export default async function StoreProductDetailPage({ params }: ProductPageProp
     notFound();
   }
 
+  const { rawId, shortId, slug } = extractProductLookup(productId);
+  const lookupOrConditions: any[] = [{ id: productId }];
+  if (rawId && rawId !== productId) {
+    lookupOrConditions.push({ id: rawId });
+  }
+  if (shortId) {
+    lookupOrConditions.push({ id: { startsWith: shortId } });
+  }
+  if (slug) {
+    lookupOrConditions.push({ slug });
+    lookupOrConditions.push({ slug: { equals: slug, mode: "insensitive" } });
+  }
+
   const rawProduct = await prisma.product.findFirst({
     where: {
-      id: productId,
       storeId: rawStore.id,
+      OR: lookupOrConditions,
     },
     include: {
       branch: {
@@ -132,6 +176,10 @@ export default async function StoreProductDetailPage({ params }: ProductPageProp
     notFound();
   }
 
+  const headersList = headers();
+  const host = headersList.get("host") || "";
+  const currentIsTenantHost = isTenantHost(host);
+
   // Sanitasi Plain Object untuk batas Client Component
   const storeData = {
     id: String(rawStore.id),
@@ -146,13 +194,19 @@ export default async function StoreProductDetailPage({ params }: ProductPageProp
     tier: String(rawStore.tier || "STARTER"),
     templateId: String(rawStore.templateId || "minimal-clean"),
     hasWatermark: Boolean(rawStore.hasWatermark || rawStore.tier !== "STARTER"),
+    isTenantHost: currentIsTenantHost,
   };
+
+  const canonicalSlug =
+    rawProduct.slug && rawProduct.slug.trim() !== ""
+      ? rawProduct.slug.trim()
+      : generateProductSlug(rawProduct.title || rawProduct.name || "unit", rawProduct.id);
 
   const productData = {
     id: String(rawProduct.id),
     name: String(rawProduct.title || rawProduct.name || ""),
     title: String(rawProduct.title || rawProduct.name || ""),
-    slug: String(rawProduct.slug || ""),
+    slug: canonicalSlug,
     category: String(rawProduct.category || "SMARTPHONE"),
     brand: String(rawProduct.brand),
     price: Number(rawProduct.price || 0),
@@ -192,11 +246,13 @@ export default async function StoreProductDetailPage({ params }: ProductPageProp
       : null,
   };
 
+  const backUrl = currentIsTenantHost ? "/" : `/${storeData.slug}`;
+
   return (
     <ProductDetailView
       store={storeData}
       product={productData}
-      backUrl={`/${storeData.slug}`}
+      backUrl={backUrl}
     />
   );
 }

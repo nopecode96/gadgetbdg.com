@@ -19,6 +19,7 @@ import { StoreData, ProductData, StoreTabType } from "./types";
 import { getTemplateConfig } from "@/lib/constants/templates";
 import { ProductCard } from "./ProductCard";
 import { formatRupiah } from "@/lib/utils";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface StoreHomeViewProps {
   store: StoreData;
@@ -346,7 +347,7 @@ export function StoreHomeView({
                   key={`spotlight-${item.id}`}
                   className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white dark:bg-slate-900 rounded-3xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col group"
                 >
-                  <a href={`/${store.slug}/product/${item.id}`} className="block">
+                  <a href={getProductDetailUrl(store.slug, item, store.isTenantHost)} className="block">
                     <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 flex items-center justify-center">
                       <img
                         src={item.images?.[0] || "/images/items/iphone-15-pro.png"}
@@ -374,7 +375,7 @@ export function StoreHomeView({
                   </a>
 
                   <div className="mt-2.5">
-                    <a href={`/${store.slug}/product/${item.id}`} className="block">
+                    <a href={getProductDetailUrl(store.slug, item, store.isTenantHost)} className="block">
                       <h4 className="font-bold text-sm text-slate-950 dark:text-white line-clamp-1 hover:underline">
                         {item.name}
                       </h4>

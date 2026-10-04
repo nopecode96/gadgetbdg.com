@@ -19,6 +19,7 @@ import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { StoreAboutView } from "../shared/StoreAboutView";
 import { trackWhatsAppClickAction } from "@/lib/actions";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface ArchetypeLayoutProps {
   store: StoreData;
@@ -176,7 +177,7 @@ export function KeynoteObsidianLayout({ store, products }: ArchetypeLayoutProps)
 
                         <div className="pt-2 flex items-center gap-2">
                           <Link
-                            href={`/${store.slug}/product/${featured.id}`}
+                            href={getProductDetailUrl(store.slug, featured, store.isTenantHost)}
                             className="px-4 py-2 rounded-xl text-xs font-bold bg-white text-black hover:bg-zinc-200 transition"
                           >
                             Detail Lengkap
@@ -246,7 +247,7 @@ export function KeynoteObsidianLayout({ store, products }: ArchetypeLayoutProps)
                     </div>
 
                     <Link
-                      href={`/${store.slug}/product/${p.id}`}
+                      href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                       className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition shrink-0"
                     >
                       <ArrowRight className="w-4 h-4" />
@@ -316,7 +317,7 @@ export function KeynoteObsidianLayout({ store, products }: ArchetypeLayoutProps)
 
                   <div className="flex items-center gap-1.5 shrink-0">
                     <Link
-                      href={`/${store.slug}/product/${p.id}`}
+                      href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                       className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white transition"
                     >
                       Detail

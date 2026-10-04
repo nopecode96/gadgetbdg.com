@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
+import { getProductDetailUrl } from "@/lib/product-slug";
 import { submitTradeInOfferAction } from "@/lib/actions/tradein-actions";
 import { submitStoreReviewAction } from "@/lib/actions/review-actions";
 import {
@@ -461,7 +462,7 @@ export function MidnightGoldLayout({
                         className={`${styles.goldCardInteractive} rounded-2xl p-3 flex flex-col justify-between group`}
                       >
                         <Link
-                          href={`/${store.slug}/product/${p.id}`}
+                          href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                           className="block relative space-y-2.5"
                         >
                           <div className="aspect-square rounded-xl bg-slate-950/80 p-2 flex items-center justify-center relative overflow-hidden border border-amber-500/15">
@@ -586,7 +587,7 @@ export function MidnightGoldLayout({
                       className={`${styles.goldCardInteractive} rounded-2xl p-3 flex flex-col justify-between group`}
                     >
                       <Link
-                        href={`/${store.slug}/product/${p.id}`}
+                        href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                         className="block relative space-y-2.5"
                       >
                         <div className="aspect-square rounded-xl bg-slate-950/80 p-2 flex items-center justify-center relative overflow-hidden border border-amber-500/15">

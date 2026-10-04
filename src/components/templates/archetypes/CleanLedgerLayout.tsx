@@ -19,6 +19,7 @@ import {
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { StoreTradeInView } from "../shared/StoreTradeInView";
 import { trackWhatsAppClickAction } from "@/lib/actions";
+import { getProductDetailUrl } from "@/lib/product-slug";
 
 interface ArchetypeLayoutProps {
   store: StoreData;
@@ -254,7 +255,7 @@ export function CleanLedgerLayout({ store, products }: ArchetypeLayoutProps) {
 
                       <div className="flex items-center gap-1.5">
                         <Link
-                          href={`/${store.slug}/product/${p.id}`}
+                          href={getProductDetailUrl(store.slug, p, store.isTenantHost)}
                           className="px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
                         >
                           Detail

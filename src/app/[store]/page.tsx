@@ -1,9 +1,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
 import { getTemplateConfig } from "@/lib/constants/templates";
 import { resolveHexColor } from "@/lib/pwa-utils";
+import { generateProductSlug, isTenantHost } from "@/lib/product-slug";
 
 interface StorePageProps {
   params: Promise<{ store: string }> | { store: string };
@@ -179,6 +181,10 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     ? (rawStore.reviews || []).filter((r) => r.branchId === matchedBranch.id || !r.branchId)
     : rawStore.reviews || [];
 
+  const headersList = headers();
+  const host = headersList.get("host") || "";
+  const currentIsTenantHost = isTenantHost(host);
+
   // Deep plain-object sanitization for Client Components boundary
   const storeData = {
     id: String(rawStore.id),
@@ -205,6 +211,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     promoBannerImage: rawStore.promoBannerImage ? String(rawStore.promoBannerImage) : null,
     promoBannerCtaText: rawStore.promoBannerCtaText ? String(rawStore.promoBannerCtaText) : null,
     promoBannerCtaLink: rawStore.promoBannerCtaLink ? String(rawStore.promoBannerCtaLink) : null,
+    isTenantHost: currentIsTenantHost,
     branches: (rawStore.branches || []).map((b) => ({
       id: String(b.id),
       name: String(b.name),
@@ -236,7 +243,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     id: String(p.id),
     name: String(p.title || p.name || ""),
     title: String(p.title || p.name || ""),
-    slug: String(p.slug || ""),
+    slug: p.slug && p.slug.trim() !== "" ? p.slug.trim() : generateProductSlug(p.title || p.name || "unit", p.id),
     category: String(p.category || "SMARTPHONE"),
     brand: String(p.brand),
     price: Number(p.price || 0),

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { StoreData, ProductData, StoreTabType } from "../shared/types";
 import { formatRupiah } from "@/lib/utils";
+import { getProductDetailUrl } from "@/lib/product-slug";
 import { submitTradeInOfferAction } from "@/lib/actions/tradein-actions";
 import { submitStoreReviewAction } from "@/lib/actions/review-actions";
 import {
@@ -450,7 +451,7 @@ export function CyberHudLayout({
                     {spotlightProducts.map((p) => {
                       const detailUrl = isMockup
                         ? "#"
-                        : `/${store.slug}/product/${p.id}`;
+                        : getProductDetailUrl(store.slug, p, store.isTenantHost);
                       const buyWaUrl = getProductWaUrl(p);
 
                       return (
@@ -564,16 +565,9 @@ export function CyberHudLayout({
                 <TradeInBanner onOpen={() => setIsTradeInModalOpen(true)} isDark={true} />
                 <div className="grid grid-cols-2 gap-3">
                 {filteredProducts.map((p) => {
-                  const isCustomDomain =
-                    typeof window !== "undefined" &&
-                    !window.location.pathname.startsWith(`/${store.slug}`) &&
-                    !window.location.hostname.includes("localhost") &&
-                    !window.location.hostname.includes("gadgetbdg.com");
                   const detailUrl = isMockup
                     ? "#"
-                    : isCustomDomain
-                    ? `/product/${p.id}`
-                    : `/${store.slug}/product/${p.id}`;
+                    : getProductDetailUrl(store.slug, p, store.isTenantHost);
                   const buyWaUrl = getProductWaUrl(p);
 
                   return (

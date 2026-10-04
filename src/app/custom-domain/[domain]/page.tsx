@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { TemplateRenderer } from "@/components/templates/TemplateRenderer";
 import { getTemplateConfig } from "@/lib/constants/templates";
 import { resolveHexColor } from "@/lib/pwa-utils";
+import { generateProductSlug } from "@/lib/product-slug";
 
 interface CustomDomainPageProps {
   params: Promise<{ domain: string }> | { domain: string };
@@ -192,6 +193,7 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
     promoBannerImage: rawStore.promoBannerImage ? String(rawStore.promoBannerImage) : null,
     promoBannerCtaText: rawStore.promoBannerCtaText ? String(rawStore.promoBannerCtaText) : null,
     promoBannerCtaLink: rawStore.promoBannerCtaLink ? String(rawStore.promoBannerCtaLink) : null,
+    isTenantHost: true,
     branches: (rawStore.branches || []).map((b) => ({
       id: String(b.id),
       name: String(b.name),
@@ -223,7 +225,7 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
     id: String(p.id),
     name: String(p.title || p.name || ""),
     title: String(p.title || p.name || ""),
-    slug: String(p.slug || ""),
+    slug: p.slug && p.slug.trim() !== "" ? p.slug.trim() : generateProductSlug(p.title || p.name || "unit", p.id),
     category: String(p.category || "SMARTPHONE"),
     brand: String(p.brand),
     price: Number(p.price || 0),

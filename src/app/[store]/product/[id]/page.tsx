@@ -63,6 +63,10 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return {
     title,
     description,
+    icons: {
+      icon: store.logoUrl || "/icon.png",
+      apple: store.logoUrl || "/apple-icon.png",
+    },
     openGraph: {
       title,
       description,

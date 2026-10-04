@@ -56,6 +56,10 @@ export async function GET(request: Request, context: RouteContext) {
   // Icons array with store logo or fallback
   const iconUrl = store.logoUrl || "/icons/icon-192.png";
   const icon512Url = store.logoUrl || "/icons/icon-512.png";
+  const isSvg = iconUrl.toLowerCase().endsWith(".svg");
+  const isJpg = iconUrl.toLowerCase().endsWith(".jpg") || iconUrl.toLowerCase().endsWith(".jpeg");
+  const isWebp = iconUrl.toLowerCase().endsWith(".webp");
+  const iconType = isSvg ? "image/svg+xml" : isJpg ? "image/jpeg" : isWebp ? "image/webp" : "image/png";
 
   const manifest = {
     name: store.name,
@@ -68,14 +72,14 @@ export async function GET(request: Request, context: RouteContext) {
     icons: [
       {
         src: iconUrl,
-        sizes: "192x192",
-        type: "image/png",
+        sizes: isSvg ? "any" : "192x192",
+        type: iconType,
         purpose: "any maskable",
       },
       {
         src: icon512Url,
-        sizes: "512x512",
-        type: "image/png",
+        sizes: isSvg ? "any" : "512x512",
+        type: iconType,
         purpose: "any maskable",
       },
     ],

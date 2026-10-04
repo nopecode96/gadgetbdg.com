@@ -61,8 +61,8 @@ export async function generateMetadata({ params }: CustomDomainPageProps): Promi
     manifest: "/manifest.webmanifest",
     themeColor: themeColor,
     icons: {
-      icon: store.logoUrl || "/icons/icon-192.png",
-      apple: store.logoUrl || "/icons/icon-192.png",
+      icon: store.logoUrl || "/icon.png",
+      apple: store.logoUrl || "/apple-icon.png",
     },
     appleWebApp: {
       capable: true,

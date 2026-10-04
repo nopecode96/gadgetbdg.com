@@ -194,6 +194,7 @@ async function main() {
       templateId: "minimal-clean",
       primaryColor: "#0f172a",
       desc: "Desain e-commerce mobile terang, modern & clean.",
+      logoUrl: "/demo-logos/demo1-logo.png",
     },
     {
       slug: "demo2",
@@ -350,6 +351,7 @@ async function main() {
         verifiedBadge: true,
         hasWatermark: true,
         primaryColor: demoConfig.primaryColor,
+        logoUrl: demoConfig.logoUrl || null,
         subscriptionExpiresAt: lifetimeExpiry,
       },
       create: {
@@ -368,6 +370,7 @@ async function main() {
         verifiedBadge: true,
         hasWatermark: true,
         primaryColor: demoConfig.primaryColor,
+        logoUrl: demoConfig.logoUrl || null,
         subscriptionStartedAt: new Date(),
         subscriptionExpiresAt: lifetimeExpiry,
       },

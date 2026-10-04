@@ -160,3 +160,218 @@ export async function updateTradeInStatusAction(offerId: string, newStatus: Trad
     return { success: false, error: error?.message || "Gagal mengubah status penawaran." };
   }
 }
+
+// ============================================================
+// 3. SUBMIT TRADE-IN / DIRECT BUYBACK LEAD (Fast & Streamlined)
+// ============================================================
+export interface SubmitTradeInLeadInput {
+  storeId: string;
+  type: "TRADE_IN" | "SELL_ONLY";
+  customerName: string;
+  customerPhone: string;
+  deviceModel: string;
+  condition: string;
+  completeness: string;
+  notes?: string;
+  pricingType: "APPRAISAL_REQUEST" | "EXPECTED_PRICE";
+  expectedPrice?: number | null;
+  targetProductId?: string | null;
+  targetProductTitle?: string | null;
+}
+
+export async function submitTradeInLeadAction(formData: FormData | SubmitTradeInLeadInput) {
+  try {
+    let data: SubmitTradeInLeadInput;
+
+    if (formData instanceof FormData) {
+      const storeId = (formData.get("storeId") as string)?.trim();
+      const type = ((formData.get("type") as string)?.trim() || "TRADE_IN") as "TRADE_IN" | "SELL_ONLY";
+      const customerName = (formData.get("customerName") as string)?.trim();
+      const customerPhone = (formData.get("customerPhone") as string || formData.get("customerWa") as string)?.trim();
+      const deviceModel = (formData.get("deviceModel") as string)?.trim();
+      const condition = (formData.get("condition") as string)?.trim() || "NORMAL";
+      const completeness = (formData.get("completeness") as string)?.trim() || "FULLSET";
+      const notes = (formData.get("notes") as string)?.trim() || undefined;
+      const pricingType = ((formData.get("pricingType") as string)?.trim() || "APPRAISAL_REQUEST") as "APPRAISAL_REQUEST" | "EXPECTED_PRICE";
+      const expectedPriceRaw = formData.get("expectedPrice");
+      const expectedPrice = expectedPriceRaw ? parseInt(String(expectedPriceRaw).replace(/\D/g, ""), 10) : null;
+      const targetProductId = (formData.get("targetProductId") as string)?.trim() || null;
+      const targetProductTitle = (formData.get("targetProductTitle") as string)?.trim() || null;
+
+      data = {
+        storeId,
+        type,
+        customerName,
+        customerPhone,
+        deviceModel,
+        condition,
+        completeness,
+        notes,
+        pricingType,
+        expectedPrice,
+        targetProductId,
+        targetProductTitle,
+      };
+    } else {
+      data = formData;
+    }
+
+    if (!data.storeId) {
+      return { success: false, error: "Identitas toko tidak valid." };
+    }
+    if (!data.customerName || !data.customerPhone || !data.deviceModel) {
+      return {
+        success: false,
+        error: "Mohon lengkapi Nama Anda, Nomor WhatsApp, dan Tipe HP Lama.",
+      };
+    }
+
+    const store = await prisma.store.findUnique({
+      where: { id: data.storeId },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        whatsapp: true,
+        isActive: true,
+      },
+    });
+
+    if (!store || !store.isActive) {
+      return { success: false, error: "Toko tidak ditemukan atau sedang nonaktif." };
+    }
+
+    let cleanCustomerPhone = data.customerPhone.replace(/\D/g, "");
+    if (cleanCustomerPhone.startsWith("0")) {
+      cleanCustomerPhone = "62" + cleanCustomerPhone.slice(1);
+    }
+
+    // Insert to PostgreSQL
+    const lead = await prisma.tradeInLead.create({
+      data: {
+        storeId: store.id,
+        type: data.type,
+        customerName: data.customerName,
+        customerPhone: cleanCustomerPhone,
+        deviceModel: data.deviceModel,
+        condition: data.condition,
+        completeness: data.completeness,
+        notes: data.notes || null,
+        pricingType: data.pricingType,
+        expectedPrice: data.expectedPrice && !isNaN(data.expectedPrice) ? data.expectedPrice : null,
+        targetProductId: data.targetProductId || null,
+        targetProductTitle: data.targetProductTitle || null,
+        status: "PENDING",
+      },
+    });
+
+    // Format clean WhatsApp redirection message
+    let cleanStoreWa = (store.whatsapp || "").replace(/\D/g, "");
+    if (cleanStoreWa.startsWith("0")) {
+      cleanStoreWa = "62" + cleanStoreWa.slice(1);
+    }
+
+    const typeLabel = data.type === "TRADE_IN" ? "TUKAR TAMBAH" : "JUAL HP LANGSUNG";
+    const pricingLabel =
+      data.pricingType === "EXPECTED_PRICE" && data.expectedPrice
+        ? `Target Harga Saya: ${formatRupiah(data.expectedPrice)}`
+        : "Minta Estimasi Taksiran Tertinggi Admin";
+
+    const conditionMap: Record<string, string> = {
+      LIKE_NEW: "Mulus Like New (99%)",
+      NORMAL: "Normal Pemakaian Wajar (95-98%)",
+      MINUS: "Ada Minus Fisik / Fungsi",
+    };
+    const completenessMap: Record<string, string> = {
+      FULLSET: "Fullset Box Original",
+      UNIT_ONLY: "Unit Only (Batangan)",
+    };
+
+    const conditionDisplay = conditionMap[data.condition] || data.condition;
+    const completenessDisplay = completenessMap[data.completeness] || data.completeness;
+
+    let waMessageText =
+      `Halo *${store.name}*, saya ingin mengajukan *${typeLabel}*:\n\n` +
+      `• *Nama Pengirim:* ${data.customerName}\n` +
+      `• *No WhatsApp:* ${cleanCustomerPhone}\n` +
+      `• *HP Lama:* ${data.deviceModel}\n` +
+      `• *Kondisi:* ${conditionDisplay}\n` +
+      `• *Kelengkapan:* ${completenessDisplay}\n`;
+
+    if (data.notes) {
+      waMessageText += `• *Catatan / Minus / BH:* ${data.notes}\n`;
+    }
+
+    waMessageText += `• *Ekspektasi Harga:* ${pricingLabel}\n`;
+
+    if (data.type === "TRADE_IN") {
+      waMessageText += `• *Mau Tukar ke:* ${data.targetProductTitle || "Mau Konsultasi Dulu"}\n`;
+    }
+
+    waMessageText += `\nMohon dicek dan dibantu taksirannya ya kak, siap COD / transaksi hari ini. Terima kasih!`;
+
+    const whatsappUrl = `https://wa.me/${cleanStoreWa}?text=${encodeURIComponent(waMessageText)}`;
+
+    if (store.slug) {
+      revalidatePath(`/${store.slug}`);
+    }
+    revalidatePath("/admin/trade-ins");
+    revalidatePath("/admin/trade-in");
+    revalidatePath("/admin");
+
+    return {
+      success: true,
+      leadId: lead.id,
+      whatsappNumber: cleanStoreWa,
+      whatsappUrl,
+    };
+  } catch (error: any) {
+    console.error("submitTradeInLeadAction error:", error);
+    return {
+      success: false,
+      error: error?.message || "Gagal memproses penawaran tukar tambah.",
+    };
+  }
+}
+
+export async function updateTradeInLeadStatusAction(
+  leadId: string,
+  newStatus: string,
+  adminNotes?: string
+) {
+  try {
+    const dataToUpdate: any = { status: newStatus };
+    if (adminNotes !== undefined) {
+      dataToUpdate.adminNotes = adminNotes;
+    }
+
+    const updated = await prisma.tradeInLead.update({
+      where: { id: leadId },
+      data: dataToUpdate,
+    });
+
+    revalidatePath("/admin/trade-ins");
+    revalidatePath("/admin/trade-in");
+    revalidatePath("/admin");
+    return { success: true, lead: updated };
+  } catch (error: any) {
+    console.error("updateTradeInLeadStatusAction error:", error);
+    return { success: false, error: error?.message || "Gagal mengubah status lead." };
+  }
+}
+
+export async function deleteTradeInLeadAction(leadId: string) {
+  try {
+    await prisma.tradeInLead.delete({
+      where: { id: leadId },
+    });
+
+    revalidatePath("/admin/trade-ins");
+    revalidatePath("/admin/trade-in");
+    return { success: true };
+  } catch (error: any) {
+    console.error("deleteTradeInLeadAction error:", error);
+    return { success: false, error: error?.message || "Gagal menghapus lead." };
+  }
+}
+

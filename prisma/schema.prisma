@@ -95,6 +95,7 @@ model Store {
   referredBySales  SalesPartner?         @relation("StoreSalesPartner", fields: [referredBySalesId], references: [id], onDelete: SetNull)
   products         Product[]
   tradeInOffers    TradeInOffer[]
+  tradeInLeads     TradeInLead[]
   users            User[]
   branches         Branch[]
   payments         SubscriptionPayment[]
@@ -243,6 +244,44 @@ model TradeInOffer {
 
   @@index([storeId])
   @@index([status])
+}
+
+model TradeInLead {
+  id                 String   @id @default(cuid())
+  storeId            String
+  store              Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Jenis Transaksi: "TRADE_IN" atau "SELL_ONLY"
+  type               String   @default("TRADE_IN")
+  
+  // Kontak Pengunjung (Aset Leads Toko)
+  customerName       String
+  customerPhone      String
+  
+  // Rincian HP Lama
+  deviceModel        String   // contoh: iPhone 12 128GB
+  condition          String   // LIKE_NEW, NORMAL, MINUS
+  completeness       String   // FULLSET, UNIT_ONLY
+  notes              String?  // Catatan minus / BH
+  
+  // Ekspektasi Harga: "APPRAISAL_REQUEST" atau "EXPECTED_PRICE"
+  pricingType        String   @default("APPRAISAL_REQUEST")
+  expectedPrice      Float?   // Nominal jika customer punya ekspektasi
+  
+  // Target Unit (jika TRADE_IN)
+  targetProductId    String?
+  targetProductTitle String?
+  
+  // Status Follow-up di Admin Toko: PENDING, FOLLOW_UP, DEAL, CANCELLED
+  status             String   @default("PENDING")
+  adminNotes         String?  // Catatan internal kasir/admin toko
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([status])
+  @@index([type])
 }
 
 model SubscriptionPayment {

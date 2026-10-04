@@ -317,225 +317,224 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
         </div>
       </section>
 
-      {/* ── 1.5. SECTION KOMPARASI TAJAM: MARKETPLACE HIJAU & ORANYE VS GADGETBDG ── */}
-      <section id="komparasi" className="relative overflow-hidden py-20 lg:py-28 bg-slate-950 text-slate-100 border-b border-slate-800">
+      {/* ── 1.5. SECTION KOMPARASI TAJAM: TOKO HIJAU & ORANGE VS WEB TOKO GADGETBDG ── */}
+      <section id="komparasi" className="relative overflow-hidden py-16 sm:py-20 lg:py-28 bg-slate-950 text-slate-100 border-b border-slate-800">
         {/* Glow ambient background */}
         <div className="absolute top-1/4 left-10 w-96 h-96 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
-          {/* Header Title & Badges */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12 sm:space-y-16">
+          {/* 1. Badge & Headline Utama */}
           <div className="text-center max-w-4xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-black tracking-widest uppercase shadow-sm">
-              <AlertTriangle className="w-4 h-4 text-rose-400 animate-pulse" />
-              <span>FAKTA MARGIN GADGET 2026</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs sm:text-sm font-black tracking-wide uppercase shadow-sm">
+              <span>⚠️ REALITA PEDAGANG GADGET 2026</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.2]">
-              Jual HP Untung Rp500 Ribu, Dipotong Admin Marketplace Rp550 Ribu.{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-amber-300">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.2]">
+              Jual HP Untung Rp500 Ribu, Dipotong Admin Rp550 Ribu.{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-400">
                 Anda Jualan Buat Siapa?
               </span>
             </h2>
 
             <p className="text-sm sm:text-base lg:text-lg text-slate-300 font-medium leading-relaxed max-w-3xl mx-auto">
-              Di Toko Hijau &amp; Oranye, makin laris toko Anda, makin bengkak potongan komisinya. Di{" "}
-              <span className="text-emerald-400 font-bold">GadgetBdg</span>, 100% uang pembeli langsung masuk rekening kasir Anda tanpa potongan sepeser pun.
+              Niat untung malah buntung di Toko Hijau &amp; Orange karena potongan admin makin liar. Mau lari ke FB Marketplace? Malah pusing ketemu penipu e-cash dan tukang PHP. Saatnya punya toko online sendiri!
             </p>
           </div>
 
-          {/* Tabel Komparasi 2 Kolom: Bakar Uang vs Cuan Utuh */}
-          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
-            {/* KOLOM A: Marketplace Toko Hijau & Oranye */}
-            <div className="rounded-3xl bg-slate-900/90 border-2 border-rose-500/30 p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 px-4 py-1.5 bg-rose-500/20 text-rose-300 text-[11px] font-black uppercase rounded-bl-2xl border-l border-b border-rose-500/30">
-                Bakar Uang &amp; Dikekang
+          {/* 2. Kartu Komparasi 2 Kolom Kontras Tajam */}
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 items-stretch">
+            {/* 🔴 KOLOM KIRI: JUALAN DI TEMPAT LAIN */}
+            <div className="rounded-3xl bg-slate-900/90 border-2 border-rose-500/30 p-5 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 px-3.5 py-1.5 bg-rose-500/20 text-rose-300 text-[11px] font-black uppercase rounded-bl-2xl border-l border-b border-rose-500/30">
+                Sering Tekor &amp; Capek Hati
               </div>
 
-              <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-5">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-rose-500/10 text-rose-400 text-xs font-black mb-2">
+              <div className="space-y-5">
+                <div className="border-b border-slate-800 pb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-rose-500/15 text-rose-400 text-xs font-black mb-2">
                     <TrendingDown className="w-4 h-4 text-rose-500" />
-                    <span>MARKETPLACE (TOKO HIJAU &amp; ORANYE)</span>
+                    <span>JUALAN DI TEMPAT LAIN</span>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white">
-                    Sistem Monopoli: Margin Tergerus Habis
+                  <h3 className="text-lg sm:text-2xl font-black text-white">
+                    Toko Hijau, Toko Orange &amp; FB Marketplace
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">
-                    Anda kerja keras banting tulang, keuntungan bersih dipangkas sepihak.
+                    Kerja banting tulang, uang terpotong banyak, dan pusing ngadepin penipu.
                   </p>
                 </div>
 
-                <div className="space-y-4 text-xs sm:text-sm">
+                <div className="space-y-3.5 text-xs sm:text-sm">
+                  {/* Poin 1: Toko Hijau & Orange */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20">
-                    <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">💸</span>
                     <div>
-                      <div className="font-black text-rose-200">Biaya Komisi Transaksi</div>
+                      <div className="font-black text-rose-200">Toko Hijau &amp; Toko Orange</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        <b className="text-rose-400">6.5% – 10%+ melayang per unit</b> (Admin fee + Biaya Gratis Ongkir Ekstra + Biaya Layanan platform).
+                        <b className="text-rose-400">Dipotong 6% – 10%+ per transaksi.</b> Jual iPhone 15 juta, duit Anda dipotong Rp1 juta lebih cuma buat biaya admin &amp; layanan!
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 2: Uang Ditahan */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20">
-                    <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">⏳</span>
                     <div>
-                      <div className="font-black text-rose-200">Pencairan Dana (Escrow)</div>
+                      <div className="font-black text-rose-200">Uang Ditahan Berhari-hari</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Uang ditahan 2–5 hari, rawan dibekukan sepihak saat pembeli mengajukan komplain fiktif atau retur sepihak.
+                        Dana nyangkut di aplikasi. Kalau ada pembeli nakal ngajuin komplain retur, uang bisa dibekukan sepihak.
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 3: Perang Banting Harga */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20">
-                    <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">🥊</span>
                     <div>
-                      <div className="font-black text-rose-200">Perang Harga Barbar</div>
+                      <div className="font-black text-rose-200">Perang Banting Harga</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Tepat di samping etalase unit Anda, algoritma menampilkan iklan toko sebelah yang banting harga lebih murah Rp20.000.
+                        Di bawah postingan Anda, aplikasi sengaja nampilin toko sebelah yang jual lebih murah Rp20 ribu.
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 4: FB Marketplace Sarang Penipu */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20">
-                    <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">🎭</span>
                     <div>
-                      <div className="font-black text-rose-200">Risiko Retur Unit &amp; IMEI</div>
+                      <div className="font-black text-rose-200">FB Marketplace Sarang Penipu</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Rawan ditipu pembeli nakal: retur barang ditukar batu, casing lecet, komponen kanibal, atau IMEI tiba-tiba diblokir.
+                        Penuh calon pembeli fiktif, modus bukti transfer palsu/e-cash, dan tukang PHP yang ngajak COD tapi ngilang.
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 5: Kontak Pembeli Hilang */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20">
-                    <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">❌</span>
                     <div>
-                      <div className="font-black text-rose-200">Data Pelanggan Disensor</div>
+                      <div className="font-black text-rose-200">Kontak Pembeli Hilang</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Kontak WhatsApp pembeli disensor habis. Anda dilarang keras transaksi luar &amp; mustahil melakukan retensi/repeat order.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20">
-                    <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-black text-rose-200">Biaya Iklan Harian</div>
-                      <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Dipaksa bakar uang pasang ads harian. Jika tidak bayar iklan, produk Anda tenggelam ke halaman belakang pencarian.
+                        Anda dilarang simpan nomor WA pelanggan. Pembeli selamanya jadi milik aplikasi, bukan langganan Anda.
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-rose-400 font-bold">
+              <div className="mt-5 pt-3.5 border-t border-slate-800 flex items-center justify-between text-xs text-rose-400 font-bold">
                 <span>⚠️ Hasil Akhir:</span>
-                <span>Capek packing, omset semu, untung dinikmati platform</span>
+                <span>Capek packing, untung tipis, rawan kena tipu</span>
               </div>
             </div>
 
-            {/* KOLOM B: Web Toko Mandiri GadgetBdg */}
-            <div className="rounded-3xl bg-slate-900/90 border-2 border-emerald-500/60 p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden ring-4 ring-emerald-500/10">
-              <div className="absolute top-0 right-0 px-4 py-1.5 bg-emerald-500 text-slate-950 text-[11px] font-black uppercase rounded-bl-2xl shadow-md">
+            {/* 🟢 KOLOM KANAN: JUALAN DI WEB TOKO SENDIRI (GADGETBDG) */}
+            <div className="rounded-3xl bg-slate-900/90 border-2 border-emerald-500/60 p-5 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden ring-4 ring-emerald-500/10">
+              <div className="absolute top-0 right-0 px-3.5 py-1.5 bg-emerald-500 text-slate-950 text-[11px] font-black uppercase rounded-bl-2xl shadow-md">
                 100% Cuan Utuh Masuk Kantong
               </div>
 
-              <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-5">
+              <div className="space-y-5">
+                <div className="border-b border-slate-800 pb-4">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 text-xs font-black mb-2">
                     <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span>WEB TOKO MANDIRI GADGETBDG</span>
+                    <span>JUALAN DI WEB TOKO SENDIRI</span>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white">
-                    Kedaulatan Toko: Keuntungan 100% Milik Anda
+                  <h3 className="text-lg sm:text-2xl font-black text-white">
+                    Platform Mandiri GadgetBdg
                   </h3>
                   <p className="text-xs sm:text-sm text-emerald-300 font-medium mt-1">
-                    Kendali penuh di tangan Anda. Tanpa potongan, tanpa perantara, tanpa perang harga.
+                    Cuan utuh, tanpa perantara, bebas potongan, dan kendali 100% di tangan Anda.
                   </p>
                 </div>
 
-                <div className="space-y-4 text-xs sm:text-sm">
+                <div className="space-y-3.5 text-xs sm:text-sm">
+                  {/* Poin 1: Potongan 0% */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">💰</span>
                     <div>
-                      <div className="font-black text-emerald-200">Potongan Transaksi: 0% (Nol Persen)</div>
+                      <div className="font-black text-emerald-200">Potongan 0% (Nol Rupiah)</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        <b className="text-emerald-400">Komisi 0% mutlak.</b> Mau laku 10 unit atau 100 unit per bulan, keuntungan 100% langsung masuk kantong Anda.
+                        Jual Rp10 juta, uang masuk rekening utuh Rp10 juta. <b className="text-emerald-400">Tidak ada potongan admin sepeser pun.</b>
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 2: Duit Langsung Cair */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">⚡</span>
                     <div>
-                      <div className="font-black text-emerald-200">Pencairan Dana Instan</div>
+                      <div className="font-black text-emerald-200">Duit Langsung Cair Detik Itu Juga</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Uang diterima <b className="text-emerald-400">detik itu juga</b> via Cash COD fisik, QRIS, atau Transfer langsung ke Rekening Toko Anda sendiri.
+                        Pembeli transfer langsung ke rekening toko Anda atau bayar cash pas COD di konter. Uang langsung aman di kasir.
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 3: 100% Panggung Milik Anda */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">👑</span>
                     <div>
-                      <div className="font-black text-emerald-200">Panggung 100% Milik Anda</div>
+                      <div className="font-black text-emerald-200">100% Panggung Milik Anda</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Nol iklan kompetitor! Pengunjung yang membuka web tokomu hanya melihat stok Anda tanpa digoda lapak toko sebelah.
+                        Tidak ada iklan kompetitor. Pembeli cuma fokus lihat stok barang Anda tanpa distraksi banting harga toko sebelah.
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 4: Bebas Penipu & Terpercaya */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">🛡️</span>
                     <div>
-                      <div className="font-black text-emerald-200">Transaksi Transparan &amp; Aman</div>
+                      <div className="font-black text-emerald-200">Bebas Penipu &amp; Terpercaya</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Deal langsung via WhatsApp resmi toko. Prioritaskan janjian COD atau cek unit langsung di meja konter Anda.
+                        Link katalog toko Anda terlihat profesional dan terverifikasi, bikin pembeli serius langsung percaya transfer DP atau mampir ke konter.
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 5: Data Pelanggan 100% Milik Anda */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">📱</span>
                     <div>
-                      <div className="font-black text-emerald-200">Data Pelanggan 100% Aset Anda</div>
+                      <div className="font-black text-emerald-200">Data Pelanggan 100% Milik Anda</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Nomor WhatsApp pembeli tersimpan rapi sebagai aset abadi toko Anda untuk penawaran repeat order &amp; promo broadcast.
+                        Nomor WhatsApp pembeli langsung masuk ke kontak HP kasir. Mudah diajak repeat order atau tukar tambah kapan saja.
                       </p>
                     </div>
                   </div>
 
+                  {/* Poin 6: Biaya Ringan & Pasti */}
                   <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-lg shrink-0 mt-0.5">☕</span>
                     <div>
-                      <div className="font-black text-emerald-200">Biaya Langganan Flat Transparan</div>
+                      <div className="font-black text-emerald-200">Biaya Ringan &amp; Pasti</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Mulai Rp250.000/bulan flat tanpa biaya tersembunyi. Biaya ini <b className="text-emerald-400">cukup ditutup dari untung 1 unit HP termurah</b> Anda!
+                        Cuma sewa sistem flat mulai Rp250.000/bulan. <b className="text-emerald-400">Cukup dari keuntungan jual 1 unit HP bekas sebulan.</b>
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-emerald-400 font-bold">
+              <div className="mt-5 pt-3.5 border-t border-slate-800 flex items-center justify-between text-xs text-emerald-400 font-bold">
                 <span>⚡ Hasil Nyata:</span>
-                <span>Brand toko makin kuat, margin aman, cashflow kasir sehat</span>
+                <span>Brand toko kuat, pembeli loyal, uang langsung aman di kasir</span>
               </div>
             </div>
           </div>
 
-          {/* 3. SIMULASI KASUS RIIL (KALKULATOR RINGKAS PENGHEMATAN) */}
-          <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/60 border-2 border-blue-500/40 p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-            <div className="max-w-4xl mx-auto space-y-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+          {/* 3. KARTU KALKULATOR PENGHEMATAN (BAHASA SEDERHANA) */}
+          <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/70 border-2 border-blue-500/40 p-5 sm:p-10 shadow-2xl relative overflow-hidden">
+            <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-black mb-2">
                     <Calculator className="w-4 h-4 text-blue-400" />
-                    <span>SIMULASI HITUNG PENGHEMATAN BULANAN</span>
+                    <span>KALKULATOR MARGIN PEDAGANG</span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white">
-                    Berapa Juta Rupiah yang Selamat Masuk Kantong Anda?
+                  <h3 className="text-xl sm:text-3xl font-black text-white">
+                    Hitungan Waras: Jual {calcUnits} Unit HP Sebulan (Omset {formatRupiah(calcOmset)})
                   </h3>
                 </div>
 
@@ -557,83 +556,71 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
                 </div>
               </div>
 
-              {/* Komputasi Konkret */}
-              <div className="grid sm:grid-cols-3 gap-6">
-                <div className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Volume Penjualan &amp; Omset
+              {/* Komputasi 2 Box Kontras: Box Merah vs Box Hijau */}
+              <div className="grid sm:grid-cols-2 gap-5 sm:gap-6">
+                {/* Box Merah: Potongan Toko Hijau / Orange */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-rose-950/30 border-2 border-rose-500/30 space-y-2">
+                  <div className="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>💸</span>
+                    <span>Potongan Toko Hijau / Orange:</span>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black text-white mt-1">
-                    {formatRupiah(calcOmset)}
+                  <div className="text-2xl sm:text-4xl font-black text-rose-400">
+                    Melayang ±{formatRupiah(calcMarketplaceFee)}
                   </div>
-                  <p className="text-xs text-slate-400 mt-2">
-                    Estimasi penjualan {calcUnits} unit HP (asumsi rata-rata Rp5.000.000/unit)
+                  <p className="text-xs text-rose-200/80 leading-relaxed font-medium">
+                    Duit amblas cuma buat bayar biaya admin, gratis ongkir ekstra &amp; komisi aplikasi yang makin naik terus.
                   </p>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-rose-950/30 border border-rose-500/30">
-                  <div className="text-xs font-bold text-rose-400 uppercase tracking-wider">
-                    Potongan Marketplace (~7%)
+                {/* Box Hijau: Langganan GadgetBdg */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-emerald-950/40 border-2 border-emerald-500/50 space-y-2">
+                  <div className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>💰</span>
+                    <span>Langganan GadgetBdg (Paket PRO):</span>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black text-rose-400 mt-1">
-                    -{formatRupiah(calcMarketplaceFee)}
+                  <div className="text-2xl sm:text-4xl font-black text-emerald-400">
+                    Cuma {formatRupiah(calcGadgetBdgFee)} Flat
                   </div>
-                  <p className="text-xs text-rose-300/80 mt-2">
-                    Melayang cuma-cuma ke biaya admin, fee gratis ongkir &amp; komisi platform
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-emerald-950/40 border-2 border-emerald-500/50">
-                  <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                    Biaya Langganan GadgetBdg
-                  </div>
-                  <div className="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">
-                    {formatRupiah(calcGadgetBdgFee)}
-                  </div>
-                  <p className="text-xs text-emerald-300 mt-2">
-                    Flat paket PRO sebulan • 0% potongan transaksi
+                  <p className="text-xs text-emerald-200/80 leading-relaxed font-medium">
+                    Biaya sewa sistem flat per bulan. Bebas jual berapa ratus unit pun, keuntungan 100% tetap masuk kantong Anda.
                   </p>
                 </div>
               </div>
 
-              {/* Banner Total Penghematan */}
-              <div className="p-6 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="space-y-1 text-center sm:text-left">
-                  <div className="text-xs font-black text-emerald-400 uppercase tracking-widest">
-                    💰 TOTAL MARGIN BERSIH YANG ANDA HEMAT:
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                    +{formatRupiah(calcSavings)}{" "}
-                    <span className="text-base sm:text-lg font-bold text-emerald-400">/ bulan</span>
+              {/* Pesan Bawah Banner Penghematan */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="space-y-1.5 text-center sm:text-left">
+                  <div className="text-base sm:text-xl font-black text-emerald-300">
+                    👉 Setiap bulan Anda hemat {formatRupiah(calcSavings)}!
                   </div>
                   <p className="text-xs sm:text-sm text-slate-300 font-medium">
-                    Uang sebesar <b>{formatRupiah(calcSavings)}</b> ini cukup untuk bayar sewa konter fisik atau nambah stok 1 unit HP second siap jual!
+                    Duitnya bisa dipakai bayar sewa konter atau nambah stok unit HP baru.
                   </p>
                 </div>
 
                 <button
                   onClick={() => handleOpenRegister("PRO")}
-                  className="px-6 py-3.5 rounded-xl font-black text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-xl shadow-emerald-500/20 transition text-sm shrink-0 flex items-center gap-2"
+                  className="px-6 py-3.5 rounded-xl font-black text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-xl shadow-emerald-500/20 transition text-xs sm:text-sm shrink-0 flex items-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>Amankan Margin Saya</span>
+                  <span>Amankan Duit Saya</span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* 4. TOMBOL CALL TO ACTION (CTA) UTAMA SECTION */}
-          <div className="text-center space-y-4 pt-4">
+          {/* 4. TOMBOL AKSI (CTA) */}
+          <div className="text-center space-y-3 pt-2">
             <button
               onClick={() => handleOpenRegister("PRO")}
-              className="inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-5 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-500 shadow-2xl shadow-blue-600/30 transition text-base sm:text-lg hover:scale-[1.02] transform duration-200"
+              className="inline-flex items-center justify-center gap-3 px-7 sm:px-10 py-4 sm:py-5 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-500 shadow-2xl shadow-blue-600/30 transition text-base sm:text-lg hover:scale-[1.02] transform duration-200"
             >
               <Sparkles className="w-5 h-5 text-amber-300" />
-              <span>Buka Web Toko Saya Sekarang (Bebas Potongan 0%)</span>
+              <span>Bikin Web Toko Saya Sekarang (Bebas Potongan 0%)</span>
               <ArrowRight className="w-5 h-5" />
             </button>
             <p className="text-xs sm:text-sm text-slate-400 font-bold tracking-wide">
-              ✓ Setup cepat 5 menit • Tanpa syarat ribet • Langsung terima order WA
+              Setup beres dalam 5 menit • Langsung terima orderan ke WhatsApp kasir
             </p>
           </div>
         </div>

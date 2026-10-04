@@ -87,9 +87,9 @@ model Store {
   // Konfigurasi Hero Banner Promosi Beranda
   promoBannerActive   Boolean   @default(true)
   promoBannerBadge    String?   @default("PROMO SPESIAL")
-  promoBannerTitle    String?   @default("Diskon Unit Pilihan Siap COD")
-  promoBannerSubtitle String?   @default("Garansi replace unit dan jaminan IMEI aman seumur hidup.")
-  promoBannerImage    String?   // File upload atau URL gambar unit banner
+  promoBannerTitle    String?   @default("Diskon Unit Flagship Siap COD")
+  promoBannerSubtitle String?   @default("Lolos uji kelayakan, garansi replace unit dan jaminan IMEI aman seumur hidup.")
+  promoBannerImage    String?   // URL foto unit/banner promosi
   promoBannerCtaText  String?   @default("Lihat Promo")
   promoBannerCtaLink  String?   @default("/katalog")
   subscriptionStartedAt DateTime? @default(now())

@@ -155,10 +155,7 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
             </span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-7 text-sm font-bold text-slate-600">
-            <a href="#komparasi" className="text-rose-600 hover:text-rose-700 transition-colors font-black flex items-center gap-1">
-              <span>Bakar Uang vs Cuan</span>
-            </a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
             <a href="#fitur" className="hover:text-blue-600 transition-colors">
               4 Solusi Konter
             </a>
@@ -267,48 +264,48 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
             {/* Kolom Kanan: Visual Perbandingan Konkret */}
             <div className="lg:col-span-5">
               <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200/90 relative">
-                <div className="text-center pb-4 mb-4 border-b border-slate-100">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                    Kenyataan Pedagang HP Second
+                <div className="text-center pb-3.5 mb-3.5 border-b border-slate-100">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+                    REALITA JUALAN HP BEKAS 2026
                   </span>
-                  <h3 className="text-base font-black text-slate-900 mt-0.5">
-                    Mengapa Harus Pindah ke {settings.platformName}?
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1.5">
+                    Kenapa Harus Punya Web Toko Sendiri?
                   </h3>
                 </div>
 
-                <div className="space-y-4">
-                  {/* Sisi Merah: Cara Lama */}
-                  <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-2">
+                <div className="space-y-3.5">
+                  {/* KOTAK MERAH */}
+                  <div className="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 space-y-2">
                     <div className="flex items-center gap-2 text-rose-700 font-black text-xs uppercase tracking-wide">
                       <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                      <span>Cara Lama yang Melelahkan</span>
+                      <span>JUALAN DI MARKETPLACE &amp; FB</span>
                     </div>
-                    <ul className="text-xs text-rose-950/80 space-y-1.5 pl-5 list-disc font-medium leading-relaxed">
-                      <li>Broadcast list teks WA panjang, calon buyer malas baca &amp; pusing.</li>
-                      <li>Nanya berulang kali: <i>"Minus apa bang? BH berapa? IMEI aman gak?"</i></li>
-                      <li>Foto etalase motret sendiri sering dicuri olshop bodong untuk nipu.</li>
-                      <li>Penaksiran tukar tambah manual lewat chat, berantakan &amp; rawan lupa.</li>
+                    <ul className="text-xs text-rose-950 space-y-1.5 pl-4 list-disc font-medium leading-relaxed">
+                      <li>Toko Hijau &amp; Orange potong komisi 6% - 10%+. Jual iPhone Rp15 Juta, kepotong Rp1 Juta lebih cuma buat biaya admin!</li>
+                      <li>Uang hasil penjualan ditahan berhari-hari, rawan dibekukan sepihak kalau pembeli nakal ajukan komplain retur.</li>
+                      <li>FB Marketplace penuh penipu bukti transfer palsu (e-cash), akun kloningan, dan tukang PHP ngajak COD lalu kabur.</li>
+                      <li>Di bawah postingan Anda, aplikasi sengaja memunculkan unit toko sebelah yang jual lebih murah Rp20 ribu.</li>
                     </ul>
                   </div>
 
-                  {/* Sisi Hijau: Pakai Platform */}
+                  {/* KOTAK HIJAU */}
                   <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 space-y-2 shadow-xs">
                     <div className="flex items-center gap-2 text-emerald-800 font-black text-xs uppercase tracking-wide">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Pakai Toko Online {settings.platformName}</span>
+                      <span>PAKAI WEB TOKO SENDIRI (GADGETBDG)</span>
                     </div>
-                    <ul className="text-xs text-emerald-950 space-y-1.5 pl-5 list-disc font-bold leading-relaxed">
-                      <li>Web profesional dengan logo tokomu sendiri, link siap ditaruh di bio IG/WA.</li>
-                      <li>Kartu spesifikasi transparan: BH, IMEI, fisik, minus, langsung jelas.</li>
-                      <li>Watermark otomatis logo tokomu: foto 100% aman anti-bajak.</li>
-                      <li>Formulir taksiran Trade-In otomatis, draf spek langsung masuk ke WhatsApp toko.</li>
+                    <ul className="text-xs text-emerald-950 space-y-1.5 pl-4 list-disc font-bold leading-relaxed">
+                      <li>Bebas potongan transaksi 0%! Uang penjualan 100% utuh masuk ke rekening atau kasir toko Anda.</li>
+                      <li>Duit langsung cair detik itu juga via Cash COD atau transfer bank langsung saat cek fisik unit.</li>
+                      <li>Toko profesional dengan link &amp; logo sendiri di bio IG/WA, pembeli langsung percaya tanpa drama PHP.</li>
+                      <li>100% panggung milik Anda sendiri: tidak ada perang banting harga atau iklan toko sebelah di etalase Anda.</li>
                     </ul>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 text-center">
-                  <span className="text-[11px] text-slate-500 font-bold">
-                    ⚡ Dipercaya oleh pedagang konter gadget {settings.cityCoverage}
+                <div className="mt-3.5 pt-3 border-t border-slate-100 text-center">
+                  <span className="text-[11px] sm:text-xs text-emerald-700 font-black">
+                    ⚡ 100% Profit Milik Anda • Solusi Pedagang Gadget Mandiri
                   </span>
                 </div>
               </div>

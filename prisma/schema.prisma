@@ -111,17 +111,22 @@ model Store {
 }
 
 model StoreReview {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   storeId       String
+  branchId      String?   // Null jika ulasan toko umum/pusat, terisi jika ulasan gerai cabang
   customerName  String
-  rating        Int      @default(5)
+  rating        Int       @default(5)
   comment       String
   purchasedUnit String?
-  isApproved    Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  isApproved    Boolean   @default(true)
+  reviewDate    DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  store         Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  branch        Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
   @@index([storeId])
+  @@index([branchId])
 }
 
 model Branch {
@@ -148,6 +153,7 @@ model Branch {
   products        Product[]     // Unit HP yang dialokasikan di cabang ini
   users           User[]        // Staf/Kasir yang bertugas di cabang ini
   tradeIns        TradeInLead[] // Leads tukar tambah yang dialokasikan ke cabang ini
+  reviews         StoreReview[] // Relasi ulasan khusus cabang ini
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt

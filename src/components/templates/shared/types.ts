@@ -19,6 +19,9 @@ export interface ReviewData {
   rating: number;
   comment: string;
   purchasedUnit?: string | null;
+  branchId?: string | null;
+  branchName?: string | null;
+  reviewDate?: string;
   createdAt: string;
 }
 
@@ -30,6 +33,7 @@ export interface StoreData {
   address: string | null;
   storeImage?: string | null;
   mapsUrl: string | null;
+  googleReviewUrl?: string | null;
   operationalHours?: string | null;
   warrantyPolicy?: string | null;
   verifiedBadge?: boolean;

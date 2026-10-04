@@ -402,26 +402,49 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
                       <Star key={i} className="w-3 h-3 fill-current" />
                     ))}
                   </div>
-                  {rev.purchasedUnit && (
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md truncate max-w-[140px] ${
-                      isDark
-                        ? "bg-emerald-900/40 text-emerald-300 border border-emerald-800/60"
-                        : "bg-blue-50 text-blue-700 border border-blue-200"
-                    }`}>
-                      Unit: {rev.purchasedUnit}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {rev.branchName && (
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md truncate max-w-[120px] ${
+                        isDark
+                          ? "bg-purple-900/40 text-purple-300 border border-purple-800/60"
+                          : "bg-purple-50 text-purple-700 border border-purple-200"
+                      }`}>
+                        📍 {rev.branchName}
+                      </span>
+                    )}
+                    {rev.purchasedUnit && (
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md truncate max-w-[140px] ${
+                        isDark
+                          ? "bg-emerald-900/40 text-emerald-300 border border-emerald-800/60"
+                          : "bg-blue-50 text-blue-700 border border-blue-200"
+                      }`}>
+                        Unit: {rev.purchasedUnit}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <p className={`text-xs italic leading-relaxed ${
                   isDark ? "text-slate-200" : "text-slate-700"
                 }`}>
                   &ldquo;{rev.comment}&rdquo;
                 </p>
-                <span className={`text-[10px] block mt-1.5 font-bold ${
-                  isDark ? "text-slate-400" : "text-slate-500"
-                }`}>
-                  — {rev.customerName}
-                </span>
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className={`text-[10px] font-bold ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}>
+                    — {rev.customerName}
+                  </span>
+                  {rev.reviewDate && (
+                    <span className={`text-[9px] ${
+                      isDark ? "text-slate-500" : "text-slate-400"
+                    }`}>
+                      {new Date(rev.reviewDate).toLocaleDateString("id-ID", {
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -446,6 +469,25 @@ export function StoreAboutView({ store, theme, isMockup = false }: StoreAboutVie
                 <span>Tulis Ulasan Pembeli Sekarang</span>
               </button>
             )}
+          </div>
+        )}
+
+        {/* Tombol Beri Ulasan di Google Bisnis */}
+        {store.googleReviewUrl && (
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+            <a
+              href={isMockup ? "#" : store.googleReviewUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => {
+                if (isMockup) e.preventDefault();
+              }}
+              className="w-full py-2.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
+            >
+              <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+              <span>Beri Ulasan di Google Bisnis</span>
+              <ExternalLink className="w-3 h-3 text-amber-500" />
+            </a>
           </div>
         )}
       </div>

@@ -19,6 +19,7 @@ import {
   Sparkles,
   CreditCard,
   Lock,
+  Star,
 } from "lucide-react";
 import { useAdminSidebar } from "./AdminSidebarContext";
 import { merchantLogoutAction } from "@/lib/actions/login-actions";
@@ -80,6 +81,12 @@ export function AdminSidebar({
       title: "QR Meja & Standee",
       href: "/admin/marketing/qr-stands",
       icon: QrCode,
+    },
+    {
+      title: "Ulasan & Testimoni",
+      href: "/admin/reviews",
+      icon: Star,
+      isLocked: isStarter,
     },
     ...(isOwner
       ? [

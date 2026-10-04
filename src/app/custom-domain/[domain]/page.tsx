@@ -106,6 +106,11 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
       },
       reviews: {
         where: { isApproved: true },
+        include: {
+          branch: {
+            select: { id: true, name: true, slug: true },
+          },
+        },
         orderBy: { createdAt: "desc" },
         take: 50,
       },
@@ -156,6 +161,11 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
     ? (rawStore.products || []).filter((p) => p.branchId === matchedBranch.id)
     : rawStore.products || [];
 
+  // Filter reviews: If branch mode, load specific branch reviews + general reviews (branchId: null)
+  const filteredRawReviews = matchedBranch
+    ? (rawStore.reviews || []).filter((r) => r.branchId === matchedBranch.id || !r.branchId)
+    : rawStore.reviews || [];
+
   // Deep plain-object sanitization for Client Components boundary
   const storeData = {
     id: String(rawStore.id),
@@ -184,14 +194,20 @@ export default async function CustomDomainPage({ params, searchParams }: CustomD
       phone: b.phone ? String(b.phone) : null,
       mapsUrl: b.googleMapsUrl || b.mapsUrl ? String(b.googleMapsUrl || b.mapsUrl) : null,
       image: b.image ? String(b.image) : null,
+      googleReviewUrl: b.googleReviewUrl ? String(b.googleReviewUrl) : null,
+      businessHours: b.businessHours ? String(b.businessHours) : null,
+      warrantyInfo: b.warrantyInfo ? String(b.warrantyInfo) : null,
       isMain: Boolean(b.isMain),
     })),
-    reviews: (rawStore.reviews || []).map((r) => ({
+    reviews: (filteredRawReviews || []).map((r) => ({
       id: String(r.id),
       customerName: String(r.customerName),
       rating: Number(r.rating || 5),
       comment: String(r.comment),
       purchasedUnit: r.purchasedUnit ? String(r.purchasedUnit) : null,
+      branchId: r.branchId ? String(r.branchId) : null,
+      branchName: r.branch?.name ? String(r.branch.name) : null,
+      reviewDate: (r.reviewDate || r.createdAt).toISOString(),
       createdAt: r.createdAt.toISOString(),
     })),
   };

@@ -57,18 +57,38 @@ export default async function AdminDashboardPage() {
   const ctx = await requireStoreOwnerOrStaff();
   const { store, limits, usage, permissions } = ctx;
 
-  const [products, pendingLeadsCount, totalLeadsCount] = await Promise.all([
+  // Query metrics and data from PostgreSQL
+  const [
+    products,
+    pendingLeads,
+    totalLeads,
+    totalReviewsCount,
+    recentTradeIns,
+  ] = await Promise.all([
     prisma.product.findMany({
       where: { storeId: store.id },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.tradeInOffer.count({
-      where: { storeId: store.id, status: "PENDING" },
-    }),
-    prisma.tradeInOffer.count({
+    Promise.all([
+      prisma.tradeInLead.count({ where: { storeId: store.id, status: "PENDING" } }),
+      prisma.tradeInOffer.count({ where: { storeId: store.id, status: "PENDING" } }),
+    ]).then(([leads, offers]) => leads + offers),
+    Promise.all([
+      prisma.tradeInLead.count({ where: { storeId: store.id } }),
+      prisma.tradeInOffer.count({ where: { storeId: store.id } }),
+    ]).then(([leads, offers]) => leads + offers),
+    prisma.storeReview.count({
       where: { storeId: store.id },
     }),
+    prisma.tradeInLead.findMany({
+      where: { storeId: store.id },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
   ]);
+
+  const pendingLeadsCount = pendingLeads;
+  const totalLeadsCount = totalLeads;
 
   const availableCount = products.filter((p) => p.status === "AVAILABLE").length;
   const bookedCount = products.filter((p) => p.status === "BOOKED").length;
@@ -312,6 +332,83 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Section: Leads Tukar Tambah & Ulasan Terbaru dari Database PostgreSQL */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Card 1: Leads Terbaru */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-purple-600" />
+              <h2 className="font-bold text-sm text-slate-900">Leads Tukar Tambah Terbaru</h2>
+            </div>
+            <Link
+              href="/admin/trade-ins"
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            >
+              <span>Lihat Semua ({totalLeadsCount})</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
+
+          {recentTradeIns.length === 0 ? (
+            <div className="p-6 text-center text-xs text-slate-400">
+              Belum ada pengajuan tukar tambah atau jual HP masuk.
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 text-xs">
+              {recentTradeIns.map((lead) => (
+                <div key={lead.id} className="py-2.5 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 truncate">{lead.customerName}</div>
+                    <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                      {lead.deviceModel} • <span className="text-purple-700 font-medium">{lead.condition}</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${
+                      lead.status === "PENDING"
+                        ? "bg-amber-50 text-amber-700 border border-amber-200"
+                        : lead.status === "DEAL"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {lead.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Card 2: Ringkasan Ulasan Pembeli */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <h2 className="font-bold text-sm text-slate-900">Reputasi &amp; Ulasan Pembeli</h2>
+            </div>
+            <Link
+              href="/admin/reviews"
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            >
+              <span>Kelola Ulasan ({totalReviewsCount})</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+            <div className="flex items-baseline justify-between">
+              <span className="text-xs text-slate-600 font-medium">Total Testimoni Tersimpan:</span>
+              <span className="text-sm font-black text-slate-900">{totalReviewsCount} Ulasan</span>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Testimoni pembeli langsung di-render pada tab &quot;Toko&quot; di etalase publik dan kartu Google Review.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Quick Menu */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

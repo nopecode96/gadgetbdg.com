@@ -8,29 +8,65 @@ import {
   Share2,
   Smartphone,
   DollarSign,
-  TrendingUp,
   Flame,
-  CheckCircle2,
   Clock,
   ExternalLink,
   AlertCircle,
+  Sparkles,
+  ShoppingBag,
 } from "lucide-react";
 
 export const revalidate = 0;
+
+// Helper to format condition / grade cleanly
+function formatConditionBadge(condition?: string | null, grade?: string | null): string {
+  if (grade && grade.trim()) {
+    return grade;
+  }
+  if (!condition || !condition.trim()) {
+    return "Grade A";
+  }
+
+  const raw = condition.trim();
+  const MAP: Record<string, string> = {
+    SECOND_LIKE_NEW: "Grade A+ (Like New)",
+    SECOND_MULUS: "Grade A (Sangat Mulus)",
+    SECOND_FULLSET: "Grade B+ (Pemakaian Wajar)",
+    SECOND_MINUS: "Minus Fisik / Fungsi",
+    BRAND_NEW_SEIN: "Baru Segel (BNIB)",
+    BARU_BNIB: "Baru Segel (BNIB)",
+    BEKAS_MULUS: "Grade A (Mulus)",
+  };
+
+  if (MAP[raw]) return MAP[raw];
+
+  // If already clean like "Grade A" or "Bekas (Mulus)"
+  if (raw.toLowerCase().includes("grade") || raw.toLowerCase().includes("mulus") || raw.toLowerCase().includes("baru")) {
+    return raw;
+  }
+
+  // Format enum like SOME_ENUM_NAME to Title Case
+  return raw
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
 
 export default async function AdminDashboardPage() {
   // requireStoreOwnerOrStaff validates session, store.isActive, and subscription
   const ctx = await requireStoreOwnerOrStaff();
   const { store, limits, usage, permissions } = ctx;
 
-  const [products, offers] = await Promise.all([
+  const [products, pendingLeadsCount, totalLeadsCount] = await Promise.all([
     prisma.product.findMany({
       where: { storeId: store.id },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.tradeInOffer.findMany({
+    prisma.tradeInOffer.count({
+      where: { storeId: store.id, status: "PENDING" },
+    }),
+    prisma.tradeInOffer.count({
       where: { storeId: store.id },
-      orderBy: { createdAt: "desc" },
     }),
   ]);
 
@@ -47,14 +83,29 @@ export default async function AdminDashboardPage() {
     .filter((p) => p.status === "AVAILABLE" || p.status === "BOOKED")
     .reduce((acc, curr) => acc + Number(curr.price), 0);
 
+  // Top 5 most wanted sorted by clickCount descending, then createdAt descending
   const mostWantedProducts = [...products]
-    .sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0))
+    .sort((a, b) => {
+      const clickDiff = (b.clickCount || 0) - (a.clickCount || 0);
+      if (clickDiff !== 0) return clickDiff;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    })
     .slice(0, 5);
 
   const remainingQuotaDisplay =
     limits.maxActiveProducts === Infinity
       ? "Tak terbatas"
       : `${usage.remainingProductQuota} sisa`;
+
+  // Public storefront URL
+  const storefrontUrl = `/${store.slug}`;
+
+  // Most wanted top 1 title
+  const top1Product = mostWantedProducts[0];
+  const top1Title =
+    top1Product?.title ||
+    top1Product?.name ||
+    (top1Product?.brand ? `${top1Product.brand} Smartphone` : "Semua Unit");
 
   return (
     <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 space-y-6">
@@ -74,18 +125,18 @@ export default async function AdminDashboardPage() {
       )}
 
       {/* Store Profile Card */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {store.logoUrl ? (
             <img
               src={store.logoUrl}
               alt={store.name}
-              className="w-14 h-14 rounded-2xl object-cover shadow-md"
+              className="w-14 h-14 rounded-2xl object-cover shadow-sm"
             />
           ) : (
             <div
-              className="w-14 h-14 rounded-2xl text-white flex items-center justify-center font-black text-xl shadow-md"
-              style={{ backgroundColor: store.primaryColor }}
+              className="w-14 h-14 rounded-2xl text-white flex items-center justify-center font-black text-xl shadow-sm"
+              style={{ backgroundColor: store.primaryColor || "#2563eb" }}
             >
               {store.name.charAt(0)}
             </div>
@@ -108,7 +159,7 @@ export default async function AdminDashboardPage() {
             <p className="text-xs text-slate-500 mt-1">{store.address}</p>
             <div className="flex items-center gap-3 mt-2 text-xs font-semibold text-slate-600">
               <span>
-                Template: <b className="text-slate-900 font-mono">{store.templateId}</b>
+                Template: <b className="text-slate-900 font-mono">{store.templateId || (store as any).template || "minimal-clean"}</b>
               </span>
               <span>•</span>
               <span>
@@ -136,9 +187,9 @@ export default async function AdminDashboardPage() {
 
         <div className="flex items-center gap-2">
           <Link
-            href={`/${store.slug}`}
+            href={storefrontUrl}
             target="_blank"
-            className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition shadow-sm flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition shadow-xs flex items-center gap-1.5"
           >
             <span>Lihat Storefront</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -148,17 +199,19 @@ export default async function AdminDashboardPage() {
 
       {/* 4 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+        {/* Metric 1: Stok Aktif */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
             <Smartphone className="w-4 h-4 text-blue-600" /> 📦 Stok Aktif
           </span>
           <div className="text-2xl font-black text-slate-900">{totalActiveStock} Unit</div>
           <p className="text-[11px] text-slate-400">
-            {availableCount} Available • {bookedCount} Booked ({formatRupiah(activeStockValue)})
+            {availableCount} Tersedia • {bookedCount} Booked ({formatRupiah(activeStockValue)})
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+        {/* Metric 2: Estimasi Omset Terjual */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
             <DollarSign className="w-4 h-4 text-emerald-600" /> 💰 Estimasi Omset Terjual
           </span>
@@ -166,62 +219,96 @@ export default async function AdminDashboardPage() {
           <p className="text-[11px] text-slate-400">Total dari {soldCount} unit berstatus SOLD</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+        {/* Metric 3: Paling Diminati */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
             <Flame className="w-4 h-4 text-amber-500" /> 🔥 Paling Diminati
           </span>
-          <div className="text-2xl font-black text-amber-600 truncate">
-            {mostWantedProducts[0]?.name?.split(" ")[0] || "Semua"}{" "}
-            {mostWantedProducts[0]?.name?.split(" ")[1] || "Unit"}
+          <div className="text-lg font-black text-amber-600 truncate" title={top1Title}>
+            {top1Title}
           </div>
           <p className="text-[11px] text-slate-400 truncate">
-            {mostWantedProducts[0]?.clickCount || 0}x klik minat beli via WA
+            {top1Product?.clickCount || 0}x klik minat beli via WA
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+        {/* Metric 4: Leads Trade-In */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
             <RefreshCw className="w-4 h-4 text-purple-600" /> 🔄 Leads Trade-In
           </span>
-          <div className="text-2xl font-black text-purple-600">{offers.length} Pengajuan</div>
-          <p className="text-[11px] text-slate-400">Siap ditaksir &amp; dinego via WhatsApp</p>
+          <div className="text-2xl font-black text-purple-600">
+            {pendingLeadsCount} <span className="text-xs font-medium text-slate-400">Pending</span>
+          </div>
+          <p className="text-[11px] text-slate-400">
+            {totalLeadsCount} total penawaran tukar tambah
+          </p>
         </div>
       </div>
 
       {/* Top 5 Most Wanted */}
       {mostWantedProducts.length > 0 && (
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <Flame className="w-4 h-4 text-amber-500" />
               <h2 className="font-bold text-sm text-slate-900">Top 5 Unit HP Paling Banyak Diminati</h2>
             </div>
-            <span className="text-[11px] text-slate-400">Berdasarkan Klik Tombol Beli WA</span>
+            <span className="text-[11px] text-slate-400">Berdasarkan Minat Beli WA</span>
           </div>
 
           <div className="divide-y divide-slate-100 text-xs">
-            {mostWantedProducts.map((p, idx) => (
-              <div key={p.id} className="py-2.5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs shrink-0">
-                    #{idx + 1}
-                  </span>
-                  <div className="min-w-0">
-                    <div className="font-bold text-slate-900 truncate">{p.name}</div>
-                    <div className="text-[11px] text-slate-400">
-                      {p.ramRom} • {p.condition} • Status:{" "}
-                      <b className="text-slate-700">{p.status}</b>
+            {mostWantedProducts.map((p, idx) => {
+              const displayTitle =
+                p.title ||
+                p.name ||
+                (p.brand ? `${p.brand} Smartphone` : "Unit Smartphone");
+
+              const conditionLabel = formatConditionBadge(p.condition, p.grade);
+              const ramRomDisplay =
+                p.ramRom ||
+                (p.storage ? `${p.ram ? `${p.ram} / ` : ""}${p.storage}` : "");
+
+              return (
+                <div key={p.id} className="py-2.5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs shrink-0">
+                      #{idx + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="font-bold text-slate-900 truncate">{displayTitle}</div>
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1.5 flex-wrap mt-0.5">
+                        {ramRomDisplay && <span>{ramRomDisplay} •</span>}
+                        <span className="font-medium text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded text-[10px]">
+                          {conditionLabel}
+                        </span>
+                        <span>•</span>
+                        <span>
+                          Status:{" "}
+                          <b
+                            className={
+                              p.status === "AVAILABLE"
+                                ? "text-emerald-600"
+                                : p.status === "BOOKED"
+                                ? "text-amber-600"
+                                : "text-slate-600"
+                            }
+                          >
+                            {p.status}
+                          </b>
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className="font-bold text-slate-900">{formatRupiah(p.price)}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold text-[10px] border border-amber-200">
+                      {p.clickCount || 0} Klik WA
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                  <span className="font-bold text-slate-900">{formatRupiah(p.price)}</span>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold text-[10px] border border-amber-200">
-                    {p.clickCount || 0} Klik WA
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -230,7 +317,7 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link
           href="/admin/products"
-          className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition space-y-3"
+          className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 transition space-y-3"
         >
           <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 transition">
             <Package className="w-6 h-6" />
@@ -246,7 +333,7 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/trade-in"
-          className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition space-y-3"
+          className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-emerald-400 transition space-y-3"
         >
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition">
             <RefreshCw className="w-6 h-6" />
@@ -261,7 +348,7 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/social-tools"
-          className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-pink-400 transition space-y-3"
+          className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-pink-400 transition space-y-3"
         >
           <div className="w-12 h-12 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center group-hover:scale-105 transition">
             <Share2 className="w-6 h-6" />

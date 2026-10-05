@@ -344,6 +344,62 @@ export async function deleteStoreLogoAction(storeId: string) {
   }
 }
 
+export async function updateStoreBannerAction(
+  storeId: string,
+  data: {
+    promoBannerActive?: boolean;
+    promoBannerBadge?: string | null;
+    promoBannerTitle?: string | null;
+    promoBannerSubtitle?: string | null;
+    promoBannerImage?: string | null;
+    promoBannerCtaText?: string | null;
+    promoBannerCtaLink?: string | null;
+  }
+) {
+  try {
+    if (!storeId) return { success: false, error: "ID toko tidak ditemukan." };
+
+    const { requireStoreAccess } = await import("@/lib/auth/tenant-guard");
+    await requireStoreAccess(storeId);
+
+    const store = await prisma.store.findUnique({
+      where: { id: storeId },
+      select: { id: true, slug: true, customDomain: true },
+    });
+
+    if (!store) return { success: false, error: "Toko tidak ditemukan." };
+
+    const updated = await prisma.store.update({
+      where: { id: storeId },
+      data: {
+        ...(data.promoBannerActive !== undefined ? { promoBannerActive: data.promoBannerActive } : {}),
+        ...(data.promoBannerBadge !== undefined ? { promoBannerBadge: data.promoBannerBadge || null } : {}),
+        ...(data.promoBannerTitle !== undefined ? { promoBannerTitle: data.promoBannerTitle || null } : {}),
+        ...(data.promoBannerSubtitle !== undefined ? { promoBannerSubtitle: data.promoBannerSubtitle || null } : {}),
+        ...(data.promoBannerImage !== undefined ? { promoBannerImage: data.promoBannerImage || null } : {}),
+        ...(data.promoBannerCtaText !== undefined ? { promoBannerCtaText: data.promoBannerCtaText || null } : {}),
+        ...(data.promoBannerCtaLink !== undefined ? { promoBannerCtaLink: data.promoBannerCtaLink || null } : {}),
+      },
+    });
+
+    revalidatePath("/[store]", "layout");
+    revalidatePath("/[store]");
+    revalidatePath(`/${store.slug}`, "layout");
+    revalidatePath(`/${store.slug}`);
+    if (store.customDomain) {
+      revalidatePath(`/custom-domain/${store.customDomain}`, "layout");
+      revalidatePath(`/custom-domain/${store.customDomain}`);
+    }
+    revalidatePath("/admin/marketing");
+    revalidatePath("/admin");
+
+    return { success: true, store: updated };
+  } catch (error: any) {
+    console.error("Error updating store banner:", error);
+    return { success: false, error: error?.message || "Gagal menyimpan banner promosi toko." };
+  }
+}
+
 export async function updateGoogleReviewUrlAction(storeId: string, googleReviewUrl: string) {
   try {
     const { assertCanAccessQrGoogleReview } = await import("@/lib/guards/plan-guard");

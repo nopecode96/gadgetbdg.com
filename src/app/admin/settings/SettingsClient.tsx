@@ -26,7 +26,7 @@ import Link from "next/link";
 import { updateStoreSettingsAction, updateStorefrontPhotoAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier, TEMPLATE_REGISTRY } from "@/lib/constants/templates";
 import { DomainSettingsSection } from "./DomainSettingsSection";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+
 
 interface SettingsClientProps {
   store?: any;
@@ -756,101 +756,28 @@ export function SettingsClient({ store }: SettingsClientProps) {
           </div>
         </div>
 
-        {/* Section: Hero Banner Promosi Beranda */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>Banner Promosi Beranda (Hero Banner)</span>
-            </h2>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                name="promoBannerActive"
-                defaultChecked={store.promoBannerActive ?? true}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              <span className="ml-2 text-xs font-semibold text-slate-700">Aktifkan Banner</span>
-            </label>
-          </div>
 
-          <p className="text-xs text-slate-500">
-            Banner promosi utama yang tampil di bagian atas halaman beranda (Home) storefront Anda.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="block font-medium text-slate-700 mb-1">Badge Promo (Label Kecil)</label>
-              <input
-                type="text"
-                name="promoBannerBadge"
-                defaultValue={store.promoBannerBadge || "PROMO SPESIAL"}
-                placeholder="Contoh: FLASH SALE, PROMO GAJIAN"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+        {/* ── Info: Banner Promosi dipindahkan ke Marketing ── */}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-400 text-white flex items-center justify-center shrink-0 mt-0.5">
+              <Sparkles className="w-4 h-4" />
             </div>
-
-            <div>
-              <label className="block font-medium text-slate-700 mb-1">Judul Banner Promosi</label>
-              <input
-                type="text"
-                name="promoBannerTitle"
-                defaultValue={store.promoBannerTitle || "Diskon Unit Pilihan Siap COD"}
-                placeholder="Contoh: Diskon iPhone Flagship Siap COD"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+            <div className="space-y-0.5">
+              <p className="text-sm font-black text-amber-900">Atur Banner Promosi Beranda Toko</p>
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Pengaturan banner hero promo beranda toko kini ada di menu{" "}
+                <b>Marketing & Medsos → Tab "Banner Promosi Beranda"</b>.
+              </p>
             </div>
           </div>
-
-          <div className="text-xs">
-            <label className="block font-medium text-slate-700 mb-1">Sub-judul / Rincian Promo</label>
-            <textarea
-              name="promoBannerSubtitle"
-              rows={2}
-              defaultValue={store.promoBannerSubtitle || "Garansi replace unit dan jaminan IMEI aman seumur hidup."}
-              placeholder="Jelaskan keuntungan atau syarat promo secara singkat..."
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          {/* Upload Foto Unit Banner */}
-          <div className="space-y-1 text-xs">
-            <label className="block font-medium text-slate-700">
-              Foto Produk / Grafis Banner Promosi
-            </label>
-            <ImageUpload
-              name="promoBannerImage"
-              value={store.promoBannerImage || null}
-              aspectRatio="1:1"
-              uploadType="store-profile"
-              description="Foto produk unggulan berformat transparan/PNG atau foto unit promo yang akan melayang di kartu hero banner."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
-            <div>
-              <label className="block font-medium text-slate-700 mb-1">Teks Tombol Aksi (CTA)</label>
-              <input
-                type="text"
-                name="promoBannerCtaText"
-                defaultValue={store.promoBannerCtaText || "Lihat Promo"}
-                placeholder="Contoh: Lihat Promo, Chat WhatsApp"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block font-medium text-slate-700 mb-1">Tautan Tujuan Tombol (CTA Link)</label>
-              <input
-                type="text"
-                name="promoBannerCtaLink"
-                defaultValue={store.promoBannerCtaLink || "/katalog"}
-                placeholder="Contoh: /katalog, /trade-in, atau link WhatsApp"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
+          <Link
+            href="/admin/marketing?tab=banner"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition shrink-0 self-start sm:self-auto shadow-sm"
+          >
+            <span>Kelola Banner</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         {/* Section 2: Pemilihan Template Storefront */}

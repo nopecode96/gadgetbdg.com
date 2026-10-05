@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { MarketingClient } from "./MarketingClient";
+import { MarketingTabs } from "./MarketingTabs";
 
 export const revalidate = 0;
 
@@ -36,7 +37,9 @@ export default async function AdminMarketingPage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
-      <MarketingClient store={serializedStore} products={serializedProducts as any} />
+      <Suspense fallback={<div className="h-10 animate-pulse bg-slate-100 rounded-2xl" />}>
+        <MarketingTabs store={serializedStore} products={serializedProducts as any} />
+      </Suspense>
     </div>
   );
 }

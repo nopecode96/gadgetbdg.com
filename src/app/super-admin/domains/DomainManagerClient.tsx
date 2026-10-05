@@ -122,7 +122,7 @@ export function DomainManagerClient({ initialData }: { initialData: CustomDomain
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
-            PRO &amp; ADVANCE TIER ONLY
+            PRO TIER EXCLUSIVE
           </span>
           <span className="flex items-center gap-1 text-xs text-slate-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Live DNS Resolver (Node.js)
@@ -141,7 +141,7 @@ export function DomainManagerClient({ initialData }: { initialData: CustomDomain
         <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 shadow-lg">
           <div className="text-xs font-mono text-slate-400 uppercase font-semibold">Total Domain Terdaftar</div>
           <div className="text-3xl font-black text-purple-400 mt-2">{data.totalRegistered}</div>
-          <div className="text-[11px] text-slate-500 mt-1">Dari merchant PRO &amp; ADVANCE</div>
+          <div className="text-[11px] text-slate-500 mt-1">Dari merchant paket PRO</div>
         </div>
 
         <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 shadow-lg">
@@ -231,7 +231,7 @@ export function DomainManagerClient({ initialData }: { initialData: CustomDomain
                     <Globe className="w-8 h-8 mx-auto mb-2 text-slate-600" />
                     Belum ada toko yang mendaftarkan custom domain di database.
                     <br />
-                    Toko paket PRO/ADVANCE dapat mengajukannya di menu Settings etalase.
+                    Toko paket PRO dapat mengajukannya di menu Settings etalase.
                   </td>
                 </tr>
               ) : (
@@ -330,7 +330,7 @@ export function DomainManagerClient({ initialData }: { initialData: CustomDomain
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
               <Building className="w-4 h-4 text-amber-400" />
-              Toko PRO &amp; ADVANCE Belum Setup Custom Domain ({data.storesWithoutDomain.length})
+              Toko PRO Belum Setup Custom Domain ({data.storesWithoutDomain.length})
             </h3>
             <span className="text-[11px] text-slate-400 font-mono">Dinamis dari database</span>
           </div>

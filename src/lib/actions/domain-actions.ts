@@ -200,7 +200,7 @@ export async function saveCustomDomainAction(customDomainInput: string) {
     if (store.tier === "STARTER") {
       return {
         success: false,
-        error: "Custom domain hanya didukung pada paket PRO dan ADVANCE.",
+        error: "Custom domain hanya didukung pada paket PRO.",
       };
     }
 

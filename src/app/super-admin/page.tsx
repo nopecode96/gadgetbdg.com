@@ -132,8 +132,10 @@ export default async function SuperAdminDashboardPage() {
             </h2>
 
             <div className="space-y-4">
-              {planDistributions.map((plan) => {
-                const isAdvance = plan.planId === "ADVANCE";
+              {planDistributions
+                .filter((p) => p.planId === "STARTER" || p.planId === "PRO")
+                .map((plan) => {
+                  const isAdvance = false;
                 const isPro = plan.planId === "PRO";
                 const barColor = isAdvance
                   ? "bg-purple-500"
@@ -183,8 +185,10 @@ export default async function SuperAdminDashboardPage() {
             {/* MRR breakdown per tier */}
             <div className="pt-3 border-t border-slate-700/60 text-xs space-y-1.5">
               <p className="text-slate-400 font-semibold">Kontribusi Nominal &amp; Porsi MRR</p>
-              {planDistributions.map((plan) => {
-                const isAdvance = plan.planId === "ADVANCE";
+              {planDistributions
+                .filter((p) => p.planId === "STARTER" || p.planId === "PRO")
+                .map((plan) => {
+                  const isAdvance = false;
                 const isPro = plan.planId === "PRO";
                 const textColor = isAdvance
                   ? "text-purple-300"

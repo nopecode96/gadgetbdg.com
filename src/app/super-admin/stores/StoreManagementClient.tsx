@@ -196,7 +196,6 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
               <option value="ALL">Semua Paket</option>
               <option value="STARTER">STARTER</option>
               <option value="PRO">PRO</option>
-              <option value="ADVANCE">ADVANCE</option>
             </select>
           </div>
         </div>

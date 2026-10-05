@@ -428,4 +428,9 @@ export async function deleteStoreLogoAction(storeId: string) {
   return deleteAction(storeId);
 }
 
+export async function updateStorefrontPhotoAction(storeId: string, photoUrl: string | null) {
+  const { updateStorefrontPhotoAction: photoAction } = await import("@/lib/actions/store-actions");
+  return photoAction(storeId, photoUrl);
+}
+
 

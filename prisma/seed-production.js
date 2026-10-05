@@ -209,8 +209,8 @@ async function main() {
     {
       slug: "demo3",
       name: "Demo 3: Midnight Gold",
-      planId: "ADVANCE",
-      tier: "ADVANCE",
+      planId: "PRO",
+      tier: "PRO",
       template: "midnight-gold",
       templateId: "midnight-gold",
       primaryColor: "#f59e0b",
@@ -246,8 +246,8 @@ async function main() {
     {
       slug: "demo6",
       name: "Demo 6: Official Store (Obsidian)",
-      planId: "ADVANCE",
-      tier: "ADVANCE",
+      planId: "PRO",
+      tier: "PRO",
       template: "official-store",
       templateId: "keynote-obsidian",
       primaryColor: "#ffffff",

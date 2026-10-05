@@ -211,10 +211,12 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
       {/* TAB 1: Subscription Plans */}
       {activeTab === "plans" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {plans.map((plan) => {
-              const isSaving = savingPlanId === plan.id;
-              const isAdvance = plan.id === "ADVANCE";
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
+            {plans
+              .filter((p) => p.id === "STARTER" || p.id === "PRO")
+              .map((plan) => {
+                const isSaving = savingPlanId === plan.id;
+                const isAdvance = false;
               const isPro = plan.id === "PRO";
 
               return (

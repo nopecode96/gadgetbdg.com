@@ -23,7 +23,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import Link from "next/link";
-import { updateStoreSettingsAction } from "@/lib/actions";
+import { updateStoreSettingsAction, updateStorefrontPhotoAction } from "@/lib/actions";
 import { getAvailableTemplatesForTier, TEMPLATE_REGISTRY } from "@/lib/constants/templates";
 import { DomainSettingsSection } from "./DomainSettingsSection";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -47,6 +47,12 @@ export function SettingsClient({ store }: SettingsClientProps) {
   const [isDragging, setIsDragging] = useState(false);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Storefront Photo (16:9) state
+  const [currentStoreImage, setCurrentStoreImage] = useState<string | null>(store?.storeImage || null);
+  const [storeImageUploading, setStoreImageUploading] = useState(false);
+  const [storeImageToast, setStoreImageToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const storeImageInputRef = useRef<HTMLInputElement | null>(null);
+
   if (!store) {
     return (
       <div className="bg-white rounded-2xl p-12 text-center text-slate-400 text-xs border border-slate-200">
@@ -55,7 +61,7 @@ export function SettingsClient({ store }: SettingsClientProps) {
     );
   }
 
-  const isProOrAdvance = store.tier === "PRO" || store.tier === "ADVANCE";
+  const isPro = store.tier === "PRO" || store.tier === "ADVANCE";
 
   // Hitung status cooldown 30 hari untuk paket PRO
   let isCooldownActive = false;
@@ -148,6 +154,98 @@ export function SettingsClient({ store }: SettingsClientProps) {
     }
   }
 
+  async function handleStoreImageUpload(file: File) {
+    if (!file) return;
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/webp", "image/jpg"];
+    if (!allowedTypes.includes(file.type)) {
+      setStoreImageToast({
+        type: "error",
+        message: "Format tidak didukung. Gunakan file PNG, JPG, atau WebP.",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setStoreImageToast({
+        type: "error",
+        message: "Ukuran file foto fisik konter maksimal 5 MB.",
+      });
+      return;
+    }
+
+    setStoreImageUploading(true);
+    setStoreImageToast(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "store-profile");
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal mengunggah foto storefront.");
+      }
+
+      const uploadedUrl = data.url;
+      setCurrentStoreImage(uploadedUrl);
+
+      // Simpan langsung ke database toko
+      const saveRes = await updateStorefrontPhotoAction(store.id, uploadedUrl);
+      if (!saveRes.success) {
+        throw new Error(saveRes.error || "Gagal menyimpan foto ke database.");
+      }
+
+      setStoreImageToast({
+        type: "success",
+        message: "Foto fisik konter toko (16:9) berhasil disimpan dan langsung tayang di profil toko!",
+      });
+      setTimeout(() => setStoreImageToast(null), 4000);
+    } catch (err: any) {
+      setStoreImageToast({
+        type: "error",
+        message: err?.message || "Terjadi kesalahan saat mengunggah foto toko.",
+      });
+    } finally {
+      setStoreImageUploading(false);
+      if (storeImageInputRef.current) storeImageInputRef.current.value = "";
+    }
+  }
+
+  async function handleDeleteStoreImage() {
+    if (!confirm("Hapus foto fisik konter toko Anda?")) return;
+
+    setStoreImageUploading(true);
+    setStoreImageToast(null);
+
+    try {
+      const res = await updateStorefrontPhotoAction(store.id, null);
+      if (!res.success) {
+        throw new Error(res.error || "Gagal menghapus foto gerai toko.");
+      }
+
+      setCurrentStoreImage(null);
+      setStoreImageToast({
+        type: "success",
+        message: "Foto fisik konter berhasil dihapus dari profil toko.",
+      });
+      setTimeout(() => setStoreImageToast(null), 4000);
+    } catch (err: any) {
+      setStoreImageToast({
+        type: "error",
+        message: err?.message || "Terjadi kesalahan saat menghapus foto toko.",
+      });
+    } finally {
+      setStoreImageUploading(false);
+      if (storeImageInputRef.current) storeImageInputRef.current.value = "";
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -158,6 +256,7 @@ export function SettingsClient({ store }: SettingsClientProps) {
     formData.append("storeId", store.id);
     formData.append("templateId", selectedTemplate);
     formData.set("logoUrl", currentLogoUrl || "");
+    formData.set("storeImage", currentStoreImage || "");
 
     const res = await updateStoreSettingsAction(formData);
     setLoading(false);
@@ -191,7 +290,7 @@ export function SettingsClient({ store }: SettingsClientProps) {
             <h2 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
               <span>💡 Fitur Multi-Cabang &amp; Subdomain Tersendiri</span>
               <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full uppercase">
-                Advance
+                PRO TIER
               </span>
             </h2>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -276,35 +375,134 @@ export function SettingsClient({ store }: SettingsClientProps) {
               />
             </div>
 
-            {/* Foto Toko Fisik Konter (Terkunci untuk STARTER) */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="block font-medium text-slate-700">
-                  Foto Fisik Konter / Storefront Gerai (Rasio 16:9)
-                </label>
-                {!isProOrAdvance && (
-                  <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-amber-600" />
-                    <span>Fitur Paket Pro / Advance</span>
-                  </span>
-                )}
-              </div>
-              {isProOrAdvance ? (
-                <ImageUpload
-                  name="storeImage"
-                  value={store.storeImage || null}
-                  aspectRatio="16:9"
-                  uploadType="store-profile"
-                  description="Foto fisik etalase atau tampak depan konter di BEC/ITC/Mall. Ditampilkan sebagai header profil gerai di website."
-                />
-              ) : (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-xs text-center space-y-1">
-                  <p className="font-bold text-slate-600">Upload Foto Toko Terkunci</p>
-                  <p className="text-[11px] text-amber-700">
-                    Upgrade ke paket Pro atau Advance untuk upload foto fisik toko dan mengaktifkan ulasan pembeli.
+            {/* Foto Fisik Konter / Storefront Gerai (Rasio 16:9) */}
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <label className="block font-bold text-slate-800 text-xs sm:text-sm">
+                    Foto Fisik Konter / Storefront Gerai (Rasio 16:9)
+                  </label>
+                  <p className="text-[11px] text-slate-500">
+                    Foto etalase fisik atau tampak depan konter di BEC/ITC/Mall. Ditampilkan sebagai banner profil gerai di website.
                   </p>
                 </div>
+                <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 self-start sm:self-auto">
+                  Rasio 16:9 HD
+                </span>
+              </div>
+
+              {/* Toast Feedback */}
+              {storeImageToast && (
+                <div
+                  className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between gap-2 border transition ${
+                    storeImageToast.type === "success"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-rose-50 text-rose-800 border-rose-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {storeImageToast.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{storeImageToast.message}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setStoreImageToast(null)}
+                    className="text-slate-400 hover:text-slate-600 font-bold px-1"
+                  >
+                    ✕
+                  </button>
+                </div>
               )}
+
+              {/* Hidden file input */}
+              <input
+                ref={storeImageInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/jpg"
+                className="hidden"
+                disabled={storeImageUploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleStoreImageUpload(file);
+                }}
+              />
+              <input type="hidden" name="storeImage" value={currentStoreImage || ""} />
+
+              {/* 16:9 Preview Container */}
+              <div className="relative aspect-video w-full rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-950 shadow-sm flex items-center justify-center group">
+                {currentStoreImage ? (
+                  <>
+                    <img
+                      src={currentStoreImage}
+                      alt="Foto Fisik Gerai Toko"
+                      className="w-full h-full object-cover"
+                    />
+                    {storeImageUploading && (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center gap-2 text-white text-xs font-bold">
+                        <RefreshCw className="w-6 h-6 animate-spin text-blue-400" />
+                        <span>Memproses foto konter...</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div
+                    onClick={() => {
+                      if (!storeImageUploading) storeImageInputRef.current?.click();
+                    }}
+                    className="w-full h-full flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-slate-50 hover:bg-slate-100/80 transition"
+                  >
+                    {storeImageUploading ? (
+                      <div className="flex flex-col items-center gap-2 text-blue-600">
+                        <RefreshCw className="w-6 h-6 animate-spin" />
+                        <span className="text-xs font-bold">Mengunggah foto...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-slate-400">
+                        <div className="w-12 h-12 rounded-2xl bg-white shadow-xs flex items-center justify-center text-blue-600 border border-slate-200">
+                          <UploadCloud className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-800">
+                            Klik untuk Unggah Foto Fisik Konter
+                          </p>
+                          <p className="text-[10px] text-slate-500">
+                            Format 16:9 Landscape (PNG, JPG, WebP maks 5MB)
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons Toolbar below preview */}
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => storeImageInputRef.current?.click()}
+                  disabled={storeImageUploading}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${storeImageUploading ? "animate-spin" : ""}`} />
+                  <span>{currentStoreImage ? "Ganti Foto Toko" : "Unggah Foto Toko"}</span>
+                </button>
+
+                {currentStoreImage && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteStoreImage}
+                    disabled={storeImageUploading}
+                    className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Hapus Foto</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             <div>
@@ -674,7 +872,7 @@ export function SettingsClient({ store }: SettingsClientProps) {
               <div>
                 <p className="font-bold">Cooldown Pergantian Tema Sedang Berjalan</p>
                 <p className="text-[11px] text-amber-800 mt-0.5">
-                  Tema dapat diganti lagi dalam <b>{cooldownDaysRemaining} hari</b> (Cooldown 30 hari paket Pro). Upgrade ke <b>Advance</b> untuk bebas ganti tema kapan saja.
+                  Tema dapat diganti lagi dalam <b>{cooldownDaysRemaining} hari</b> (Cooldown 30 hari paket Pro).
                 </p>
               </div>
             </div>
@@ -691,7 +889,7 @@ export function SettingsClient({ store }: SettingsClientProps) {
                   key={t.id}
                   onClick={() => {
                     if (isDisabled) {
-                      alert(`Tema dapat diganti lagi dalam ${cooldownDaysRemaining} hari (Cooldown 30 hari paket Pro). Upgrade ke Advance untuk bebas ganti tema kapan saja.`);
+                      alert(`Tema dapat diganti lagi dalam ${cooldownDaysRemaining} hari (Cooldown 30 hari paket Pro).`);
                       return;
                     }
                     setSelectedTemplate(t.id);

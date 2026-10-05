@@ -192,10 +192,10 @@ async function cleanReset() {
   const demoStores = [
     { slug: "demo1", name: "Demo Minimal Clean", template: "minimal-clean", templateId: "minimal-clean", tier: "STARTER", primaryColor: "#0f172a" },
     { slug: "demo2", name: "Demo Gamers Cyber", template: "gamers-cyber", templateId: "dark-gaming", tier: "STARTER", primaryColor: "#00e5b3" },
-    { slug: "demo3", name: "Demo Midnight Gold", template: "midnight-gold", templateId: "midnight-gold", tier: "ADVANCE", primaryColor: "#f59e0b" },
+    { slug: "demo3", name: "Demo Midnight Gold", template: "midnight-gold", templateId: "midnight-gold", tier: "PRO", primaryColor: "#f59e0b" },
     { slug: "demo4", name: "Demo Tokyo Street", template: "tokyo-street", templateId: "tokyo-editorial", tier: "PRO", primaryColor: "#e11d48" },
     { slug: "demo5", name: "Demo Modern Retail", template: "modern-retail", templateId: "minimal-clean", tier: "PRO", primaryColor: "#4f46e5" },
-    { slug: "demo6", name: "Demo Official Store", template: "official-store", templateId: "keynote-obsidian", tier: "ADVANCE", primaryColor: "#ffffff" },
+    { slug: "demo6", name: "Demo Official Store", template: "official-store", templateId: "keynote-obsidian", tier: "PRO", primaryColor: "#ffffff" },
   ];
 
   const hashedDemoPass = await bcrypt.hash("Admin123!", 10);

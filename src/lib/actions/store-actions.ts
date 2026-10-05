@@ -95,7 +95,7 @@ export async function updateStoreSettings(formData: FormData) {
       : null;
 
     if (customDomain && currentStore.tier === "STARTER") {
-      return { success: false, error: "Custom domain hanya tersedia untuk paket PRO dan ADVANCE." };
+      return { success: false, error: "Custom domain hanya tersedia untuk paket PRO." };
     }
 
     if (customDomain && customDomain !== currentStore.customDomain) {
@@ -129,9 +129,6 @@ export async function updateStoreSettings(formData: FormData) {
     const promoBannerCtaText = formData.get("promoBannerCtaText") as string | null;
     const promoBannerCtaLink = formData.get("promoBannerCtaLink") as string | null;
 
-    // Guard canCustomProfile (Starter tidak boleh custom storeImage, dsb jika ada perubahan)
-    const canCustom = currentStore.tier !== "STARTER";
-
     const updated = await prisma.store.update({
       where: { id: storeId },
       data: {
@@ -144,7 +141,7 @@ export async function updateStoreSettings(formData: FormData) {
         bankAccount: bankAccount !== null && bankAccount !== undefined ? (bankAccount.trim() || null) : currentStore.bankAccount,
         bankHolder: bankHolder !== null && bankHolder !== undefined ? (bankHolder.trim() || null) : currentStore.bankHolder,
         ...(logoUrl !== null && logoUrl !== undefined ? { logoUrl: logoUrl || null } : {}),
-        ...(canCustom && storeImage !== null && storeImage !== undefined ? { storeImage: storeImage || null } : {}),
+        ...(storeImage !== null && storeImage !== undefined ? { storeImage: storeImage.trim() || null } : {}),
         operationalHours: operationalHours !== undefined ? (operationalHours || null) : currentStore.operationalHours,
         warrantyPolicy: warrantyPolicy !== undefined ? (warrantyPolicy || null) : currentStore.warrantyPolicy,
         primaryColor: primaryColor || currentStore.primaryColor,
@@ -164,6 +161,8 @@ export async function updateStoreSettings(formData: FormData) {
 
     revalidatePath("/", "layout");
     revalidatePath("/[store]", "layout");
+    revalidatePath("/[store]");
+    revalidatePath("/[store]/boutique");
     revalidatePath("/[store]/manifest.webmanifest");
     revalidatePath("/admin/settings");
     revalidatePath("/admin/qr-kit");
@@ -171,10 +170,12 @@ export async function updateStoreSettings(formData: FormData) {
     revalidatePath("/admin");
     revalidatePath(`/${updated.slug}`, "layout");
     revalidatePath(`/${updated.slug}`);
+    revalidatePath(`/${updated.slug}/boutique`);
     revalidatePath(`/${updated.slug}/manifest.webmanifest`);
     if (updated.customDomain) {
       revalidatePath(`/custom-domain/${updated.customDomain}`, "layout");
       revalidatePath(`/custom-domain/${updated.customDomain}`);
+      revalidatePath(`/custom-domain/${updated.customDomain}/boutique`);
       revalidatePath(`/custom-domain/${updated.customDomain}/manifest.webmanifest`);
     }
 
@@ -182,6 +183,42 @@ export async function updateStoreSettings(formData: FormData) {
   } catch (error: any) {
     console.error("Error updating store settings:", error);
     return { success: false, error: error?.message || "Gagal menyimpan pengaturan toko." };
+  }
+}
+
+/**
+ * Server Action khusus untuk memperbarui foto fisik konter (storefront 16:9).
+ * Dipanggil secara instan saat merchant mengunggah atau menghapus foto toko di /admin/settings.
+ */
+export async function updateStorefrontPhotoAction(storeId: string, photoUrl: string | null) {
+  try {
+    const { requireStoreAccess } = await import("@/lib/auth/tenant-guard");
+    await requireStoreAccess(storeId);
+
+    const updated = await prisma.store.update({
+      where: { id: storeId },
+      data: { storeImage: photoUrl ? photoUrl.trim() : null },
+    });
+
+    revalidatePath("/", "layout");
+    revalidatePath("/[store]", "layout");
+    revalidatePath("/[store]");
+    revalidatePath("/[store]/boutique");
+    revalidatePath("/admin/settings");
+    revalidatePath("/admin");
+    revalidatePath(`/${updated.slug}`, "layout");
+    revalidatePath(`/${updated.slug}`);
+    revalidatePath(`/${updated.slug}/boutique`);
+    if (updated.customDomain) {
+      revalidatePath(`/custom-domain/${updated.customDomain}`, "layout");
+      revalidatePath(`/custom-domain/${updated.customDomain}`);
+      revalidatePath(`/custom-domain/${updated.customDomain}/boutique`);
+    }
+
+    return { success: true, storeImage: updated.storeImage };
+  } catch (err: any) {
+    console.error("Error updating storefront photo:", err);
+    return { success: false, error: err?.message || "Gagal memperbarui foto gerai toko." };
   }
 }
 

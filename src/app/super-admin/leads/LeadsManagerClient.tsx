@@ -196,7 +196,6 @@ export function LeadsManagerClient({
             <option value="ALL">Semua Paket</option>
             <option value="STARTER">Starter</option>
             <option value="PRO">Pro</option>
-            <option value="ADVANCE">Advance</option>
           </select>
         </div>
       </div>

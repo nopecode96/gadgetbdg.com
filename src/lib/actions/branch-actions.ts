@@ -112,10 +112,10 @@ export async function createBranchAction(data: {
       return { success: false, error: "Hanya pemilik toko (Store Owner) yang dapat menambah cabang." };
     }
 
-    if (store.tier !== "ADVANCE") {
+    if (store.tier !== "PRO" && store.tier !== "ADVANCE") {
       return {
         success: false,
-        error: "Fitur Multi-Cabang khusus untuk paket Advance. Silakan upgrade paket Anda.",
+        error: "Fitur Multi-Cabang khusus untuk paket PRO. Silakan upgrade paket Anda.",
       };
     }
 
@@ -243,10 +243,10 @@ export async function updateBranchAction(
       return { success: false, error: "Hanya pemilik toko (Store Owner) yang dapat mengubah data cabang." };
     }
 
-    if (store.tier !== "ADVANCE") {
+    if (store.tier !== "PRO" && store.tier !== "ADVANCE") {
       return {
         success: false,
-        error: "Fitur Multi-Cabang khusus untuk paket Advance. Silakan upgrade paket Anda.",
+        error: "Fitur Multi-Cabang khusus untuk paket PRO. Silakan upgrade paket Anda.",
       };
     }
 
@@ -350,10 +350,10 @@ export async function deleteBranchAction(branchId: string) {
       return { success: false, error: "Hanya pemilik toko (Store Owner) yang dapat menghapus cabang." };
     }
 
-    if (store.tier !== "ADVANCE") {
+    if (store.tier !== "PRO" && store.tier !== "ADVANCE") {
       return {
         success: false,
-        error: "Fitur Multi-Cabang khusus untuk paket Advance.",
+        error: "Fitur Multi-Cabang khusus untuk paket PRO.",
       };
     }
 

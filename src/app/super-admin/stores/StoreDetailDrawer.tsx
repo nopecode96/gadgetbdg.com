@@ -478,7 +478,6 @@ export function StoreDetailDrawer({ store, onClose, onStoreUpdated }: StoreDetai
                   >
                     <option value="STARTER">STARTER</option>
                     <option value="PRO">PRO</option>
-                    <option value="ADVANCE">ADVANCE</option>
                   </select>
                 </div>
 

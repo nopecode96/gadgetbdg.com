@@ -77,17 +77,19 @@ export function PlansManagerClient({ initialPlans }: { initialPlans: PlanItem[] 
         <div className="text-xs text-indigo-200 space-y-1">
           <p className="font-bold text-white">Struktur Skema 2 Paket Aktif Platform 2026</p>
           <p className="text-slate-300">
-            Landing page publik dan formulir registrasi hanya menampilkan 2 paket utama: <b>Starter</b> (Rp 300rb/bln, limit 50 produk, hemat 40%) dan <b>Pro</b> (Rp 600rb/bln, produk unlimited, custom domain aktif). Toko pengguna paket <b>Advance</b> lama tetap memiliki akses penuh tanpa terganggu.
+            Platform resmi mengoperasikan 2 paket aktif: <b>Starter</b> (Rp 300rb/bln, limit 50 produk, hemat 40%) dan <b>Pro</b> (Rp 600rb/bln, produk unlimited, custom domain aktif, multi-cabang).
           </p>
         </div>
       </div>
 
       {/* Grid of Plans */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {initialPlans.map((plan) => {
-          const isStarter = plan.id === "STARTER";
-          const isPro = plan.id === "PRO";
-          const isAdvance = plan.id === "ADVANCE";
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        {initialPlans
+          .filter((p) => p.id === "STARTER" || p.id === "PRO")
+          .map((plan) => {
+            const isStarter = plan.id === "STARTER";
+            const isPro = plan.id === "PRO";
+            const isAdvance = false;
 
           return (
             <div

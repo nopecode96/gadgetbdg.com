@@ -62,7 +62,7 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const isAdvance = store.tier === "ADVANCE";
+  const isPro = store.tier === "PRO" || store.tier === "ADVANCE";
   const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";
 
   function openCreateModal() {
@@ -226,7 +226,7 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
           </p>
         </div>
 
-        {isAdvance && (
+        {isPro && (
           <button
             onClick={openCreateModal}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition cursor-pointer"
@@ -247,7 +247,7 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
             <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
               <span>💡 Fitur Multi-Cabang &amp; Subdomain Tersendiri</span>
               <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full uppercase">
-                Advance
+                PRO TIER
               </span>
             </h2>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -269,13 +269,13 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
         </div>
       </div>
 
-      {/* ── Locked Banner for Starter / Pro ── */}
-      {!isAdvance && (
+      {/* ── Locked Banner for Starter ── */}
+      {!isPro && (
         <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-blue-500/10 border border-amber-200 rounded-2xl p-6 relative overflow-hidden">
           <div className="max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white">
               <Lock className="w-3.5 h-3.5" />
-              <span>Fitur Eksklusif Paket Advance</span>
+              <span>Fitur Eksklusif Paket PRO</span>
             </div>
             <h2 className="text-lg font-black text-slate-900">
               Punya Lebih dari 1 Konter HP / Titik COD di Bandung?
@@ -291,7 +291,7 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
                 href="/admin/subscription"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow"
               >
-                <span>Upgrade ke Paket Advance</span>
+                <span>Upgrade ke Paket PRO</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -307,11 +307,11 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
           </div>
           <h3 className="font-bold text-slate-900 text-sm">Belum Ada Cabang Fisik Didaftarkan</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            {isAdvance
+            {isPro
               ? "Tambahkan cabang utama atau konter fisik toko Anda untuk mulai mengalokasikan stok unit dan akun staf kasir."
-              : "Upgrade ke paket Advance untuk membuka fitur multi-cabang ini."}
+              : "Upgrade ke paket PRO untuk membuka fitur multi-cabang ini."}
           </p>
-          {isAdvance && (
+          {isPro && (
             <button
               onClick={openCreateModal}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition"
@@ -355,7 +355,7 @@ export function BranchManagerClient({ store, initialBranches }: BranchManagerCli
                       </div>
                     </div>
 
-                    {isAdvance && (
+                    {isPro && (
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => openEditModal(b)}

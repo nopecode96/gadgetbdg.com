@@ -31,6 +31,8 @@ import {
   QrCode,
   Star,
   Share2,
+  Copy,
+  Download,
 } from "lucide-react";
 import { StoreRegistrationModal } from "@/components/saas/StoreRegistrationModal";
 import { TemplateShowcase } from "@/components/saas/TemplateShowcase";
@@ -81,6 +83,7 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
       features: [
         "Kapasitas Hingga 50 Unit Produk Aktif",
         "Subdomain Toko: namatoko.gadgetbdg.com",
+        "Generator Poster Story 9:16 & Caption Siap Posting",
         "0% Potongan Komisi Transaksi (Keuntungan 100% Milik Toko)",
         "Akses Semua Template Desain Modern (PWA Mobile)",
         "Modul Tukar Tambah / Trade-In Otomatis ke WhatsApp",
@@ -100,6 +103,7 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
         "Semua Fitur di Paket Starter +",
         "Kapasitas Produk Tanpa Batas (Unlimited)",
         "Custom Domain Sendiri (namatoko.com / namatoko.id)",
+        "Generator Poster Story 9:16 & Caption Siap Posting",
         "Tampilan Lebih Terpercaya & Bonafide di Bio IG & Google Search",
         "Dukungan SSL Gratis & Setup Domain Dibantu Tim Sampai Beres",
         "Prioritas Server & Dukungan VIP WhatsApp",
@@ -146,6 +150,9 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
           </div>
 
           <nav className="hidden md:flex items-center gap-7 text-sm font-bold text-slate-600">
+            <a href="#story-generator" className="hover:text-blue-600 transition-colors">
+              Poster Story 9:16
+            </a>
             <a href="#qr-kasir" className="hover:text-blue-600 transition-colors">
               QR Meja Kasir
             </a>
@@ -732,6 +739,252 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Tiap ada buyer nanya "ready apa aja bang?", cukup kirim link web tokomu. Buyer bebas memilih unit dan klik tombol beli langsung ke WhatsApp.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3.3. SEKSI GENERATOR POSTER STORY 9:16 & AUTO CAPTION MEDSOS ── */}
+      <section id="story-generator" className="py-20 bg-white border-b border-slate-200 relative overflow-hidden">
+        {/* Subtle decorative ambient lights */}
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-50 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 -right-20 w-96 h-96 bg-indigo-50 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Header Section */}
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-3.5 py-1.5 rounded-full shadow-xs">
+              ⚡ PROMOSI OTOMATIS TANPA RIBET DESAIN
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-tight">
+              Sekali Input Stok, Poster Story 9:16 &amp; Caption Medsos Langsung Siap Posting!
+            </h2>
+            <p className="text-slate-600 text-sm sm:text-base font-medium leading-relaxed">
+              Gak perlu sewa desainer atau buka Canva. Sistem otomatis menyusun foto unit, rincian Battery Health, legalitas IMEI resmi, dan harga jual menjadi poster resolusi tinggi (1080x1920) siap tayang.
+            </p>
+          </div>
+
+          {/* 2 Kolom Konten */}
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            {/* Kolom Kiri: Visual Mockup Kartu Story 9:16 */}
+            <div className="lg:col-span-5 flex justify-center relative">
+              {/* Floating Badge Kiri Atas */}
+              <div className="hidden sm:flex absolute -top-4 -left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl rounded-2xl p-3 items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-pink-500/10 text-pink-600 flex items-center justify-center font-bold">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Format Otomatis</p>
+                  <p className="text-xs font-black text-slate-900">1080 x 1920 HD Ready</p>
+                </div>
+              </div>
+
+              {/* Floating Badge Kanan Bawah */}
+              <div className="hidden sm:flex absolute -bottom-4 -right-4 z-20 bg-slate-950 text-white shadow-2xl rounded-2xl p-3.5 items-center gap-2.5 border border-slate-800">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                  <Share2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Web Share API</p>
+                  <p className="text-xs font-black text-white">1-Klik ke WA Status &amp; IG</p>
+                </div>
+              </div>
+
+              {/* Mobile Phone Mockup Container */}
+              <div className="w-full max-w-[310px] sm:max-w-[330px] rounded-[44px] bg-slate-950 p-3 shadow-2xl ring-1 ring-slate-800 border-4 border-slate-800 relative select-none">
+                {/* Dynamic Island / Speaker Notch */}
+                <div className="w-24 h-4 bg-slate-900 rounded-full mx-auto mb-2 flex items-center justify-end px-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500/80 animate-pulse" />
+                </div>
+
+                {/* 9:16 Inner Canvas Card UI */}
+                <div className="rounded-[32px] overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4 text-white text-center flex flex-col justify-between space-y-3 relative shadow-inner">
+                  {/* Store Header */}
+                  <div>
+                    <h4 className="font-black text-sm tracking-wide text-white">IBOX SECOND STORE</h4>
+                    <p className="text-[10px] text-blue-300 font-medium">📍 Bandung Electronic Center (BEC)</p>
+                    <div className="mt-1.5 inline-block px-3 py-0.5 rounded-full bg-blue-600 text-white font-bold text-[9px] tracking-wider uppercase">
+                      READY STOCK • UNIT TERUJI
+                    </div>
+                  </div>
+
+                  {/* Photo Container with Watermark */}
+                  <div className="relative rounded-2xl overflow-hidden bg-slate-800 border border-slate-700 aspect-[4/3] flex items-center justify-center p-2 shadow-lg">
+                    {/* Flash Sale Banner */}
+                    <div className="absolute top-2 inset-x-2 bg-rose-600 text-white text-[9px] font-black py-0.5 rounded-md shadow-xs">
+                      🔥 FLASH SALE HANYA HARI INI!
+                    </div>
+
+                    {/* Smartphone Illustration */}
+                    <div className="relative z-0 flex flex-col items-center justify-center scale-90">
+                      <div className="w-20 h-32 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 border-2 border-slate-500 shadow-2xl flex flex-col items-center justify-between p-1.5 relative overflow-hidden">
+                        <div className="w-6 h-1 bg-slate-800 rounded-full" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-400 to-blue-600 shadow-inner flex items-center justify-center">
+                          <Smartphone className="w-7 h-7 text-white/90" />
+                        </div>
+                        <div className="w-3 h-3 rounded-full border border-slate-400" />
+                      </div>
+                    </div>
+
+                    {/* Diagonal Watermark Badge */}
+                    <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                      <div className="rotate-[-14deg] px-3.5 py-1 rounded-lg bg-black/55 backdrop-blur-xs border border-white/20 text-white/80 font-black text-[10px] tracking-wider uppercase shadow-md">
+                        IBOX SECOND STORE
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Product Title & Price */}
+                  <div>
+                    <h5 className="font-black text-sm text-white leading-tight">iPhone 13 Pro 256GB Sierra Blue</h5>
+                    <p className="text-base font-black text-sky-400 font-mono mt-0.5">Rp 10.450.000</p>
+                  </div>
+
+                  {/* 4 Badges Grid */}
+                  <div className="grid grid-cols-2 gap-1.5 text-left text-[9px]">
+                    <div className="p-1.5 rounded-lg bg-slate-800/90 border border-slate-700">
+                      <p className="text-slate-400 text-[8px] font-bold">STATUS IMEI</p>
+                      <p className="font-bold text-sky-300 truncate">Resmi iBox</p>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-800/90 border border-slate-700">
+                      <p className="text-slate-400 text-[8px] font-bold">STORAGE</p>
+                      <p className="font-bold text-white truncate">256 GB</p>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-800/90 border border-slate-700">
+                      <p className="text-slate-400 text-[8px] font-bold">KONDISI FISIK</p>
+                      <p className="font-bold text-sky-300 truncate">Mulus 98%</p>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-800/90 border border-slate-700">
+                      <p className="text-slate-400 text-[8px] font-bold">BATTERY HEALTH</p>
+                      <p className="font-bold text-emerald-400 truncate">BH 89%</p>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  <div className="p-1.5 rounded-lg bg-slate-800/60 border border-slate-700/60 text-[9px] text-left text-slate-300">
+                    <p className="truncate">📋 Fullset Box Original • Garansi Toko 30 Hari</p>
+                  </div>
+
+                  {/* Footer CTA */}
+                  <div className="p-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[9px] font-bold space-y-0.5">
+                    <p className="text-yellow-300 font-black text-[10px]">📲 WhatsApp: 0812-3456-7890</p>
+                    <p className="text-white text-[9px]">👉 Cek Katalog Lengkap di Bio Toko Kami</p>
+                    <p className="text-blue-200 text-[8px] font-mono">iboxstore.gadgetbdg.com</p>
+                  </div>
+                </div>
+
+                {/* 3 Action Buttons on Mockup Bar */}
+                <div className="grid grid-cols-3 gap-1.5 mt-2.5 pt-2 border-t border-slate-800/80 text-[10px] font-bold">
+                  <div className="py-1 px-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg flex items-center justify-center gap-1">
+                    <Share2 className="w-3 h-3" />
+                    <span>Share</span>
+                  </div>
+                  <div className="py-1 px-1 bg-slate-800 text-white rounded-lg flex items-center justify-center gap-1">
+                    <Download className="w-3 h-3" />
+                    <span>Unduh</span>
+                  </div>
+                  <div className="py-1 px-1 bg-slate-800 text-slate-200 rounded-lg flex items-center justify-center gap-1">
+                    <Copy className="w-3 h-3" />
+                    <span>Caption</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Kolom Kanan: 3 Poin Praktis & Penjelasan Fitur */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="space-y-4">
+                {/* Poin 1 */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-blue-500 hover:bg-blue-50/30 transition duration-200 flex gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20">
+                    <Share2 className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-base sm:text-lg text-slate-900">
+                        1-Klik Bagikan ke Story (Web Share API)
+                      </h3>
+                      <span className="hidden sm:inline-block text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                        Instan
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed">
+                      Cukup tekan satu tombol dari HP, langsung buka WhatsApp Status, Instagram Stories, atau TikTok tanpa perlu unduh-unggah manual.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Poin 2 */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 hover:bg-emerald-50/30 transition duration-200 flex gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-base sm:text-lg text-slate-900">
+                        Poster HD 1080x1920 Otomatis Ter-Watermark
+                      </h3>
+                      <span className="hidden sm:inline-block text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                        Anti-Maling
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed">
+                      Foto produk otomatis dicap logo toko Anda dengan tata letak profesional, anti-maling olshop bodong.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Poin 3 */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-purple-500 hover:bg-purple-50/30 transition duration-200 flex gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-500/20">
+                    <Copy className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-base sm:text-lg text-slate-900">
+                        Salin Format Caption Siap Posting
+                      </h3>
+                      <span className="hidden sm:inline-block text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                        Siap Closing
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed">
+                      Draf teks caption rapi berformat emoji, rincian spek, dan tautan katalog langsung tersalin ke clipboard, siap di-paste ke feed sosmed atau broadcast WA.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Caption Snippet Preview Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-800">
+                  <span className="font-mono text-[11px] text-slate-400 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Contoh Format Caption Otomatis:
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
+                    Tersedia di Semua Paket
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/80 text-[11px] font-mono text-slate-300 leading-relaxed border border-slate-800/80">
+                  🔥 DIJUAL: iPhone 13 Pro 256GB Sierra Blue 🔥<br />
+                  💰 Harga: Rp 10.450.000 (Nego Santai di Toko)<br />
+                  ✅ Garansi IMEI: Resmi iBox • BH 89% Mulus 98%<br />
+                  🌐 Web Katalog Lengkap: https://iboxstore.gadgetbdg.com<br />
+                  📲 Fast Deal WA: 0812-3456-7890
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                  <p className="text-[11px] text-slate-400">
+                    Semua toko langsung dapat fitur ini di Dashboard Merchant.
+                  </p>
+                  <button
+                    onClick={() => handleOpenRegister("STARTER")}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-sm"
+                  >
+                    <span>Coba Sekarang (Gratis/Demo)</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

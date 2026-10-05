@@ -199,10 +199,10 @@ export function ProductDetailDrawer({
         onClick={onClose}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-        <div className="w-screen max-w-xl bg-white shadow-2xl flex flex-col justify-between transform transition-all duration-300 ease-in-out border-l border-slate-200">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-screen max-w-full sm:max-w-xl bg-white shadow-2xl flex flex-col justify-between transform transition-all duration-300 ease-in-out border-l border-slate-200">
           {/* ── Top Header ── */}
-          <div className="px-6 py-4 border-b border-slate-200/90 flex items-center justify-between bg-slate-50/70 shrink-0">
+          <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/90 flex items-center justify-between bg-slate-50/70 shrink-0">
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="text-[11px] font-black tracking-wider uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md">
                 {product.category || "Smartphone"}
@@ -248,7 +248,7 @@ export function ProductDetailDrawer({
           )}
 
           {/* ── Scrollable Body: Preview or Edit Mode ── */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-6">
             {isEditing ? (
               /* ── IN-PLACE EDIT FORM ── */
               <div className="pb-4">

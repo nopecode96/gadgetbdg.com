@@ -181,8 +181,8 @@ export function BannerPromoManager({ store }: BannerPromoManagerProps) {
         </div>
 
         {/* Banner Preview */}
-        <div className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-6 flex items-center gap-6 min-h-[120px]">
-          <div className="flex-1 space-y-1.5">
+        <div className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 min-h-[120px]">
+          <div className="flex-1 space-y-1.5 w-full">
             {badge && (
               <span className="inline-block px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black uppercase tracking-wider">
                 {badge}
@@ -204,7 +204,7 @@ export function BannerPromoManager({ store }: BannerPromoManagerProps) {
             )}
           </div>
           {bannerImage && (
-            <div className="shrink-0 w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-white/10 shadow-lg">
+            <div className="shrink-0 w-20 h-20 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-white/10 shadow-lg self-center sm:self-auto">
               <img src={bannerImage} alt="Banner" className="w-full h-full object-cover" />
             </div>
           )}

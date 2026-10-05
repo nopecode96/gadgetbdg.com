@@ -551,7 +551,7 @@ export function SubscriptionClient({
       </div>
 
       {/* ── Riwayat Pembayaran (Payment History) ── */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Receipt className="w-5 h-5 text-indigo-600" />
@@ -559,7 +559,7 @@ export function SubscriptionClient({
               Riwayat Pembayaran &amp; Invoice Langganan
             </h3>
           </div>
-          <span className="text-[11px] text-slate-400">10 Transaksi Terakhir</span>
+          <span className="text-[11px] text-slate-400">{payments.length} Transaksi</span>
         </div>
 
         {payments.length === 0 ? (
@@ -568,70 +568,130 @@ export function SubscriptionClient({
             Belum ada catatan pembayaran langganan untuk toko ini.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">
-                  <th className="py-2.5 px-3">Tanggal</th>
-                  <th className="py-2.5 px-3">Paket</th>
-                  <th className="py-2.5 px-3">Nominal</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3">Bukti</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {payments.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50">
-                    <td className="py-2.5 px-3 font-mono text-slate-600">
+          <div className="space-y-3">
+            {/* Mobile View: Adaptive Card List */}
+            <div className="block sm:hidden space-y-3">
+              {payments.map((p) => (
+                <div
+                  key={p.id}
+                  className="p-3.5 rounded-2xl border border-slate-200/90 bg-slate-50/50 space-y-2 text-xs"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[11px] text-slate-500">
                       {new Date(p.createdAt).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
-                    </td>
-                    <td className="py-2.5 px-3 font-bold text-slate-800">{p.tier}</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
-                      {formatRupiah(p.amount)}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          p.status === "APPROVED"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : p.status === "REJECTED"
-                            ? "bg-rose-50 text-rose-700 border border-rose-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
-                        }`}
-                      >
-                        {p.status === "APPROVED" ? (
-                          <Check className="w-3 h-3 text-emerald-600" />
-                        ) : p.status === "REJECTED" ? (
-                          <XCircle className="w-3 h-3 text-rose-600" />
-                        ) : (
-                          <Clock className="w-3 h-3 text-amber-600" />
-                        )}
-                        <span>{p.status}</span>
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      {p.receiptUrl ? (
-                        <a
-                          href={p.receiptUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 hover:underline inline-flex items-center gap-1 font-bold text-[11px]"
-                        >
-                          <span>Lihat Resi</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        p.status === "APPROVED"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : p.status === "REJECTED"
+                          ? "bg-rose-50 text-rose-700 border border-rose-200"
+                          : "bg-amber-50 text-amber-700 border border-amber-200"
+                      }`}
+                    >
+                      {p.status === "APPROVED" ? (
+                        <Check className="w-3 h-3 text-emerald-600" />
+                      ) : p.status === "REJECTED" ? (
+                        <XCircle className="w-3 h-3 text-rose-600" />
                       ) : (
-                        <span className="text-slate-400 text-[11px]">-</span>
+                        <Clock className="w-3 h-3 text-amber-600" />
                       )}
-                    </td>
+                      <span>{p.status}</span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+                    <div className="font-bold text-slate-800">Paket {p.tier}</div>
+                    <div className="font-mono font-black text-slate-900">{formatRupiah(p.amount)}</div>
+                  </div>
+
+                  {p.receiptUrl && (
+                    <div className="pt-1 border-t border-slate-200/60 text-right">
+                      <a
+                        href={p.receiptUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:underline inline-flex items-center gap-1 font-bold text-[11px]"
+                      >
+                        <span>Lihat Bukti Transfer</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View: Clean Table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">
+                    <th className="py-2.5 px-3">Tanggal</th>
+                    <th className="py-2.5 px-3">Paket</th>
+                    <th className="py-2.5 px-3">Nominal</th>
+                    <th className="py-2.5 px-3">Status</th>
+                    <th className="py-2.5 px-3">Bukti</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {payments.map((p) => (
+                    <tr key={p.id} className="hover:bg-slate-50">
+                      <td className="py-2.5 px-3 font-mono text-slate-600">
+                        {new Date(p.createdAt).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="py-2.5 px-3 font-bold text-slate-800">{p.tier}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
+                        {formatRupiah(p.amount)}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            p.status === "APPROVED"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : p.status === "REJECTED"
+                              ? "bg-rose-50 text-rose-700 border border-rose-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
+                          }`}
+                        >
+                          {p.status === "APPROVED" ? (
+                            <Check className="w-3 h-3 text-emerald-600" />
+                          ) : p.status === "REJECTED" ? (
+                            <XCircle className="w-3 h-3 text-rose-600" />
+                          ) : (
+                            <Clock className="w-3 h-3 text-amber-600" />
+                          )}
+                          <span>{p.status}</span>
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        {p.receiptUrl ? (
+                          <a
+                            href={p.receiptUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 hover:underline inline-flex items-center gap-1 font-bold text-[11px]"
+                          >
+                            <span>Lihat Resi</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

@@ -274,32 +274,32 @@ export function SettingsClient({ store }: SettingsClientProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Pengaturan Toko & Custom Domain</h1>
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Pengaturan Toko & Custom Domain</h1>
         <p className="text-xs text-slate-500 mt-1">
           Kustomisasi identitas toko, nomor kontak WhatsApp, tema storefront, dan konfigurasi domain pribadi.
         </p>
       </div>
 
       {/* ── Banner Edukasi Multi-Cabang & Subdomain ── */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/80 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/80 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
           <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
             <Building2 className="w-5 h-5" />
           </div>
-          <div className="space-y-1">
-            <h2 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <div className="space-y-1 min-w-0">
+            <h2 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
               <span>💡 Fitur Multi-Cabang &amp; Subdomain Tersendiri</span>
               <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full uppercase">
                 PRO TIER
               </span>
             </h2>
-            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+            <p className="text-xs text-slate-600 leading-relaxed font-medium break-words">
               Setiap cabang memiliki tautan katalog mandiri. Pada domain sendiri (misal:{" "}
-              <code className="text-blue-700 bg-blue-100/60 px-1 py-0.5 rounded font-mono font-bold">
+              <code className="text-blue-700 bg-blue-100/60 px-1 py-0.5 rounded font-mono font-bold break-all">
                 {store.customDomain || `${store.slug}.com`}
               </code>
               ), cabang dapat diakses via subdomain seperti{" "}
-              <code className="text-purple-700 bg-purple-100/60 px-1 py-0.5 rounded font-mono font-bold">
+              <code className="text-purple-700 bg-purple-100/60 px-1 py-0.5 rounded font-mono font-bold break-all">
                 bec.{store.customDomain || `${store.slug}.com`}
               </code>
               . Pembeli yang masuk melalui link cabang otomatis hanya melihat stok unit cabang tersebut dan langsung terhubung ke WhatsApp kasir konter terkait.

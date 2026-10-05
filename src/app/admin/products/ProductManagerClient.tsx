@@ -170,12 +170,21 @@ export function ProductManagerClient({
     }
   };
 
+  // Pagination state
+  const ITEMS_PER_PAGE = 12;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedProducts = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="space-y-6">
       {/* ── Title & Quota Bar ── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Manajemen Stok Unit</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Manajemen Stok Unit</h1>
           <p className="text-xs text-slate-500 mt-1">
             Update stok, ubah status unit secara realtime, dan kelola listing HP second.
           </p>
@@ -228,7 +237,7 @@ export function ProductManagerClient({
         </div>
 
         {/* Add Button — triggers modal or opens form */}
-        <div className="shrink-0 flex items-center gap-2">
+        <div className="shrink-0 flex items-center flex-wrap gap-2">
           {isQuotaFull ? (
             <>
               <button
@@ -295,7 +304,7 @@ export function ProductManagerClient({
       {/* ── Upgrade Modal ── */}
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-5 animate-scale-up">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-5 animate-scale-up max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setShowUpgradeModal(false)}
@@ -344,7 +353,7 @@ export function ProductManagerClient({
 
       {/* ── Add Product Form (3-Blok Layout) ── */}
       {isFormOpen && !isQuotaFull && (
-        <div className="bg-slate-50/80 rounded-3xl p-5 sm:p-7 border border-blue-200 shadow-md">
+        <div className="bg-slate-50/80 rounded-3xl p-4 sm:p-7 border border-blue-200 shadow-md">
           <ProductForm
             mode="create"
             branches={branches}
@@ -358,19 +367,22 @@ export function ProductManagerClient({
       )}
 
       {/* ── Filter & Search Bar ── */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="relative w-full sm:w-64">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Cari nama, brand, atau kategori..."
             className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {(["ALL", "AVAILABLE", "BOOKED", "SOLD"] as const).map((status) => {
             const count =
               status === "ALL"
@@ -385,8 +397,11 @@ export function ProductManagerClient({
             return (
               <button
                 key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition whitespace-nowrap ${
+                onClick={() => {
+                  setFilterStatus(status);
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition whitespace-nowrap text-xs shrink-0 ${
                   filterStatus === status
                     ? "bg-slate-900 text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -399,15 +414,16 @@ export function ProductManagerClient({
         </div>
       </div>
 
-      {/* ── Products List (Master View) ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="divide-y divide-slate-100">
-          {filtered.length === 0 ? (
-            <div className="text-center py-16 text-slate-400 text-xs">
-              Belum ada data unit yang sesuai filter.
-            </div>
-          ) : (
-            filtered.map((p) => {
+      {/* ── Products List (Adaptive Card-Based Grid) ── */}
+      {filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 text-xs">
+          Belum ada data unit yang sesuai pencarian atau filter.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Card Grid: 1 col on mobile, 2 cols on tablet/laptop, 3 cols on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+            {paginatedProducts.map((p) => {
               const displayImage =
                 p.images && p.images.length > 0 ? p.images[0] : p.thumbnail || null;
 
@@ -415,11 +431,12 @@ export function ProductManagerClient({
                 <div
                   key={p.id}
                   onClick={() => handleOpenDetail(p)}
-                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-blue-50/40 cursor-pointer transition group"
+                  className="bg-white rounded-2xl border border-slate-200/90 hover:border-blue-400 shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer p-4 flex flex-col justify-between gap-3.5 group relative"
                 >
-                  {/* Product Info */}
-                  <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                    <div className="relative w-16 h-16 rounded-xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200">
+                  {/* Row 1: Header Thumbnail & Basic Info */}
+                  <div className="flex items-start gap-3 min-w-0">
+                    {/* Thumbnail 80x80 on mobile, 72x72 on desktop */}
+                    <div className="relative w-20 h-20 sm:w-18 sm:h-18 rounded-xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200">
                       {displayImage ? (
                         <>
                           <img
@@ -440,9 +457,10 @@ export function ProductManagerClient({
                       )}
                     </div>
 
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                    {/* Title, Brand, Price */}
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
                           {p.brand}
                         </span>
                         {p.isFeatured && (
@@ -456,57 +474,65 @@ export function ProductManagerClient({
                             Non-COD
                           </span>
                         )}
-                        <h3 className="font-bold text-sm text-slate-900 truncate group-hover:text-blue-600 transition">
-                          {p.title || p.name}
-                        </h3>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span className="font-extrabold text-blue-600 text-sm">
-                          {formatRupiah(p.price)}
-                        </span>
-                        <span>•</span>
-                        <span>{p.ramRom || (p.storage ? `${p.ram || ""} ${p.storage}` : "-")}</span>
-                        <span>•</span>
-                        <span className="font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded text-[10px] flex items-center gap-0.5">
-                          <Sparkles className="w-2.5 h-2.5" />
-                          {p.grade || p.condition || "Grade A"}
-                        </span>
-                        {p.batteryHealth !== null && p.batteryHealth !== "" && (
-                          <span className="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
-                            <BatteryCharging className="w-3 h-3" /> BH {p.batteryHealth}
-                          </span>
-                        )}
-                        {p.imeiStatus && (
-                          <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
-                            {p.imeiStatus}
-                          </span>
-                        )}
-                        {p.branch && (
-                          <span className="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">
-                            🏢 {p.branch.name}
-                          </span>
-                        )}
-                      </div>
+                      <h3 className="font-bold text-sm text-slate-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition">
+                        {p.title || p.name}
+                      </h3>
 
-                      {(p.conditionNotes || p.minusNotes) && (
-                        <p className="text-[11px] text-slate-500 italic flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3 text-amber-500 shrink-0" />
-                          <span className="truncate">{p.conditionNotes || p.minusNotes}</span>
-                        </p>
-                      )}
+                      <div className="font-black text-blue-600 text-sm sm:text-base pt-0.5">
+                        {formatRupiah(p.price)}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Actions & Status */}
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                    {/* Status Badge Toggle */}
+                  {/* Row 2: Detail Chips */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] pt-1 border-t border-slate-100">
+                    <span className="font-semibold text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                      {p.ramRom || (p.storage ? `${p.ram || ""} ${p.storage}` : "-")}
+                    </span>
+
+                    <span className="font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      {p.grade || p.condition || "Grade A"}
+                    </span>
+
+                    {p.batteryHealth !== null && p.batteryHealth !== "" && (
+                      <span className="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        <BatteryCharging className="w-3 h-3" /> BH {p.batteryHealth}
+                      </span>
+                    )}
+
+                    {p.imeiStatus && (
+                      <span className="font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                        {p.imeiStatus}
+                      </span>
+                    )}
+
+                    {p.branch && (
+                      <span className="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                        🏢 {p.branch.name}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Row 3: Minus Notes (if any) */}
+                  {(p.conditionNotes || p.minusNotes) && (
+                    <div className="text-[11px] text-amber-800 bg-amber-50/70 p-2 rounded-xl border border-amber-200/60 italic flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span className="truncate">{p.conditionNotes || p.minusNotes}</span>
+                    </div>
+                  )}
+
+                  {/* Row 4: Action Bar */}
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                    {/* Status Toggle Button (Always visible without clipping) */}
                     <button
                       type="button"
                       onClick={(e) => handleToggleStatus(e, p.id, p.status)}
                       disabled={statusUpdatingId === p.id}
                       title={`Status: ${p.status}. Klik untuk ubah cepat.`}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs ${
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs ${
                         statusUpdatingId === p.id
                           ? "bg-slate-200 text-slate-500 cursor-wait"
                           : p.status === "AVAILABLE"
@@ -527,54 +553,81 @@ export function ProductManagerClient({
                       )}
                     </button>
 
-                    {/* Quick Featured Toggle */}
-                    <button
-                      type="button"
-                      onClick={(e) => handleToggleFeatured(e, p.id)}
-                      disabled={featuredUpdatingId === p.id}
-                      title={p.isFeatured ? "Unit Pilihan Aktif (Klik untuk matikan)" : "Jadikan Unit Pilihan Minggu Ini"}
-                      className={`p-2 rounded-lg transition ${
-                        featuredUpdatingId === p.id
-                          ? "text-slate-300 cursor-wait"
-                          : p.isFeatured
-                          ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
-                          : "text-slate-300 hover:text-amber-500 hover:bg-amber-50"
-                      }`}
-                    >
-                      <Star className={`w-4 h-4 ${p.isFeatured ? "fill-amber-400" : ""}`} />
-                    </button>
+                    {/* Quick Action Icons */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => handleToggleFeatured(e, p.id)}
+                        disabled={featuredUpdatingId === p.id}
+                        title={p.isFeatured ? "Unit Pilihan Aktif" : "Jadikan Unit Pilihan"}
+                        className={`p-2 rounded-xl transition ${
+                          p.isFeatured
+                            ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+                            : "text-slate-400 hover:text-amber-500 hover:bg-amber-50"
+                        }`}
+                      >
+                        <Star className={`w-4 h-4 ${p.isFeatured ? "fill-amber-400" : ""}`} />
+                      </button>
 
-                    {/* Quick Edit */}
-                    <Link
-                      href={`/admin/products/${p.id}/edit`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                      title="Edit Spesifikasi & Galeri"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Link>
+                      <Link
+                        href={`/admin/products/${p.id}/edit`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition"
+                        title="Edit Produk"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Link>
 
-                    {/* Quick Delete */}
-                    <button
-                      type="button"
-                      onClick={(e) => handleDelete(e, p.id)}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                      title="Hapus Unit"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-
-                    {/* Chevron to indicate detail drawer clickability */}
-                    <div className="text-slate-300 group-hover:text-blue-500 transition pl-1">
-                      <ChevronRight className="w-5 h-5" />
+                      <button
+                        type="button"
+                        onClick={(e) => handleDelete(e, p.id)}
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                        title="Hapus Unit"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
               );
-            })
+            })}
+          </div>
+
+          {/* ── Pagination Controls ── */}
+          {filtered.length > ITEMS_PER_PAGE && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <span className="text-slate-500 font-medium">
+                Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
+                {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} dari {filtered.length} unit
+              </span>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition cursor-pointer"
+                >
+                  ← Sebelumnya
+                </button>
+
+                <span className="px-3 py-1.5 font-bold text-slate-700 bg-slate-100 rounded-lg">
+                  {currentPage} / {totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition cursor-pointer"
+                >
+                  Selanjutnya →
+                </button>
+              </div>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* ── Master-Detail Slide-Over Drawer ── */}
       <ProductDetailDrawer

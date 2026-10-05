@@ -93,10 +93,18 @@ export function TradeInInboxClient({
     },
   };
 
+  const ITEMS_PER_PAGE = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(offers.length / ITEMS_PER_PAGE) || 1;
+  const paginatedOffers = offers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
           Inbox Pengajuan Trade-In
         </h1>
         <p className="text-xs text-slate-500 mt-1">
@@ -106,13 +114,13 @@ export function TradeInInboxClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Offers List */}
-        <div className="lg:col-span-2 space-y-3">
+        <div className="lg:col-span-2 space-y-3.5">
           {offers.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center text-slate-400 text-xs">
               Belum ada pengajuan tukar tambah yang masuk.
             </div>
           ) : (
-            offers.map((offer) => {
+            paginatedOffers.map((offer) => {
               const phone = offer.customerPhone || offer.customerWa;
               let cleanWa = phone.replace(/\D/g, "");
               if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
@@ -144,9 +152,9 @@ export function TradeInInboxClient({
               return (
                 <div
                   key={offer.id}
-                  className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition space-y-3.5"
+                  className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs hover:shadow-md transition space-y-3.5"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-black text-sm text-slate-900">{model}</span>
@@ -156,12 +164,16 @@ export function TradeInInboxClient({
                           {currentBadge.label}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <User className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="font-bold text-slate-800">{offer.customerName}</span>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                        <span className="flex items-center gap-1 font-bold text-slate-800">
+                          <User className="w-3.5 h-3.5 text-slate-400" />
+                          {offer.customerName}
+                        </span>
                         <span>•</span>
-                        <Phone className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{phone}</span>
+                        <span className="flex items-center gap-1">
+                          <Phone className="w-3.5 h-3.5 text-slate-400" />
+                          {phone}
+                        </span>
                       </div>
                     </div>
 
@@ -169,7 +181,7 @@ export function TradeInInboxClient({
                       href={`https://wa.me/${cleanWa}?text=${negoMessage}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition shrink-0"
+                      className="w-full sm:w-auto justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition shrink-0"
                     >
                       <MessageCircle className="w-4 h-4" /> Balas via WA
                     </a>
@@ -222,7 +234,7 @@ export function TradeInInboxClient({
                       <div className="text-[10.5px] font-bold text-slate-500">
                         Foto Fisik Unit ({offer.photoUrls.length} Foto):
                       </div>
-                      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                         {offer.photoUrls.map((url, idx) => (
                           <a
                             key={idx}
@@ -243,7 +255,7 @@ export function TradeInInboxClient({
                   )}
 
                   {/* Dropdown Update Status Penawaran */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3 text-xs">
+                  <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
                     <span className="text-[11px] font-bold text-slate-500">
                       Ubah Status Penawaran:
                     </span>
@@ -253,7 +265,7 @@ export function TradeInInboxClient({
                       onChange={(e) =>
                         handleStatusChange(offer.id, e.target.value as TradeInStatus)
                       }
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                      className="w-full sm:w-auto px-3 py-2 sm:py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
                     >
                       <option value="PENDING">Menunggu Follow-up</option>
                       <option value="CONTACTED">Sedang Dihubungi</option>
@@ -265,7 +277,38 @@ export function TradeInInboxClient({
               );
             })
           )}
+
+          {/* Pagination Controls */}
+          {offers.length > ITEMS_PER_PAGE && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <span className="text-slate-500 font-medium">
+                Halaman {currentPage} dari {totalPages} ({offers.length} pengajuan)
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 transition cursor-pointer"
+                >
+                  ← Sebelumnya
+                </button>
+                <span className="px-3 py-1.5 font-bold text-slate-700 bg-slate-100 rounded-lg">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 transition cursor-pointer"
+                >
+                  Selanjutnya →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
 
         {/* Trade-In Tips / Workflow Box */}
         <div className="space-y-4">

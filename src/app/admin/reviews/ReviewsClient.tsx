@@ -80,6 +80,15 @@ export function ReviewsClient({
     return r.branchId === selectedBranchFilter;
   });
 
+  // Pagination
+  const ITEMS_PER_PAGE = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredReviews.length / ITEMS_PER_PAGE) || 1;
+  const paginatedReviews = filteredReviews.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   // Calculate statistics
   const totalReviews = reviews.length;
   const avgRating =
@@ -348,7 +357,7 @@ export function ReviewsClient({
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
-            {filteredReviews.map((item) => (
+            {paginatedReviews.map((item) => (
               <div
                 key={item.id}
                 className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 hover:bg-slate-50/60 transition"
@@ -417,6 +426,36 @@ export function ReviewsClient({
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {filteredReviews.length > ITEMS_PER_PAGE && (
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span className="text-slate-500 font-medium">
+              Halaman {currentPage} dari {totalPages} ({filteredReviews.length} ulasan)
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3.5 py-2 rounded-xl border border-slate-200 font-bold hover:bg-white disabled:opacity-40 transition cursor-pointer"
+              >
+                ← Sebelumnya
+              </button>
+              <span className="px-3 py-1.5 font-bold text-slate-700 bg-white border border-slate-200 rounded-lg">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3.5 py-2 rounded-xl border border-slate-200 font-bold hover:bg-white disabled:opacity-40 transition cursor-pointer"
+              >
+                Selanjutnya →
+              </button>
+            </div>
           </div>
         )}
       </div>

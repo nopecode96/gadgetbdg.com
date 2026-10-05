@@ -126,19 +126,12 @@ export async function assertCanChangeTemplate(storeId: string, newTemplateId: st
 
 /**
  * Validasi akses fitur Google Review QR Stand.
- * Hanya tersedia untuk Pro dan Advance.
+ * Terbuka penuh untuk semua paket (Starter, Pro, Advance).
  */
 export async function assertCanAccessQrGoogleReview(storeId: string): Promise<PlanGuardResult> {
   const store = await getStoreWithPlan(storeId);
   if (!store) {
     return { allowed: false, error: "Toko tidak ditemukan." };
-  }
-
-  if (!store.plan.hasQrGoogleReview) {
-    return {
-      allowed: false,
-      error: `Fitur Cetak QR Code Google Review hanya tersedia untuk Paket Pro dan Advance. Paket ${store.plan.name} hanya mencakup QR Stand Website Toko.`,
-    };
   }
 
   return { allowed: true };

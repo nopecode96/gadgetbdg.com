@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Printer,
-  Lock,
   Sparkles,
   QrCode,
   Globe,
@@ -12,11 +11,15 @@ import {
   ExternalLink,
   Star,
   CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
   Save,
   Check,
   Loader2,
+  Phone,
+  MessageCircle,
+  Store as StoreIcon,
+  Download,
+  Smartphone,
+  Info,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { updateGoogleReviewUrlAction } from "@/lib/actions";
@@ -53,7 +56,8 @@ interface QrStandsClientProps {
 }
 
 export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
-  const [activeTab, setActiveTab] = useState<"website" | "google_review">("website");
+  // Tabs: "dual" (Default), "website", "google_review"
+  const [activeTab, setActiveTab] = useState<"dual" | "website" | "google_review">("dual");
   const [paperSize, setPaperSize] = useState<"A6" | "A5">("A6");
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
 
@@ -77,36 +81,56 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
   const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || "gadgetbdg.com";
   
   // Hitung website URL (jika cabang dipilih, arahkan ke subdomain cabang atau query cabang)
-  let websiteUrl = store.customDomain
+  const websiteUrl = store.customDomain
     ? (activeBranch ? `https://${activeBranch.slug}.${store.customDomain}` : `https://${store.customDomain}`)
     : (activeBranch ? `https://${store.slug}.${mainDomain}?branch=${activeBranch.slug}` : `https://${store.slug}.${mainDomain}`);
 
-  const currentQrTarget = activeTab === "website" ? websiteUrl : reviewUrlInput;
+  const reviewUrl = reviewUrlInput.trim() || defaultReviewUrl;
 
-  // Local HD QR Code Data URL Generator
-  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  // Local HD QR Code Data URLs (Generate both concurrently)
+  const [catalogQrDataUrl, setCatalogQrDataUrl] = useState<string>("");
+  const [reviewQrDataUrl, setReviewQrDataUrl] = useState<string>("");
 
   useEffect(() => {
     let isSubscribed = true;
-    QRCode.toDataURL(currentQrTarget, {
-      width: 600,
+
+    // 1. Generate Catalog QR
+    QRCode.toDataURL(websiteUrl, {
+      width: 800,
       margin: 1.5,
       errorCorrectionLevel: "H",
-      color: {
-        dark: "#09090b",
-        light: "#ffffff",
-      },
+      color: { dark: "#09090b", light: "#ffffff" },
     })
       .then((url) => {
-        if (isSubscribed) setQrDataUrl(url);
+        if (isSubscribed) setCatalogQrDataUrl(url);
       })
       .catch((err) => {
-        console.error("QR Code Generation Error:", err);
-        // Fallback to external reliable QR Server API
+        console.error("Catalog QR Code Generation Error:", err);
         if (isSubscribed) {
-          setQrDataUrl(
+          setCatalogQrDataUrl(
             `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(
-              currentQrTarget
+              websiteUrl
+            )}&margin=12&format=png&color=0-0-0&bgcolor=255-255-255`
+          );
+        }
+      });
+
+    // 2. Generate Review QR
+    QRCode.toDataURL(reviewUrl, {
+      width: 800,
+      margin: 1.5,
+      errorCorrectionLevel: "H",
+      color: { dark: "#09090b", light: "#ffffff" },
+    })
+      .then((url) => {
+        if (isSubscribed) setReviewQrDataUrl(url);
+      })
+      .catch((err) => {
+        console.error("Review QR Code Generation Error:", err);
+        if (isSubscribed) {
+          setReviewQrDataUrl(
+            `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(
+              reviewUrl
             )}&margin=12&format=png&color=0-0-0&bgcolor=255-255-255`
           );
         }
@@ -115,7 +139,7 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
     return () => {
       isSubscribed = false;
     };
-  }, [currentQrTarget]);
+  }, [websiteUrl, reviewUrl]);
 
   async function handleSaveReviewUrl(e: React.FormEvent) {
     e.preventDefault();
@@ -131,7 +155,7 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       } else {
-        setSaveError(res.error || "Gagal menyimpan link review ulasan Google Maps.");
+        setSaveError(res.error || "Gagal menyimpan link ulasan Google Maps.");
       }
     } catch (err: any) {
       setSaveError(err?.message || "Terjadi kesalahan saat menyimpan link ulasan.");
@@ -144,6 +168,10 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
     window.print();
   }
 
+  const effectivePhone = activeBranch?.whatsapp || store.whatsapp;
+  const effectiveAddress = activeBranch?.address || store.address;
+  const displayDomain = websiteUrl.replace(/^https?:\/\//, "");
+
   return (
     <div className="space-y-6">
       {/* ── Print Media Query CSS ── */}
@@ -153,7 +181,7 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
             size: portrait;
             margin: 0;
           }
-          body {
+          html, body {
             background: #ffffff !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -162,11 +190,13 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
           }
           header,
           nav,
+          aside,
           footer,
-          .no-print {
+          .no-print,
+          [role="navigation"] {
             display: none !important;
           }
-          .print-container {
+          .print-wrapper {
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
@@ -178,7 +208,7 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
           }
           .print-card {
             box-shadow: none !important;
-            border: 2px solid #09090b !important;
+            border: 2.5px solid #09090b !important;
             page-break-inside: avoid !important;
             margin: auto !important;
           }
@@ -188,15 +218,18 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
       {/* ── 1. HEADER HALAMAN (NO-PRINT) ── */}
       <div className="no-print bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
-            <QrCode className="w-3.5 h-3.5 text-indigo-600" />
-            <span>MARKETING KIT DISPLAY MEJA</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+            <span>MARKETING KIT DISPLAY MEJA KASIR</span>
+            <span className="bg-emerald-600 text-white text-[10px] px-2 py-0.2 rounded-full font-bold">
+              STARTER &amp; PRO UNLOCKED
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Marketing Kit: Cetak QR Stand Meja Kasir
+            Cetak QR Code Display Meja Kasir
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
-            Cetak kartu display akrilik untuk dipajang di etalase toko dan meja kasir konter Anda.
+            Pajang kartu akrilik resmi di meja kasir dan etalase konter Anda. Pembeli langsung scan untuk cek seluruh stok katalog dan beri review bintang 5 di Google!
           </p>
         </div>
 
@@ -204,23 +237,34 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
           <button
             type="button"
             onClick={handlePrint}
-            disabled={activeTab === "google_review" && !store.hasQrGoogleReview}
-            className={`px-5 py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg transition cursor-pointer ${
-              activeTab === "google_review" && !store.hasQrGoogleReview
-                ? "bg-slate-300 text-slate-500 cursor-not-allowed shadow-none"
-                : "bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20"
-            }`}
+            className="px-6 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 transition cursor-pointer active:scale-95"
           >
             <Printer className="w-4 h-4 text-emerald-400" />
-            <span>🖨️ Cetak Kartu / Simpan PDF</span>
+            <span>🖨️ Cetak Lembar Meja Kasir (A5 / A6)</span>
           </button>
         </div>
       </div>
 
-      {/* ── 2. DUA TAB SWITCHER & UKURAN KERTAS (NO-PRINT) ── */}
+      {/* ── 2. LAYOUT TABS & UKURAN KERTAS (NO-PRINT) ── */}
       <div className="no-print flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-        {/* Dua Tab Switcher */}
-        <div className="flex items-center gap-2 p-1.5 bg-slate-200/80 rounded-2xl border border-slate-300">
+        {/* Layout Mode Selector (3 Tabs) */}
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-200/80 rounded-2xl border border-slate-300">
+          <button
+            type="button"
+            onClick={() => setActiveTab("dual")}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 ${
+              activeTab === "dual"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-indigo-600" />
+            <span>Dual QR (Katalog + Review)</span>
+            <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-bold">
+              STANDAR
+            </span>
+          </button>
+
           <button
             type="button"
             onClick={() => setActiveTab("website")}
@@ -231,29 +275,24 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
             }`}
           >
             <Globe className="w-4 h-4 text-blue-600" />
-            <span>Katalog Toko (Visit Website)</span>
+            <span>QR Katalog Saja</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("google_review")}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 relative ${
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 ${
               activeTab === "google_review"
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
             <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>Google Maps Review ⭐⭐⭐⭐⭐</span>
-            {!store.hasQrGoogleReview && (
-              <span className="text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-black flex items-center gap-1">
-                <Lock className="w-3 h-3" /> PRO &amp; ADVANCE
-              </span>
-            )}
+            <span>QR Google Review Saja</span>
           </button>
         </div>
 
-        {/* Paper Size Selector */}
+        {/* Paper Size Selector (A6 vs A5) */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs">
           <span className="text-slate-500 pl-1">Ukuran Akrilik:</span>
           {(["A6", "A5"] as const).map((s) => (
@@ -261,13 +300,13 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
               key={s}
               type="button"
               onClick={() => setPaperSize(s)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-black transition ${
+              className={`px-3.5 py-1.5 rounded-xl border text-xs font-black transition cursor-pointer ${
                 paperSize === s
                   ? "bg-blue-600 border-blue-600 text-white shadow-xs"
                   : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
               }`}
             >
-              {s} {s === "A6" ? "(10 x 15 cm / Meja)" : "(15 x 21 cm / Etalase)"}
+              {s} {s === "A6" ? "(10 x 15 cm / Meja Kasir)" : "(15 x 21 cm / Etalase Besar)"}
             </button>
           ))}
         </div>
@@ -285,7 +324,7 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
                 Pilih Cabang untuk QR Meja &amp; Standee
               </h3>
               <p className="text-[11px] text-slate-500">
-                Cetak QR khusus per konter agar pembeli langsung membuka katalog cabang &amp; hotline WA cabang tersebut.
+                Cetak QR khusus per konter agar pembeli langsung membuka katalog cabang &amp; ulasan cabang tersebut.
               </p>
             </div>
           </div>
@@ -309,7 +348,7 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
                   );
                 }
               }}
-              className="px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
               <option value="">Semua Cabang / Toko Pusat (Default)</option>
               {branches.map((b) => (
@@ -322,164 +361,281 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
         </div>
       )}
 
-      {/* ── 3. INPUT FIELD GOOGLE MAPS REVIEW URL (JIKA TAB REVIEW AKTIF & PRO/ADVANCE) ── */}
-      {activeTab === "google_review" && store.hasQrGoogleReview && (
-        <div className="no-print bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-3 animate-fade-in">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-rose-500" />
-                Link Profil Google Maps Toko {activeBranch ? `(${activeBranch.name})` : ""}
-              </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Masukkan tautan langsung ulasan Google Bisnisku toko Anda agar pelanggan langsung diarahkan ke form bintang 5.
-              </p>
-            </div>
-            {saveSuccess && (
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1 self-start sm:self-auto">
-                <Check className="w-3.5 h-3.5" /> Link berhasil disimpan!
-              </span>
-            )}
+      {/* ── 3. INPUT FIELD GOOGLE MAPS REVIEW URL (SELALU TERSEDIA & DAPAT DISIMPAN) ── */}
+      <div className="no-print bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-rose-500" />
+              Link Ulasan Google Maps Toko {activeBranch ? `(${activeBranch.name})` : ""}
+            </h3>
+            <p className="text-xs text-slate-500 font-medium">
+              Tautan langsung ulasan Google Bisnisku toko Anda. Bila belum punya link pendek ulasan, sistem otomatis memakai pencarian Maps toko Anda.
+            </p>
           </div>
-
-          <form onSubmit={handleSaveReviewUrl} className="flex flex-col sm:flex-row gap-2.5">
-            <input
-              type="url"
-              value={reviewUrlInput}
-              onChange={(e) => setReviewUrlInput(e.target.value)}
-              placeholder="https://g.page/r/.../review atau link Google Maps toko"
-              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm font-mono"
-              required
-            />
-            <button
-              type="submit"
-              disabled={isSavingReviewUrl}
-              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition shrink-0"
-            >
-              {isSavingReviewUrl ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Menyimpan...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>Simpan Link Review</span>
-                </>
-              )}
-            </button>
-          </form>
-          {saveError && (
-            <p className="text-xs text-rose-600 font-semibold">{saveError}</p>
+          {saveSuccess && (
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1 self-start sm:self-auto">
+              <Check className="w-3.5 h-3.5" /> Link berhasil disimpan!
+            </span>
           )}
         </div>
-      )}
+
+        <form onSubmit={handleSaveReviewUrl} className="flex flex-col sm:flex-row gap-2.5">
+          <input
+            type="url"
+            value={reviewUrlInput}
+            onChange={(e) => setReviewUrlInput(e.target.value)}
+            placeholder="https://g.page/r/.../review atau link Google Maps toko"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm font-mono"
+            required
+          />
+          <button
+            type="submit"
+            disabled={isSavingReviewUrl}
+            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition shrink-0 cursor-pointer disabled:opacity-50"
+          >
+            {isSavingReviewUrl ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Menyimpan...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Simpan Link Review</span>
+              </>
+            )}
+          </button>
+        </form>
+        {saveError && (
+          <p className="text-xs text-rose-600 font-semibold">{saveError}</p>
+        )}
+      </div>
 
       {/* ── 4. PREVIEW DISPLAY CARD / PRINT CANVAS ── */}
-      <div className="print-container flex justify-center py-4">
+      <div className="print-wrapper flex justify-center py-4">
         {/* ========================================================
-            TAB 1: STAND "SCAN TO VISIT OUR WEBSITE"
+            LAYOUT 1: DUAL QR MEJA KASIR (KATALOG + GOOGLE REVIEW)
             ======================================================== */}
-        {activeTab === "website" && (
+        {activeTab === "dual" && (
           <div
-            className={`print-card bg-white rounded-3xl border-2 border-slate-900 text-slate-900 shadow-2xl flex flex-col items-center justify-between text-center transition-all ${
+            className={`print-card bg-white rounded-3xl border-2 border-slate-900 text-slate-900 shadow-2xl flex flex-col justify-between text-center transition-all ${
               paperSize === "A6"
-                ? "w-[360px] min-h-[510px] p-8"
-                : "w-[440px] min-h-[620px] p-10"
+                ? "w-[380px] min-h-[550px] p-6"
+                : "w-[480px] min-h-[660px] p-8"
             }`}
           >
-            {/* Header: Nama Toko & Subdomain / Custom Domain */}
-            <div className="w-full space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-300 text-[10px] font-black uppercase tracking-wider text-slate-700">
-                <Globe className="w-3 h-3 text-blue-600" />
-                <span>{activeBranch ? `CABANG: ${activeBranch.name.toUpperCase()}` : "OFFICIAL STOREFRONT"}</span>
-              </div>
-              <h2 className="text-2xl font-black text-slate-950 tracking-tight uppercase leading-snug">
+            {/* Bagian Atas: Logo, Nama Toko, Tagline, URL */}
+            <div className="w-full flex flex-col items-center space-y-1.5">
+              {/* Logo Toko */}
+              {store.logoUrl ? (
+                <div className="h-12 flex items-center justify-center mb-1">
+                  <img
+                    src={store.logoUrl}
+                    alt={store.name}
+                    className="max-h-12 max-w-[150px] object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mb-1 shadow-xs">
+                  <StoreIcon className="w-6 h-6" />
+                </div>
+              )}
+
+              {/* Nama Toko */}
+              <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight uppercase leading-snug">
                 {store.name}
               </h2>
-              <p className="text-xs text-slate-500 font-mono font-bold tracking-tight">
-                {websiteUrl.replace(/^https?:\/\//, "")}
+
+              {/* Sub-judul Badge */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-[10px] font-black uppercase tracking-wider text-slate-700">
+                <span>OFFICIAL STORE CATALOG &amp; REVIEW</span>
+              </div>
+
+              {/* URL Toko */}
+              <p className="text-xs text-blue-600 font-mono font-black tracking-tight">
+                {displayDomain}
               </p>
-              {(activeBranch?.address || store.address) && (
-                <p className="text-[11px] text-slate-400 font-medium truncate max-w-xs mx-auto">
-                  📍 {(activeBranch?.address || store.address || "").split(",")[0]}
-                </p>
-              )}
             </div>
 
-            {/* Headline */}
-            <div className="w-full my-3">
-              <div className="py-1 px-4 bg-slate-900 text-white rounded-xl inline-block">
-                <h3 className="text-sm font-black tracking-wider uppercase">
-                  SCAN TO VISIT OUR WEBSITE
-                </h3>
+            {/* Bagian Tengah: Dua QR Code Sejajar (Dual Column) */}
+            <div className="grid grid-cols-2 gap-3 my-4">
+              {/* QR 1: Web Katalog Instan */}
+              <div className="flex flex-col items-center p-3 rounded-2xl bg-slate-50 border-2 border-slate-800 shadow-2xs">
+                <div className="w-full py-1 px-1.5 bg-blue-600 text-white rounded-lg mb-2 text-center">
+                  <h3 className="text-[10px] sm:text-[11px] font-black tracking-tight uppercase leading-none">
+                    SCAN KATALOG &amp; CEK STOK
+                  </h3>
+                </div>
+
+                <div className="w-full aspect-square bg-white rounded-xl p-1 border border-slate-200 flex items-center justify-center shadow-inner">
+                  {catalogQrDataUrl ? (
+                    <img
+                      src={catalogQrDataUrl}
+                      alt={`Katalog ${store.name}`}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                  )}
+                </div>
+
+                <p className="text-[9px] text-slate-600 font-semibold leading-tight mt-2 text-center">
+                  Lihat seluruh etalase unit ready, foto asli, dan cek harga harian.
+                </p>
+              </div>
+
+              {/* QR 2: Google Review Bintang 5 */}
+              <div className="flex flex-col items-center p-3 rounded-2xl bg-amber-50/70 border-2 border-slate-800 shadow-2xs">
+                <div className="w-full py-1 px-1.5 bg-amber-500 text-slate-950 rounded-lg mb-2 text-center flex flex-col items-center justify-center">
+                  <h3 className="text-[10px] sm:text-[11px] font-black tracking-tight uppercase leading-none">
+                    ULAS KAMI DI GOOGLE
+                  </h3>
+                  <div className="flex items-center justify-center gap-0.5 text-slate-950 mt-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="w-2.5 h-2.5 fill-slate-950 text-slate-950" />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="w-full aspect-square bg-white rounded-xl p-1 border border-slate-200 flex items-center justify-center shadow-inner">
+                  {reviewQrDataUrl ? (
+                    <img
+                      src={reviewQrDataUrl}
+                      alt={`Google Review ${store.name}`}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                  )}
+                </div>
+
+                <p className="text-[9px] text-slate-700 font-semibold leading-tight mt-2 text-center">
+                  Puas belanja di toko kami? Scan untuk berikan rating &amp; review bintang 5.
+                </p>
               </div>
             </div>
 
-            {/* QR Code Container */}
-            <div className="p-3.5 rounded-3xl bg-white border-2 border-slate-900 shadow-inner flex flex-col items-center">
-              <div className="relative w-48 h-48 sm:w-52 sm:h-52 bg-white rounded-2xl flex items-center justify-center p-1">
-                {qrDataUrl ? (
-                  <img
-                    src={qrDataUrl}
-                    alt={`QR Code ${store.name}`}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-                  </div>
+            {/* Bagian Bawah: WhatsApp, Alamat Singkat, Watermark */}
+            <div className="w-full space-y-1.5 pt-2 border-t border-slate-200">
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-bold text-slate-800">
+                {effectivePhone && (
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                    <span>WA: {effectivePhone}</span>
+                  </span>
+                )}
+                {effectiveAddress && (
+                  <span className="flex items-center gap-1 text-slate-500 font-medium truncate max-w-[280px]">
+                    <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+                    <span>{effectiveAddress.split(",")[0]}</span>
+                  </span>
                 )}
               </div>
-            </div>
 
-            {/* Teks Ajakan */}
-            <div className="w-full space-y-2 mt-4">
-              <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-950 text-xs font-extrabold leading-relaxed">
-                Buka kamera HP Anda untuk melihat katalog lengkap, cek Battery Health, dan unit ready hari ini.
-              </div>
-              <div className="text-[9px] text-slate-400 font-mono font-medium tracking-wider">
-                POWERED BY GADGETBDG.COM
+              <div className="text-[9px] text-slate-400 font-mono font-bold tracking-wider pt-1 uppercase">
+                Powered by GadgetBdg
               </div>
             </div>
           </div>
         )}
 
         {/* ========================================================
-            TAB 2: STAND "REVIEW US ON GOOGLE ⭐⭐⭐⭐⭐"
+            LAYOUT 2: QR KATALOG TOKO SAJA
+            ======================================================== */}
+        {activeTab === "website" && (
+          <div
+            className={`print-card bg-white rounded-3xl border-2 border-slate-900 text-slate-900 shadow-2xl flex flex-col items-center justify-between text-center transition-all ${
+              paperSize === "A6"
+                ? "w-[380px] min-h-[550px] p-8"
+                : "w-[480px] min-h-[660px] p-10"
+            }`}
+          >
+            {/* Header: Logo, Nama Toko & Subdomain / Custom Domain */}
+            <div className="w-full space-y-1.5">
+              {store.logoUrl ? (
+                <div className="h-12 flex items-center justify-center mb-1">
+                  <img
+                    src={store.logoUrl}
+                    alt={store.name}
+                    className="max-h-12 max-w-[160px] object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mb-1">
+                  <StoreIcon className="w-6 h-6" />
+                </div>
+              )}
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-[10px] font-black uppercase tracking-wider text-slate-700">
+                <Globe className="w-3 h-3 text-blue-600" />
+                <span>{activeBranch ? `CABANG: ${activeBranch.name.toUpperCase()}` : "OFFICIAL STOREFRONT"}</span>
+              </div>
+
+              <h2 className="text-2xl font-black text-slate-950 tracking-tight uppercase leading-snug">
+                {store.name}
+              </h2>
+
+              <p className="text-xs text-blue-600 font-mono font-black tracking-tight">
+                {displayDomain}
+              </p>
+            </div>
+
+            {/* Headline Badge */}
+            <div className="w-full my-2">
+              <div className="py-1.5 px-5 bg-slate-900 text-white rounded-xl inline-block shadow-xs">
+                <h3 className="text-xs sm:text-sm font-black tracking-wider uppercase">
+                  SCAN KATALOG &amp; CEK STOK
+                </h3>
+              </div>
+            </div>
+
+            {/* Large QR Code Container */}
+            <div className="p-3.5 rounded-3xl bg-white border-2 border-slate-900 shadow-inner flex flex-col items-center">
+              <div className="relative w-48 h-48 sm:w-56 sm:h-56 bg-white rounded-2xl flex items-center justify-center p-1">
+                {catalogQrDataUrl ? (
+                  <img
+                    src={catalogQrDataUrl}
+                    alt={`QR Code ${store.name}`}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Teks Ajakan & Footer */}
+            <div className="w-full space-y-2 mt-3">
+              <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-950 text-xs font-extrabold leading-relaxed">
+                Lihat seluruh etalase unit ready, foto asli, dan cek harga harian.
+              </div>
+
+              {effectivePhone && (
+                <p className="text-[11px] font-bold text-slate-700">
+                  💬 WhatsApp Toko: {effectivePhone}
+                </p>
+              )}
+
+              <div className="text-[9px] text-slate-400 font-mono font-bold tracking-wider uppercase">
+                Powered by GadgetBdg
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            LAYOUT 3: QR GOOGLE REVIEW SAJA
             ======================================================== */}
         {activeTab === "google_review" && (
           <div
-            className={`print-card bg-white rounded-3xl border-2 border-slate-900 text-slate-900 shadow-2xl flex flex-col items-center justify-between text-center relative transition-all ${
+            className={`print-card bg-white rounded-3xl border-2 border-slate-900 text-slate-900 shadow-2xl flex flex-col items-center justify-between text-center transition-all ${
               paperSize === "A6"
-                ? "w-[360px] min-h-[510px] p-8"
-                : "w-[440px] min-h-[620px] p-10"
+                ? "w-[380px] min-h-[550px] p-8"
+                : "w-[480px] min-h-[660px] p-10"
             }`}
           >
-            {/* OVERLAY TERKUNCI JIKA AKUN STARTER */}
-            {!store.hasQrGoogleReview && (
-              <div className="no-print absolute inset-0 bg-white/95 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center p-6 text-center space-y-4 rounded-3xl border-2 border-amber-300">
-                <div className="w-14 h-14 rounded-2xl bg-amber-100 border-2 border-amber-400 text-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/10">
-                  <Lock className="w-7 h-7" />
-                </div>
-                <div className="space-y-1.5">
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                    Tingkatkan Peringkat Toko Anda di Google Maps
-                  </h3>
-                  <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-xs mx-auto">
-                    Fitur Cetak Display Akrilik Google Review ⭐⭐⭐⭐⭐ tersedia mulai paket <b>PRO • BISNIS MANDIRI</b>.
-                  </p>
-                </div>
-                <Link
-                  href="/admin/settings"
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 transition flex items-center gap-1.5"
-                >
-                  <span>Upgrade ke Paket Pro Sekarang →</span>
-                </Link>
-              </div>
-            )}
-
-            {/* Header: Logo Google Berwarna Resmi di Bagian Atas */}
+            {/* Header: Logo Google Berwarna & 5 Bintang */}
             <div className="w-full space-y-1.5">
               <div className="flex items-center justify-center gap-1">
                 <span className="text-2xl font-black tracking-tight text-[#4285F4]">G</span>
@@ -490,36 +646,33 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
                 <span className="text-2xl font-black tracking-tight text-[#EA4335]">e</span>
               </div>
 
-              {/* Teks: "review us on Google" */}
               <p className="text-xs font-black uppercase tracking-wider text-slate-800">
-                review us on Google
+                ULAS KAMI DI GOOGLE
               </p>
 
-              {/* Deretan 5 Bintang Emas */}
+              {/* 5 Bintang Emas */}
               <div className="flex items-center justify-center gap-1 text-amber-400 pt-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="w-6 h-6 fill-amber-400 text-amber-400 drop-shadow-xs" />
                 ))}
               </div>
 
-              <h2 className="text-lg font-black text-slate-950 tracking-tight uppercase leading-snug pt-1">
+              <h2 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight uppercase leading-snug pt-1">
                 {store.name}
               </h2>
             </div>
 
             {/* QR Code Container */}
             <div className="p-3.5 rounded-3xl bg-white border-2 border-slate-900 shadow-inner flex flex-col items-center my-2">
-              <div className="relative w-48 h-48 sm:w-52 sm:h-52 bg-white rounded-2xl flex items-center justify-center p-1">
-                {qrDataUrl ? (
+              <div className="relative w-48 h-48 sm:w-56 sm:h-56 bg-white rounded-2xl flex items-center justify-center p-1">
+                {reviewQrDataUrl ? (
                   <img
-                    src={qrDataUrl}
+                    src={reviewQrDataUrl}
                     alt={`QR Google Review ${store.name}`}
                     className="w-full h-full object-contain"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-                  </div>
+                  <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
                 )}
               </div>
               <span className="text-[10px] font-bold text-slate-700 mt-2 flex items-center gap-1">
@@ -528,13 +681,20 @@ export function QrStandsClient({ store, branches = [] }: QrStandsClientProps) {
               </span>
             </div>
 
-            {/* Teks Ajakan */}
+            {/* Teks Ajakan & Footer */}
             <div className="w-full space-y-2 mt-2">
               <div className="p-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 text-xs font-extrabold leading-relaxed">
-                Bantu toko kami berkembang dengan memberikan ulasan bintang 5!
+                Puas belanja di toko kami? Scan untuk berikan rating &amp; review bintang 5.
               </div>
-              <div className="text-[9px] text-slate-400 font-mono font-medium tracking-wider">
-                POWERED BY GADGETBDG.COM
+
+              {effectivePhone && (
+                <p className="text-[11px] font-bold text-slate-700">
+                  💬 WhatsApp Toko: {effectivePhone}
+                </p>
+              )}
+
+              <div className="text-[9px] text-slate-400 font-mono font-bold tracking-wider uppercase">
+                Powered by GadgetBdg
               </div>
             </div>
           </div>

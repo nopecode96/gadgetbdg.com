@@ -15,7 +15,7 @@ export const TIER_LIMITS = {
     templateChangeRule: "Hanya 1x saat pendaftaran",
     hasWatermark: false,
     hasQrWebsite: true,
-    hasQrGoogleReview: false,
+    hasQrGoogleReview: true,
     reports: "Laporan klik WhatsApp saja",
     storyFeature: "Tombol share link di halaman web produk",
     customDomain: false,
@@ -24,10 +24,10 @@ export const TIER_LIMITS = {
     maxReviews: 0,
     description: "Solusi hemat untuk toko HP pemula / konter personal yang ingin katalog online rapi.",
     qrKit: {
-      allowGoogleReview: false,
-      allowHdDownload: false,
+      allowGoogleReview: true,
+      allowHdDownload: true,
       showWatermarkPlatform: true, // label footer: "Powered by gadgetbdg.com"
-      allowedFormats: ["compact-mono"] as const,
+      allowedFormats: ["compact-mono", "acrylic-stand", "tent-card"] as const,
     },
   },
   PRO: {

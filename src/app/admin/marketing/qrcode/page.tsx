@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function AdminQrKitPage() {
+export default function MarketingQrcodePage() {
   redirect("/admin/marketing/qr-stands");
 }

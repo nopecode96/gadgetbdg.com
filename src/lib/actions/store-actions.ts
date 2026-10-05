@@ -319,6 +319,8 @@ export async function updateGoogleReviewUrlAction(storeId: string, googleReviewU
     });
 
     revalidatePath("/admin/marketing/qr-stands");
+    revalidatePath("/admin/marketing/qrcode");
+    revalidatePath("/admin/qrcode");
     revalidatePath("/admin/settings");
 
     return { success: true, store: updated };

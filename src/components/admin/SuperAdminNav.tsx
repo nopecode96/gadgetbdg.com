@@ -46,12 +46,7 @@ export function SuperAdminNav() {
             >
               <Receipt className="w-4 h-4 text-amber-400" /> Verifikasi Bayar
             </Link>
-            <Link
-              href="/super-admin/plans"
-              className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"
-            >
-              <Layers className="w-4 h-4 text-indigo-400" /> Paket SaaS
-            </Link>
+
             <Link
               href="/super-admin/stores"
               className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white flex items-center gap-1.5 transition"

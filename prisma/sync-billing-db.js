@@ -47,7 +47,7 @@ async function syncBillingDb() {
         storeId: targetStore.id,
         tier: targetStore.tier || "PRO",
         planId: targetStore.planId || "PRO",
-        amount: targetStore.planId === "ADVANCE" ? 1000000 : 600000,
+        amount: targetStore.planId === "STARTER" ? 300000 : 600000,
         status: "PENDING",
         receiptUrl: proofUrl,
         notes: "Perpanjangan langganan bulanan toko via Transfer Bank BCA",

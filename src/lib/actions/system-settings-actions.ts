@@ -92,7 +92,6 @@ export async function getSystemSettingsAction(): Promise<SystemSettingsOverview>
   const defaultComms: Record<string, number> = {
     STARTER: 50000,
     PRO: 100000,
-    ADVANCE: 150000,
   };
 
   const plans: SerializedSubscriptionPlan[] = [];

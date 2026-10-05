@@ -211,190 +211,183 @@ export function SettingsManagerClient({ initialData }: { initialData: SystemSett
       {/* TAB 1: Subscription Plans */}
       {activeTab === "plans" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {plans
               .filter((p) => p.id === "STARTER" || p.id === "PRO")
               .map((plan) => {
                 const isSaving = savingPlanId === plan.id;
-                const isAdvance = false;
-              const isPro = plan.id === "PRO";
+                const isPro = plan.id === "PRO";
 
-              return (
-                <div
-                  key={plan.id}
-                  className={`bg-slate-900/70 border border-slate-800/80 rounded-2xl p-6 shadow-xl backdrop-blur-sm flex flex-col justify-between relative overflow-hidden transition-all ${
-                    isAdvance
-                      ? "ring-1 ring-purple-500/20 shadow-purple-950/20"
-                      : isPro
-                      ? "ring-1 ring-indigo-500/20 shadow-indigo-950/20"
-                      : ""
-                  }`}
-                >
-                  {/* Badge & ID */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span
-                        className={`text-xs uppercase font-extrabold px-3 py-1 rounded-full tracking-wider ${
-                          isAdvance
-                            ? "bg-purple-900/60 text-purple-300 border border-purple-500/40"
-                            : isPro
-                            ? "bg-indigo-900/60 text-indigo-300 border border-indigo-500/40"
-                            : "bg-slate-800 text-slate-300 border border-slate-700"
-                        }`}
-                      >
-                        {plan.id}
-                      </span>
-                      <span className="text-xs font-mono text-slate-400">
-                        Tier ID: {plan.id}
-                      </span>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                          Nama Paket
-                        </label>
-                        <input
-                          type="text"
-                          disabled
-                          value={plan.name}
-                          className="w-full bg-slate-950/50 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-300 font-bold cursor-not-allowed"
-                        />
+                return (
+                  <div
+                    key={plan.id}
+                    className={`bg-slate-900/70 border rounded-2xl p-6 shadow-xl backdrop-blur-sm flex flex-col justify-between relative overflow-hidden transition-all ${
+                      isPro
+                        ? "border-indigo-500/40 ring-1 ring-indigo-500/20 shadow-indigo-950/20"
+                        : "border-slate-800/90 shadow-slate-950/20"
+                    }`}
+                  >
+                    {/* Badge & ID */}
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <span
+                          className={`text-xs uppercase font-extrabold px-3 py-1 rounded-full tracking-wider ${
+                            isPro
+                              ? "bg-indigo-900/60 text-indigo-300 border border-indigo-500/40"
+                              : "bg-slate-800 text-slate-300 border border-slate-700"
+                          }`}
+                        >
+                          {plan.id}
+                        </span>
+                        <span className="text-xs font-mono text-slate-400">
+                          Tier ID: {plan.id}
+                        </span>
                       </div>
 
-                      <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                          Harga Berlangganan / Bulan (Rp)
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-4 top-2.5 text-xs text-slate-500 font-bold">
-                            Rp
-                          </span>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                            Nama Paket
+                          </label>
                           <input
-                            type="number"
-                            value={plan.price}
-                            onChange={(e) =>
-                              handlePlanChange(plan.id, "price", Number(e.target.value))
-                            }
-                            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-sm text-white font-mono font-bold placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                            type="text"
+                            disabled
+                            value={plan.name}
+                            className="w-full bg-slate-950/50 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-300 font-bold cursor-not-allowed"
                           />
                         </div>
-                        <p className="text-[11px] text-slate-500 mt-1.5 font-mono">
-                          Format: {formatRupiah(plan.price)} / bulan
-                        </p>
-                      </div>
 
-                      <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                          Maksimal Unit Katalog
-                        </label>
-                        <input
-                          type="number"
-                          value={plan.maxActiveProducts}
-                          onChange={(e) =>
-                            handlePlanChange(
-                              plan.id,
-                              "maxActiveProducts",
-                              Number(e.target.value)
-                            )
-                          }
-                          className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono font-bold placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                        />
-                        <p className="text-[11px] text-slate-500 mt-1.5">
-                          {plan.maxActiveProducts >= 99999
-                            ? "Unlimited unit produk etalase"
-                            : `Maksimal ${plan.maxActiveProducts} produk aktif`}
-                        </p>
-                      </div>
+                        <div>
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                            Harga Berlangganan / Bulan (Rp)
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-2.5 text-xs text-slate-500 font-bold">
+                              Rp
+                            </span>
+                            <input
+                              type="number"
+                              value={plan.price}
+                              onChange={(e) =>
+                                handlePlanChange(plan.id, "price", Number(e.target.value))
+                              }
+                              className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-sm text-white font-mono font-bold placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                            />
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-1.5 font-mono">
+                            Format: {formatRupiah(plan.price)} / bulan
+                          </p>
+                        </div>
 
-                      <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
-                          Komisi Sales Partner (Rp)
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-4 top-2.5 text-xs text-slate-500 font-bold">
-                            Rp
-                          </span>
+                        <div>
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                            Maksimal Unit Katalog
+                          </label>
                           <input
                             type="number"
-                            value={plan.salesCommission}
+                            value={plan.maxActiveProducts}
                             onChange={(e) =>
                               handlePlanChange(
                                 plan.id,
-                                "salesCommission",
+                                "maxActiveProducts",
                                 Number(e.target.value)
                               )
                             }
-                            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-sm text-emerald-300 font-mono font-bold placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono font-bold placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                           />
+                          <p className="text-[11px] text-slate-500 mt-1.5">
+                            {plan.maxActiveProducts >= 99999
+                              ? "Unlimited unit produk etalase (999999)"
+                              : `Maksimal ${plan.maxActiveProducts} produk aktif`}
+                          </p>
                         </div>
-                        <p className="text-[11px] text-emerald-400 mt-1.5 font-mono">
-                          Cair ke sales: {formatRupiah(plan.salesCommission)}
-                        </p>
-                      </div>
 
-                      {/* Checkbox Toggles */}
-                      <div className="pt-3 border-t border-slate-800/80 space-y-3">
-                        <label className="flex items-center justify-between cursor-pointer group">
-                          <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition">
-                            Tampilkan Watermark GadgetBdg
-                          </span>
-                          <input
-                            type="checkbox"
-                            checked={plan.hasWatermark}
-                            onChange={(e) =>
-                              handlePlanChange(plan.id, "hasWatermark", e.target.checked)
-                            }
-                            className="w-4 h-4 rounded bg-slate-950 border-slate-700 accent-indigo-500 cursor-pointer"
-                          />
-                        </label>
+                        <div>
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+                            Komisi Sales Partner (Rp)
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-2.5 text-xs text-slate-500 font-bold">
+                              Rp
+                            </span>
+                            <input
+                              type="number"
+                              value={plan.salesCommission}
+                              onChange={(e) =>
+                                handlePlanChange(
+                                  plan.id,
+                                  "salesCommission",
+                                  Number(e.target.value)
+                                )
+                              }
+                              className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-sm text-emerald-300 font-mono font-bold placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                            />
+                          </div>
+                          <p className="text-[11px] text-emerald-400 mt-1.5 font-mono">
+                            Cair ke sales: {formatRupiah(plan.salesCommission)}
+                          </p>
+                        </div>
 
-                        <label className="flex items-center justify-between cursor-pointer group">
-                          <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition">
-                            Dukungan Custom Domain
-                          </span>
-                          <input
-                            type="checkbox"
-                            checked={plan.hasCustomDomain}
-                            onChange={(e) =>
-                              handlePlanChange(plan.id, "hasCustomDomain", e.target.checked)
-                            }
-                            className="w-4 h-4 rounded bg-slate-950 border-slate-700 accent-indigo-500 cursor-pointer"
-                          />
-                        </label>
+                        {/* Checkbox Toggles */}
+                        <div className="pt-3 border-t border-slate-800/80 space-y-3">
+                          <label className="flex items-center justify-between cursor-pointer group">
+                            <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition">
+                              Tampilkan Watermark GadgetBdg
+                            </span>
+                            <input
+                              type="checkbox"
+                              checked={plan.hasWatermark}
+                              onChange={(e) =>
+                                handlePlanChange(plan.id, "hasWatermark", e.target.checked)
+                              }
+                              className="w-4 h-4 rounded bg-slate-950 border-slate-700 accent-indigo-500 cursor-pointer"
+                            />
+                          </label>
+
+                          <label className="flex items-center justify-between cursor-pointer group">
+                            <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition">
+                              Dukungan Custom Domain
+                            </span>
+                            <input
+                              type="checkbox"
+                              checked={plan.hasCustomDomain}
+                              onChange={(e) =>
+                                handlePlanChange(plan.id, "hasCustomDomain", e.target.checked)
+                              }
+                              className="w-4 h-4 rounded bg-slate-950 border-slate-700 accent-indigo-500 cursor-pointer"
+                            />
+                          </label>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-800/80">
-                    <button
-                      type="button"
-                      disabled={isSaving}
-                      onClick={() => handleSavePlan(plan)}
-                      className={`w-full py-2.5 px-4 rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg ${
-                        isAdvance
-                          ? "bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/20"
-                          : isPro
-                          ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20"
-                          : "bg-slate-700 hover:bg-slate-600 text-white shadow-slate-700/20"
-                      } disabled:opacity-50`}
-                    >
-                      {isSaving ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Menyimpan...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4" />
-                          Simpan Paket {plan.id}
-                        </>
-                      )}
-                    </button>
+                    <div className="mt-6 pt-4 border-t border-slate-800/80">
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => handleSavePlan(plan)}
+                        className={`w-full py-2.5 px-4 rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg ${
+                          isPro
+                            ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20"
+                            : "bg-slate-700 hover:bg-slate-600 text-white shadow-slate-700/20"
+                        } disabled:opacity-50`}
+                      >
+                        {isSaving ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Menyimpan...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            Simpan Paket {plan.id}
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       )}

@@ -33,7 +33,7 @@ async function main() {
   // =========================================================================
   // 2. Seed / Upsert Subscription Plans
   // =========================================================================
-  console.log("📦 Ensuring Subscription Plans (STARTER, PRO, ADVANCE)...");
+  console.log("📦 Ensuring Subscription Plans (STARTER, PRO)...");
   const plans = [
     {
       id: "STARTER",
@@ -82,30 +82,6 @@ async function main() {
       salesCommission: 100000,
       reportsLevel: "SOLD_LEADERBOARD",
       description: "Untuk konter HP aktif BEC / Bandung yang ingin scale-up penjualan & branding profesional.",
-    },
-    {
-      id: "ADVANCE",
-      name: "Advance",
-      labelBadge: "ADVANCE • KELAS SULTAN",
-      tagline: "Ekosistem Tanpa Batas untuk Jaringan Cabang",
-      price: 1000000,
-      originalPrice: 1500000,
-      discountBadge: "HEMAT 33%",
-      popularBadge: "EKSKLUSIF",
-      period: "/ bulan",
-      maxActiveProducts: 999999,
-      maxAdmins: 5,
-      availableTemplatesCount: 6,
-      templateCooldownDays: 0,
-      templateChangeRule: "Bebas ganti template kapan saja",
-      hasWatermark: true,
-      hasQrWebsite: true,
-      hasQrGoogleReview: true,
-      hasStoryMaker: true,
-      hasCustomDomain: true,
-      salesCommission: 150000,
-      reportsLevel: "BRANCH_FULL",
-      description: "Kapasitas tanpa batas untuk juragan HP second dengan perputaran stok masif & multi-cabang.",
     },
   ];
 

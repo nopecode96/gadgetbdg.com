@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Copy, Check, Share2, Sparkles, Smartphone, Instagram, Facebook } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 import { StoryCardGenerator } from "@/components/admin/StoryCardGenerator";
-import { AdvancePaywallCard } from "@/components/admin/AdvancePaywallCard";
 
 interface Product {
   id: string;
@@ -28,8 +27,6 @@ export function SocialGeneratorClient({
   store?: any;
   products: Product[];
 }) {
-  const isAdvance = store?.tier === "ADVANCE" || store?.planId === "ADVANCE";
-
   const [selectedProductId, setSelectedProductId] = useState<string>(products[0]?.id || "");
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
@@ -41,7 +38,7 @@ export function SocialGeneratorClient({
     setTimeout(() => setCopiedType(null), 2000);
   }
 
-  if (!isAdvance) {
+  if (!product) {
     return (
       <div className="space-y-6">
         <div>
@@ -53,20 +50,19 @@ export function SocialGeneratorClient({
           </p>
         </div>
 
-        <AdvancePaywallCard
-          currentTier={store?.tier || "STARTER"}
-          storeName={store?.name}
-          featureTitle="Generator Konten Story 9:16 & Poster Promosi"
-          featureDescription="Fitur Eksklusif Paket Advance: Generator Konten Story 9:16 & Subdomain Khusus Cabang hanya tersedia untuk pengguna paket Advance. Tingkatkan paket Anda untuk membuka fitur otomatisasi promosi dan multi-cabang tanpa batas."
-        />
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="bg-white rounded-2xl p-12 text-center text-slate-400 text-xs border border-slate-200">
-        Belum ada produk untuk digenerate captionnya.
+        <div className="bg-white rounded-2xl p-12 text-center text-slate-500 text-xs border border-slate-200 space-y-3">
+          <Smartphone className="w-10 h-10 text-slate-400 mx-auto" />
+          <p className="font-semibold text-slate-700">Belum ada unit produk di etalase toko Anda.</p>
+          <p className="text-slate-400 text-[11px] max-w-md mx-auto">
+            Tambahkan produk ke katalog stok terlebih dahulu agar dapat meng-generate poster Story 9:16 dan caption medsos secara otomatis.
+          </p>
+          <a
+            href="/admin/products/new"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition"
+          >
+            + Tambah Produk Pertama
+          </a>
+        </div>
       </div>
     );
   }

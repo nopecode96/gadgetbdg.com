@@ -173,6 +173,19 @@ export async function assertCanAccessQrGoogleReview(storeId: string): Promise<Pl
 }
 
 /**
+ * Validasi akses fitur Generator Media & Caption Medsos (Marketing Generator & Story Card 9:16).
+ * Terbuka penuh untuk SEMUA paket (STARTER & PRO) tanpa lock barrier.
+ */
+export async function assertCanAccessMarketingGenerator(storeId: string): Promise<PlanGuardResult> {
+  const store = await getStoreWithPlan(storeId);
+  if (!store) {
+    return { allowed: false, error: "Toko tidak ditemukan." };
+  }
+
+  return { allowed: true };
+}
+
+/**
  * Generic feature flag guard berdasarkan kolom boolean SubscriptionPlan.
  */
 export async function assertFeatureAccess(
@@ -182,6 +195,15 @@ export async function assertFeatureAccess(
   const store = await getStoreWithPlan(storeId);
   if (!store) {
     return { allowed: false, error: "Toko tidak ditemukan." };
+  }
+
+  // Fitur QR Website, QR Google Review, dan Story Maker / Marketing terbuka untuk semua paket
+  if (
+    featureKey === "hasStoryMaker" ||
+    featureKey === "hasQrWebsite" ||
+    featureKey === "hasQrGoogleReview"
+  ) {
+    return { allowed: true };
   }
 
   const hasAccess = Boolean(store.plan[featureKey]);

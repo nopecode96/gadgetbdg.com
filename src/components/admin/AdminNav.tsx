@@ -38,10 +38,10 @@ export function AdminNav({ currentSlug, storeName, userName, role }: AdminNavPro
               <RefreshCw className="w-4 h-4" /> Inbox Trade-In
             </Link>
             <Link
-              href="/admin/social-tools"
+              href="/admin/marketing"
               className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1.5 transition"
             >
-              <Share2 className="w-4 h-4" /> Generator Medsos
+              <Share2 className="w-4 h-4" /> Marketing &amp; Medsos
             </Link>
             <Link
               href="/admin/marketing/qr-stands"

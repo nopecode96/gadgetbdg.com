@@ -1,6 +1,6 @@
 import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { SocialGeneratorClient } from "@/app/admin/social-tools/SocialGeneratorClient";
+import { MarketingClient } from "./MarketingClient";
 
 export const revalidate = 0;
 
@@ -36,7 +36,7 @@ export default async function AdminMarketingPage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
-      <SocialGeneratorClient store={serializedStore} products={serializedProducts as any} />
+      <MarketingClient store={serializedStore} products={serializedProducts as any} />
     </div>
   );
 }

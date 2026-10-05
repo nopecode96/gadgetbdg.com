@@ -75,12 +75,13 @@ export function AdminSidebar({
       title: "Marketing & Medsos",
       href: "/admin/marketing",
       icon: Share2,
-      isLocked: isStarter || tier === "PRO",
+      exact: true,
     },
     {
       title: "QR Meja & Standee",
       href: "/admin/marketing/qr-stands",
       icon: QrCode,
+      aliases: ["/admin/marketing/qrcode", "/admin/qr-kit", "/admin/qrcode"],
     },
     {
       title: "Ulasan & Testimoni",
@@ -218,9 +219,24 @@ export function AdminSidebar({
         {/* ── VERTICAL NAVIGATION MENU ── */}
         <nav className="px-2 py-2 space-y-1">
           {navigationItems.map((item) => {
-            const isActive = item.exact
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
+            let isActive = false;
+            if (item.exact) {
+              isActive = pathname === item.href;
+            } else if (item.href === "/admin/marketing/qr-stands") {
+              isActive =
+                pathname.startsWith("/admin/marketing/qr-stands") ||
+                pathname.startsWith("/admin/marketing/qrcode") ||
+                pathname.startsWith("/admin/qr-kit") ||
+                pathname.startsWith("/admin/qrcode");
+            } else if (item.href === "/admin/marketing") {
+              isActive = pathname === "/admin/marketing" || pathname === "/admin/social-tools";
+            } else if ((item as any).aliases) {
+              isActive =
+                pathname.startsWith(item.href) ||
+                (item as any).aliases.some((a: string) => pathname.startsWith(a));
+            } else {
+              isActive = pathname.startsWith(item.href);
+            }
 
             const Icon = item.icon;
 

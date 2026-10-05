@@ -359,7 +359,7 @@ export function SalesDashboardClient({
             <div className="text-xs text-slate-400 mt-1">Dari perpanjangan toko aktif</div>
           </div>
           <div className="mt-2 text-[11px] text-indigo-300/70">
-            Starter Rp 50rb • Pro Rp 100rb • Adv Rp 150rb
+            Starter (Rp 300rb): Rp 50.000/bln • Pro (Rp 600rb): Rp 100.000/bln
           </div>
         </div>
       </div>

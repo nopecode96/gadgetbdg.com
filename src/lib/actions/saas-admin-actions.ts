@@ -181,29 +181,59 @@ export async function paySalesCommissionAction(commissionId: string) {
   try {
     if (!commissionId) return { success: false, error: "Commission ID wajib diisi." };
 
-    const comm = await prisma.salesCommissionLog.findUnique({
+    // 1. Cek di tabel SalesCommissionLog
+    const commLog = await prisma.salesCommissionLog.findUnique({
       where: { id: commissionId },
       include: { salesUser: true, store: true },
     });
 
-    if (!comm) return { success: false, error: "Data komisi tidak ditemukan." };
-    if (comm.status === "PAID") return { success: false, error: "Komisi ini sudah dicairkan sebelumnya." };
+    if (commLog) {
+      if (commLog.status === "PAID") return { success: false, error: "Komisi ini sudah dicairkan sebelumnya." };
 
-    await prisma.salesCommissionLog.update({
+      await prisma.salesCommissionLog.update({
+        where: { id: commissionId },
+        data: {
+          status: "PAID",
+          paidAt: new Date(),
+        },
+      });
+
+      revalidatePath("/super-admin/sales-portal");
+      revalidatePath("/super-admin");
+
+      return {
+        success: true,
+        message: `Komisi Rp ${commLog.amount.toLocaleString("id-ID")} untuk ${commLog.salesUser.name} (${commLog.store.name}) berhasil ditandai LUNAS!`,
+      };
+    }
+
+    // 2. Cek di tabel SalesCommission
+    const comm = await prisma.salesCommission.findUnique({
       where: { id: commissionId },
-      data: {
-        status: "PAID",
-        paidAt: new Date(),
-      },
+      include: { salesPartner: true, store: true },
     });
 
-    revalidatePath("/super-admin/sales-portal");
-    revalidatePath("/super-admin");
+    if (comm) {
+      if (comm.status === "PAID") return { success: false, error: "Komisi ini sudah dicairkan sebelumnya." };
 
-    return {
-      success: true,
-      message: `Komisi Rp ${comm.amount.toLocaleString("id-ID")} untuk ${comm.salesUser.name} (${comm.store.name}) berhasil ditandai LUNAS!`,
-    };
+      await prisma.salesCommission.update({
+        where: { id: commissionId },
+        data: {
+          status: "PAID",
+          paidAt: new Date(),
+        },
+      });
+
+      revalidatePath("/super-admin/sales-portal");
+      revalidatePath("/super-admin");
+
+      return {
+        success: true,
+        message: `Komisi Rp ${Number(comm.amount).toLocaleString("id-ID")} untuk ${comm.salesPartner.name} (${comm.store.name}) berhasil ditandai LUNAS!`,
+      };
+    }
+
+    return { success: false, error: "Data komisi tidak ditemukan." };
   } catch (error: any) {
     console.error("paySalesCommissionAction error:", error);
     return { success: false, error: error.message || "Gagal mencairkan komisi." };

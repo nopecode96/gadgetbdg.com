@@ -28,6 +28,9 @@ import {
   Unlock,
   Users,
   Percent,
+  QrCode,
+  Star,
+  Share2,
 } from "lucide-react";
 import { StoreRegistrationModal } from "@/components/saas/StoreRegistrationModal";
 import { TemplateShowcase } from "@/components/saas/TemplateShowcase";
@@ -74,45 +77,30 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
       highlight: false,
       ctaText: "Mulai Paket Starter",
       discountBadge: "HEMAT 28%",
-      tagline: "Langkah Awal Konter Manual Jadi Katalog Online",
+      tagline: "Katalog Online PWA Praktis Pengganti Linktree",
       features: [
-        "Subdomain [toko].gadgetbdg.com",
-        "Label Spesifikasi HP Bekas (BH, IMEI, Minus)",
-        "Cetak QR Code Display Meja Toko (Website)",
-        "Laporan Performa: Klik WhatsApp Saja",
-        "Tombol Share Link di Halaman Web Produk",
-        "Direct WhatsApp Order & Form Trade-In",
+        "Subdomain Toko: namatoko.gadgetbdg.com",
+        "0% Potongan Komisi Transaksi (Keuntungan 100% Milik Toko)",
+        "Akses Semua Template Desain Modern (PWA Mobile)",
+        "Modul Tukar Tambah / Trade-In Otomatis ke WhatsApp",
+        "Watermark Otomatis Logo Toko Anti-Maling",
+        "Cetak QR Code Meja Kasir (Katalog Web & Review Google)",
+        "Kartu Inspeksi Fisik & Battery Health (BH) Transparan",
       ],
     },
     PRO: {
-      labelBadge: "PRO • BISNIS MANDIRI",
-      popularBadge: "PALING LARIS",
+      labelBadge: "PRO • REKOMENDASI",
+      popularBadge: "PALING POPULER",
       highlight: true,
-      ctaText: "Pilih Paket Paling Laris (Pro)",
+      ctaText: "Pilih Paket Pro (Paling Populer)",
       discountBadge: "HEMAT 33%",
-      tagline: "Wajib Punya Untuk Konter Yang Mau Naik Kelas",
+      tagline: "Toko Online Bonafide dengan Domain Brand Sendiri",
       features: [
-        "Subdomain [toko].gadgetbdg.com",
-        "Watermark Otomatis Logo Tokomu (Anti-Maling)",
-        "Generator Story IG 9:16 Siap Upload Sekali Klik",
-        "Fitur Tukar Tambah / Trade-In Terintegrasi",
-        "Cetak Label QR Stiker Meja & Etalase Kaca",
-        "Direct WhatsApp Order & Form Trade-In",
-      ],
-    },
-    ADVANCE: {
-      labelBadge: "ADVANCE • JURAGAN CABANG",
-      highlight: false,
-      ctaText: "Mulai Paket Advance",
-      discountBadge: "HEMAT 33%",
-      tagline: "Katalog Tanpa Batas Untuk Bos Konter Kelas Kakap",
-      features: [
-        "Support Custom Domain Sendiri (.com / .id)",
-        "Katalog Unlimited Tanpa Batas Unit HP",
-        "Bebas Watermark GadgetBdg (100% Brand Sendiri)",
-        "Watermark Logo Toko & Generator Poster Promo",
-        "Prioritas Server & Jalur Khusus CS VIP WhatsApp",
-        "Multi-Admin & Manajemen Multi-Cabang",
+        "Semua Fitur di Paket Starter +",
+        "Custom Domain Sendiri (namatoko.com / namatoko.id)",
+        "Tampilan Lebih Terpercaya & Bonafide di Bio IG & Google Search",
+        "Dukungan SSL Gratis & Setup Domain Dibantu Tim Sampai Beres",
+        "Prioritas Server & Dukungan VIP WhatsApp",
       ],
     },
   };
@@ -155,9 +143,12 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
             </span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-bold text-slate-600">
             <a href="#fitur" className="hover:text-blue-600 transition-colors">
-              4 Solusi Konter
+              3 Pilar Utama
+            </a>
+            <a href="#qr-kasir" className="hover:text-blue-600 transition-colors">
+              QR Meja Kasir
             </a>
             <a href="#cara-kerja" className="hover:text-blue-600 transition-colors">
               Cara Kerja
@@ -205,17 +196,16 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             {/* Kolom Kiri: Copywriting Memikat */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-900 text-xs font-black shadow-xs">
-                <Flame className="w-4 h-4 text-amber-500 animate-pulse" />
-                <span>SOLUSI TERPERCAYA KONTER {settings.cityCoverage.toUpperCase()}</span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-800 text-xs font-black shadow-xs">
+                <span>🚀 UPGRADE LINKTREE BIO SOSMED KAMU</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.15]">
-                {settings.heroTitle}
+                Stop Bikin Pembeli Pusing dengan Linktree Kosong. Ubah Jadi Web Katalog HP Siap Closing!
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">
-                {settings.heroSubtitle}
+                Cukup pasang 1 link katalog di bio Instagram, TikTok, Facebook, dan status WA. Pembeli langsung tahu stok unit ready, cek foto asli &amp; BH tanpa spam chat tanya stok, dan deal instan ke WhatsApp toko Anda.
               </p>
 
               {/* Action Buttons */}
@@ -225,21 +215,15 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
                   className="px-6 sm:px-7 py-4 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2 transition text-sm sm:text-base shrink-0"
                 >
                   <Sparkles className="w-5 h-5 text-amber-300" />
-                  <span>🚀 Buat Web Toko Sekarang</span>
+                  <span>Bikin Web Katalog Toko (Mulai Gratis/Demo)</span>
                 </button>
                 <div className="flex items-center gap-2.5">
                   <a
                     href="#showcase"
-                    className="px-4 py-4 rounded-2xl font-bold text-slate-800 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition text-sm shadow-xs"
+                    className="px-5 py-4 rounded-2xl font-bold text-slate-800 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition text-sm shadow-xs"
                   >
-                    <span>Pilihan Template</span>
+                    <span>Lihat Contoh Katalog PWA</span>
                     <ArrowRight className="w-4 h-4 text-slate-500" />
-                  </a>
-                  <a
-                    href="#harga"
-                    className="px-4 py-4 rounded-2xl font-bold text-blue-700 bg-blue-50 border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-100/70 flex items-center justify-center gap-1.5 transition text-sm shadow-xs"
-                  >
-                    <span>Lihat Biaya Paket</span>
                   </a>
                 </div>
               </div>
@@ -248,15 +232,15 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
               <div className="pt-3 flex flex-wrap items-center gap-4 text-xs font-extrabold text-slate-700">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Tanpa Koding</span>
+                  <span>1 Link untuk Semua Bio Medsos</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Auto-Watermark Anti-Maling Foto</span>
+                  <span>Format PWA Tanpa Koding</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Support {settings.cityCoverage}</span>
+                  <span>Transaksi 100% Bebas Komisi</span>
                 </div>
               </div>
             </div>
@@ -266,10 +250,10 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
               <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200/90 relative">
                 <div className="text-center pb-3.5 mb-3.5 border-b border-slate-100">
                   <span className="text-[11px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
-                    REALITA JUALAN HP BEKAS 2026
+                    MASALAH JUALAN HP DI SOSMED
                   </span>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1.5">
-                    Kenapa Harus Punya Web Toko Sendiri?
+                    Kenapa Harus Ganti Linktree &amp; Multi-Posting?
                   </h3>
                 </div>
 
@@ -278,13 +262,13 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
                   <div className="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 space-y-2">
                     <div className="flex items-center gap-2 text-rose-700 font-black text-xs uppercase tracking-wide">
                       <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                      <span>JUALAN DI MARKETPLACE &amp; FB</span>
+                      <span>CARA LAMA (LINKTREE &amp; MULTI-POSTING)</span>
                     </div>
                     <ul className="text-xs text-rose-950 space-y-1.5 pl-4 list-disc font-medium leading-relaxed">
-                      <li>Toko Hijau &amp; Orange potong komisi 6% - 10%+. Jual iPhone Rp15 Juta, kepotong Rp1 Juta lebih cuma buat biaya admin!</li>
-                      <li>Uang hasil penjualan ditahan berhari-hari, rawan dibekukan sepihak kalau pembeli nakal ajukan komplain retur.</li>
-                      <li>FB Marketplace penuh penipu bukti transfer palsu (e-cash), akun kloningan, dan tukang PHP ngajak COD lalu kabur.</li>
-                      <li>Di bawah postingan Anda, aplikasi sengaja memunculkan unit toko sebelah yang jual lebih murah Rp20 ribu.</li>
+                      <li>Pasang Linktree cuma isi teks kaku: calon pembeli bingung mau cari unit HP apa.</li>
+                      <li>Capek bikin konten &amp; posting manual berkali-kali ke Feeds, Reels, TikTok, FB, &amp; Story WA.</li>
+                      <li>HP panas melayani spam chat berulang: &quot;ready tipe apa min?&quot;, &quot;BH berapa?&quot;, &quot;minta foto asli dong&quot;.</li>
+                      <li>Barang sudah laku (sold out) tapi lupa dihapus di postingan lama, bikin pembeli kecewa.</li>
                     </ul>
                   </div>
 
@@ -292,20 +276,20 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
                   <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 space-y-2 shadow-xs">
                     <div className="flex items-center gap-2 text-emerald-800 font-black text-xs uppercase tracking-wide">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>PAKAI WEB TOKO SENDIRI (GADGETBDG)</span>
+                      <span>PAKAI 1 LINK KATALOG GADGETBDG</span>
                     </div>
                     <ul className="text-xs text-emerald-950 space-y-1.5 pl-4 list-disc font-bold leading-relaxed">
-                      <li>Bebas potongan transaksi 0%! Uang penjualan 100% utuh masuk ke rekening atau kasir toko Anda.</li>
-                      <li>Duit langsung cair detik itu juga via Cash COD atau transfer bank langsung saat cek fisik unit.</li>
-                      <li>Toko profesional dengan link &amp; logo sendiri di bio IG/WA, pembeli langsung percaya tanpa drama PHP.</li>
-                      <li>100% panggung milik Anda sendiri: tidak ada perang banting harga atau iklan toko sebelah di etalase Anda.</li>
+                      <li>Cukup 1 link di semua bio medsos: langsung tampil seperti aplikasi toko HP modern &amp; interaktif.</li>
+                      <li>Spek transparan: pembeli bisa cek foto asli, kondisi fisik, Battery Health, &amp; legalitas IMEI mandiri.</li>
+                      <li>Sekali upload atau tandai &quot;TERJUAL&quot; di admin, etalase otomatis terbarui tanpa harus repost.</li>
+                      <li>Tombol beli langsung meluncur ke WhatsApp kasir lengkap dengan ringkasan unit pilihan buyer.</li>
                     </ul>
                   </div>
                 </div>
 
                 <div className="mt-3.5 pt-3 border-t border-slate-100 text-center">
                   <span className="text-[11px] sm:text-xs text-emerald-700 font-black">
-                    ⚡ 100% Profit Milik Anda • Solusi Pedagang Gadget Mandiri
+                    ⚡ Solusi Pintar Toko HP • Stop Capek Multi-Posting
                   </span>
                 </div>
               </div>
@@ -623,87 +607,76 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
         </div>
       </section>
 
-      {/* ── 2. SEKSI 4 SOLUSI SAKIT KEPALA PEDAGANG ── */}
+      {/* ── 2. SEKSI 3 PILAR MANFAAT ── */}
       <section id="fitur" className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <span className="text-xs font-black uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-              SOLUSI MASALAH HARIAN TOKO
+              3 PILAR UTAMA KATALOG
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
-              Bukan Fitur Abstrak. Ini Senjata Menjawab Keraguan Pembeli.
+              3 Alasan Kenapa Konter HP Modern Tinggalkan Linktree Biasa
             </h2>
             <p className="text-slate-600 text-sm sm:text-base font-medium">
-              Dirancang khusus dari pengalaman nyata pedagang HP bekas di sentra konter Indonesia.
+              Solusi cerdas mengubah traffic medsos menjadi transaksi closing instan tanpa drama chat berkepanjangan.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 rounded-3xl bg-slate-50 border-2 border-slate-200 hover:border-blue-500 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Pilar 1 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border-2 border-slate-200 hover:border-blue-500 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-600 flex items-center justify-center mb-4">
-                  <ShieldCheck className="w-6 h-6" />
+                  <Smartphone className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-black text-slate-900 mb-2 leading-snug">
-                  Katalog Transparan Khusus HP Second
+                <h3 className="text-lg font-black text-slate-900 mb-2 leading-snug">
+                  1 Link untuk Semua Bio Sosmed
                 </h3>
-                <p className="text-slate-600 text-xs leading-relaxed font-medium">
-                  Lengkap dengan persentase <b>Battery Health</b>, legalitas <b>IMEI Kemenperin</b>, grade mulus, dan foto catatan minus lecet fisik. Menghemat waktu Anda menjawab chat berulang-ulang.
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                  Pasang di bio IG, TikTok, FB, dan status WA. Begitu diklik langsung terbuka katalog responsif format PWA layaknya aplikasi mobile toko resmi tanpa download.
                 </p>
               </div>
-              <div className="pt-2 border-t border-slate-200/80 text-[11px] font-black text-blue-600">
-                ✓ Buyer yakin, closing lebih cepat
+              <div className="pt-3 border-t border-slate-200/80 text-xs font-black text-blue-600 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                <span>Format PWA Mobile Eksklusif</span>
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-50 border-2 border-slate-200 hover:border-emerald-500 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
+            {/* Pilar 2 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border-2 border-slate-200 hover:border-emerald-500 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center mb-4">
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-black text-slate-900 mb-2 leading-snug">
-                  Otomatis Watermark Logo Toko
+                <h3 className="text-lg font-black text-slate-900 mb-2 leading-snug">
+                  Bebas Spam Tanya Stok &amp; Kondisi
                 </h3>
-                <p className="text-slate-600 text-xs leading-relaxed font-medium">
-                  Setiap upload foto dagangan langsung dari kamera HP, logo tokomu otomatis dicap rapi di atas foto. Bebas dari calo dan penipu medsos yang suka mencuri foto etalase konter.
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                  Pembeli bisa filter merk, rentang harga, dan grade mulus sendiri. Anda hanya melayani pembeli yang sudah siap transfer atau siap datang ke toko.
                 </p>
               </div>
-              <div className="pt-2 border-t border-slate-200/80 text-[11px] font-black text-emerald-600">
-                ✓ Foto 100% aman anti-pencurian
+              <div className="pt-3 border-t border-slate-200/80 text-xs font-black text-emerald-600 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Closing Cepat via WhatsApp Kasir</span>
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-50 border-2 border-slate-200 hover:border-purple-500 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
+            {/* Pilar 3 */}
+            <div className="p-7 rounded-3xl bg-slate-50 border-2 border-slate-200 hover:border-purple-500 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-purple-600/10 text-purple-600 flex items-center justify-center mb-4">
-                  <RefreshCw className="w-6 h-6" />
+                  <ShieldCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-black text-slate-900 mb-2 leading-snug">
-                  Formulir Terima Tukar Tambah / Beli Unit
+                <h3 className="text-lg font-black text-slate-900 mb-2 leading-snug">
+                  Watermark &amp; Anti-Bajak Foto Otomatis
                 </h3>
-                <p className="text-slate-600 text-xs leading-relaxed font-medium">
-                  Pembeli yang mau jual atau tukar HP tinggal isi tipe, kondisi fisik, BH, dan minus di web tokomu. Draf penawaran langsung tersimpan dan otomatis terkirim rapi ke WhatsApp tokomu.
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                  Upload foto langsung dari kamera HP, otomatis dicap logo toko Anda. Stok aman dari olshop penipu &amp; calo yang suka maling foto katalog konter fisik.
                 </p>
               </div>
-              <div className="pt-2 border-t border-slate-200/80 text-[11px] font-black text-purple-600">
-                ✓ Sumber stok trade-in makin lancar
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50 border-2 border-slate-200 hover:border-pink-500 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-pink-600/10 text-pink-600 flex items-center justify-center mb-4">
-                  <BarChart3 className="w-6 h-6" />
-                </div>
-                <h3 className="text-base font-black text-slate-900 mb-2 leading-snug">
-                  Bikin Gambar Story IG &amp; Status WA Sekali Klik
-                </h3>
-                <p className="text-slate-600 text-xs leading-relaxed font-medium">
-                  Tombol otomatis membuat poster ukuran 9:16 siap posting lengkap dengan banner promo 'Flash Sale' atau 'Siap COD', lengkap dengan caption siap copas ke Facebook &amp; IG.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-slate-200/80 text-[11px] font-black text-pink-600">
-                ✓ Posting harian sat-set tanpa Canva
+              <div className="pt-3 border-t border-slate-200/80 text-xs font-black text-purple-600 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                <span>Foto 100% Terproteksi Logo Toko</span>
               </div>
             </div>
           </div>
@@ -765,6 +738,125 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
         </div>
       </section>
 
+      {/* ── 3.5. SEKSI CETAK AKRILIK QR CODE MEJA KASIR ── */}
+      <section id="qr-kasir" className="py-20 bg-slate-900 text-white border-b border-slate-800 relative overflow-hidden">
+        {/* Glow ambient background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1.5 rounded-full">
+              FITUR EKSKLUSIF OFFLINE-TO-ONLINE
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+              Cetak Akrilik QR Code Meja Kasir
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base font-medium max-w-2xl mx-auto">
+              Hubungkan Pembeli Offline ke Katalog Online Anda. Pengunjung walk-in konter bisa scan QR di meja kasir untuk cek stok terkini dan memberikan rating bintang 5 Google Maps.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-8 items-center max-w-6xl mx-auto">
+            {/* Kolom Kiri: 2 Penjelasan Fitur QR */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* QR 1 */}
+              <div className="p-6 sm:p-7 rounded-3xl bg-slate-800/80 border-2 border-slate-700 hover:border-blue-500 transition duration-300 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30">
+                    <QrCode className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-wide text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full">
+                      Katalog Web Instan
+                    </span>
+                    <h3 className="text-lg font-black text-white mt-1">
+                      QR Code 1: Cek Stok Katalog Lengkap
+                    </h3>
+                  </div>
+                </div>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-medium">
+                  Scan untuk cek stok katalog lengkap &amp; update harga harian. Pengunjung toko tinggal arahkan kamera HP untuk menjelajahi seluruh etalase unit ready, perbandingan spesifikasi, dan cek minus fisik tanpa harus menunggu staf kasir membuka etalase kaca.
+                </p>
+              </div>
+
+              {/* QR 2 */}
+              <div className="p-6 sm:p-7 rounded-3xl bg-slate-800/80 border-2 border-slate-700 hover:border-amber-500 transition duration-300 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+                    <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-wide text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
+                      Reputasi Toko Melejit
+                    </span>
+                    <h3 className="text-lg font-black text-white mt-1">
+                      QR Code 2: Review Bintang 5 Google Maps
+                    </h3>
+                  </div>
+                </div>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-medium">
+                  Scan untuk ajak pembeli beri review bintang 5 di Google Maps toko secara instan setelah deal. Dongkrak reputasi dan posisi ranking toko Anda di pencarian lokal Google secara otomatis.
+                </p>
+              </div>
+            </div>
+
+            {/* Kolom Kanan: Visual Stand Akrilik Meja Kasir */}
+            <div className="lg:col-span-5">
+              <div className="relative mx-auto max-w-sm rounded-3xl p-6 sm:p-7 bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-blue-500/40 shadow-2xl text-center space-y-5">
+                {/* Header Mockup Stand Akrilik */}
+                <div className="pb-3 border-b border-slate-700/80 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-rose-500" />
+                    <div className="w-3 h-3 rounded-full bg-amber-500" />
+                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  </div>
+                  <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                    STAND MEJA KASIR AKRILIK
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="text-base font-black text-white uppercase tracking-tight">
+                    {settings.platformName.toUpperCase()} STORE
+                  </h4>
+                  <p className="text-xs text-slate-400 font-medium">
+                    Scan Langsung Dari Kamera Ponsel Anda
+                  </p>
+                </div>
+
+                {/* 2 Mock QR Cards */}
+                <div className="grid grid-cols-2 gap-3.5 pt-1">
+                  <div className="p-3.5 rounded-2xl bg-white text-slate-900 flex flex-col items-center justify-between shadow-lg">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center p-2 mb-2">
+                      <QrCode className="w-full h-full text-slate-900" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase text-blue-700 tracking-wider">
+                      Cek Stok Web
+                    </span>
+                    <span className="text-[9px] text-slate-500 font-bold">Update Tiap Hari</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-white text-slate-900 flex flex-col items-center justify-between shadow-lg">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center p-2 mb-2">
+                      <QrCode className="w-full h-full text-slate-900" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase text-amber-600 tracking-wider flex items-center gap-0.5">
+                      Review Google ⭐
+                    </span>
+                    <span className="text-[9px] text-slate-500 font-bold">Bintang 5 &amp; Ulasan</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 text-[11px] text-emerald-400 font-bold flex items-center justify-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Siap Cetak PDF Ukuran A6 / Akrilik Meja</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── 4. SEKSI TEMPLATE SHOWCASE ── */}
       <section id="showcase" className="py-20 bg-slate-900 text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -799,100 +891,89 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
-            {plans.map((plan) => {
-              const cfg = tierConfig[plan.id] || {
-                labelBadge: `${plan.name.toUpperCase()} PLAN`,
-                highlight: false,
-                ctaText: `Pilih Paket ${plan.name}`,
-                discountBadge: "PROMO",
-                tagline: "Paket langganan katalog digital terpercaya",
-                features: [
-                  `Katalog s/d ${plan.maxActiveProducts >= 9999 ? "Unlimited" : plan.maxActiveProducts} Unit HP`,
-                  `Hingga ${plan.maxAdmins} Akun Admin`,
-                  plan.hasWatermark ? "Watermark Logo Toko Otomatis" : "Bebas Watermark",
-                  plan.hasCustomDomain ? "Support Custom Domain Sendiri (.com)" : "Subdomain gratis .gadgetbdg.com",
-                  "Direct WhatsApp Order & Form Trade-In",
-                ],
-              };
+          <div className="grid md:grid-cols-2 gap-8 items-stretch max-w-4xl mx-auto">
+            {plans
+              .filter((p) => p.id === "STARTER" || p.id === "PRO")
+              .map((plan) => {
+                const cfg = tierConfig[plan.id] || {
+                  labelBadge: `${plan.name.toUpperCase()} PLAN`,
+                  highlight: plan.id === "PRO",
+                  popularBadge: plan.id === "PRO" ? "PALING POPULER" : undefined,
+                  ctaText: `Pilih Paket ${plan.name}`,
+                  discountBadge: "PROMO",
+                  tagline: "Paket langganan katalog digital terpercaya",
+                  features: [],
+                };
 
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative flex flex-col justify-between p-7 sm:p-8 rounded-3xl bg-white border-2 transition-all duration-200 ${
-                    cfg.highlight
-                      ? "border-blue-600 shadow-2xl shadow-blue-500/10 ring-2 ring-blue-600"
-                      : "border-slate-200 shadow-md"
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-black tracking-wider text-blue-600 uppercase">
-                        {cfg.labelBadge}
-                      </span>
-                      {cfg.popularBadge && (
-                        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-600 text-white shadow-xs">
-                          {cfg.popularBadge}
+                return (
+                  <div
+                    key={plan.id}
+                    className={`relative flex flex-col justify-between p-7 sm:p-8 rounded-3xl bg-white border-2 transition-all duration-200 ${
+                      cfg.highlight
+                        ? "border-blue-600 shadow-2xl shadow-blue-500/10 ring-2 ring-blue-600"
+                        : "border-slate-200 shadow-md"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-black tracking-wider text-blue-600 uppercase">
+                          {cfg.labelBadge}
                         </span>
-                      )}
-                    </div>
+                        {cfg.popularBadge && (
+                          <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-600 text-white shadow-xs">
+                            {cfg.popularBadge}
+                          </span>
+                        )}
+                      </div>
 
-                    <h3 className="text-2xl font-black text-slate-900 mb-2">{plan.name}</h3>
-                    <p className="text-xs text-slate-500 mb-5 leading-relaxed font-medium">
-                      {plan.description || "Solusi katalog online konter HP profesional."}
-                    </p>
+                      <h3 className="text-2xl font-black text-slate-900 mb-2">{plan.name}</h3>
+                      <p className="text-xs text-slate-500 mb-5 leading-relaxed font-medium">
+                        {plan.description || (plan.id === "PRO" ? "Solusi toko online bonafide dengan domain brand sendiri." : "Katalog online PWA praktis pengganti linktree.")}
+                      </p>
 
-                    {/* Price Anchoring */}
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-slate-400 line-through decoration-rose-500 decoration-2 text-sm font-semibold">
-                        {formatRupiah(plan.originalPrice || plan.price * 1.4)}
-                      </span>
-                      <span className="bg-rose-500/10 text-rose-600 border border-rose-500/20 text-xs font-bold px-2 py-0.5 rounded-full">
-                        {cfg.discountBadge}
-                      </span>
-                    </div>
-
-                    {/* Active Promo Price */}
-                    <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-3xl font-black text-slate-950 font-mono">
-                        {formatRupiah(plan.price)}
-                      </span>
-                      <span className="text-xs text-slate-500 font-bold">/ bulan</span>
-                    </div>
-
-                    {/* Tagline */}
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 text-[11px] text-slate-700 font-semibold mb-6">
-                      ✨ {cfg.tagline}
-                    </div>
-
-                    {/* Features list */}
-                    <div className="space-y-3 mb-8">
-                      <div className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                        <span>
-                          Katalog <b>{plan.maxActiveProducts >= 9999 ? "Unlimited" : `s/d ${plan.maxActiveProducts}`} Unit HP</b>
+                      {/* Price Anchoring */}
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="text-slate-400 line-through decoration-rose-500 decoration-2 text-sm font-semibold">
+                          {formatRupiah(plan.originalPrice || plan.price * 1.4)}
+                        </span>
+                        <span className="bg-rose-500/10 text-rose-600 border border-rose-500/20 text-xs font-bold px-2 py-0.5 rounded-full">
+                          {cfg.discountBadge}
                         </span>
                       </div>
-                      <div className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                        <span>Akses <b>{plan.maxAdmins} Akun Admin Toko</b></span>
-                      </div>
-                      <div className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                        <span>
-                          {plan.hasCustomDomain
-                            ? "Dukungan Custom Domain (.com / .id)"
-                            : "Subdomain Toko [nama].gadgetbdg.com"}
+
+                      {/* Active Promo Price */}
+                      <div className="flex items-baseline gap-1 mb-2">
+                        <span className="text-3xl font-black text-slate-950 font-mono">
+                          {formatRupiah(plan.price)}
                         </span>
+                        <span className="text-xs text-slate-500 font-bold">/ bulan</span>
                       </div>
-                      {cfg.features.map((feat, i) => (
-                        <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
+
+                      {/* Tagline */}
+                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 text-[11px] text-slate-700 font-semibold mb-6">
+                        ✨ {cfg.tagline}
+                      </div>
+
+                      {/* Features list */}
+                      <div className="space-y-3 mb-8">
+                        <div className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
                           <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                          <span>{feat}</span>
+                          <span>
+                            Kapasitas <b>{plan.maxActiveProducts >= 9999 ? "Unlimited" : `s/d ${plan.maxActiveProducts}`} Unit HP Ready</b>
+                          </span>
                         </div>
-                      ))}
+                        <div className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
+                          <span>Akses <b>{plan.maxAdmins} Akun Admin Toko</b></span>
+                        </div>
+                        {cfg.features.map((feat, i) => (
+                          <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
+                            <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
+                            <span>{feat}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
                   <button
                     onClick={() => handleOpenRegister(plan.id as any)}

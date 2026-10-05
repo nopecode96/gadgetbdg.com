@@ -384,14 +384,15 @@ export function StoreRegistrationModal({
             <div className="space-y-3 animate-fade-in">
               <label className="block font-bold text-slate-800 mb-1">Pilih Paket Langganan *</label>
 
-              {(["STARTER", "PRO", "ADVANCE"] as const).map((t) => {
+              {/* Hanya tampilkan Starter dan Pro (Advance diarsipkan) */}
+              {(["STARTER", "PRO"] as const).map((t) => {
                 const config = TIER_LIMITS[t];
                 const dbPlan = dbPlans.find((p) => p.id === t);
                 const isSelected = tier === t;
                 const borderCls = isSelected
-                  ? t === "ADVANCE" ? "border-purple-600 bg-purple-50/50 ring-1 ring-purple-600" : "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
+                  ? "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
                   : "border-slate-200 hover:border-slate-300";
-                const priceCls = t === "ADVANCE" ? "text-purple-600" : t === "PRO" ? "text-blue-600" : "text-slate-900";
+                const priceCls = t === "PRO" ? "text-blue-600" : "text-slate-900";
 
                 const originalPrice = dbPlan ? dbPlan.originalPrice : config.originalPrice;
                 const price = dbPlan ? dbPlan.price : config.price;
@@ -409,9 +410,7 @@ export function StoreRegistrationModal({
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition relative ${borderCls}`}
                   >
                     {popularBadge && (
-                      <span className={`absolute -top-2.5 right-4 text-white text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                        t === "ADVANCE" ? "bg-purple-600" : "bg-blue-600"
-                      }`}>
+                      <span className="absolute -top-2.5 right-4 text-white text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-600">
                         {popularBadge}
                       </span>
                     )}

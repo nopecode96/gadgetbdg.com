@@ -79,6 +79,7 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
       discountBadge: "HEMAT 28%",
       tagline: "Katalog Online PWA Praktis Pengganti Linktree",
       features: [
+        "Kapasitas Hingga 50 Unit Produk Aktif",
         "Subdomain Toko: namatoko.gadgetbdg.com",
         "0% Potongan Komisi Transaksi (Keuntungan 100% Milik Toko)",
         "Akses Semua Template Desain Modern (PWA Mobile)",
@@ -97,6 +98,7 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
       tagline: "Toko Online Bonafide dengan Domain Brand Sendiri",
       features: [
         "Semua Fitur di Paket Starter +",
+        "Kapasitas Produk Tanpa Batas (Unlimited)",
         "Custom Domain Sendiri (namatoko.com / namatoko.id)",
         "Tampilan Lebih Terpercaya & Bonafide di Bio IG & Google Search",
         "Dukungan SSL Gratis & Setup Domain Dibantu Tim Sampai Beres",

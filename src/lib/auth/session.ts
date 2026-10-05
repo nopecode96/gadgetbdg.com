@@ -240,9 +240,7 @@ export async function requireStoreOwnerOrStaff(): Promise<TenantContext> {
   const fallbackLimits = TIER_LIMITS[tier] || TIER_LIMITS.STARTER;
   const dbPlan = store.plan;
 
-  const maxActiveProducts = dbPlan
-    ? (dbPlan.maxActiveProducts >= 999999 ? Infinity : dbPlan.maxActiveProducts)
-    : fallbackLimits.maxActiveProducts;
+  const maxActiveProducts = tier === "STARTER" ? 50 : Infinity;
   const maxAdmins = dbPlan ? dbPlan.maxAdmins : fallbackLimits.maxAdmins;
   const allowedTemplates = dbPlan ? dbPlan.availableTemplatesCount : fallbackLimits.allowedTemplates;
   const templateChangeCooldownDays = dbPlan ? dbPlan.templateCooldownDays : fallbackLimits.templateChangeCooldownDays;

@@ -22,36 +22,71 @@ export async function getStoreWithPlan(storeId: string): Promise<(Store & { plan
   return store as (Store & { plan: SubscriptionPlan }) | null;
 }
 
+export type StoreTier = "STARTER" | "PRO" | "ADVANCE";
+
 /**
- * Validasi hak akses penambahan stok produk berdasarkan kuota aktif di tabel SubscriptionPlan.
+ * Validasi batasan kuota item produk (Product Limit) berdasarkan paket langganan toko:
+ * - STARTER: Maksimal 50 item produk aktif.
+ * - PRO & ADVANCE: Tanpa batas (Unlimited / null).
  */
-export async function assertCanAddProduct(storeId: string): Promise<PlanGuardResult<{ activeCount: number; maxActive: number }>> {
+export async function checkProductLimit(storeId: string): Promise<{
+  allowed: boolean;
+  currentCount: number;
+  maxLimit: number | null;
+  tier: StoreTier;
+  error?: string;
+}> {
   const store = await getStoreWithPlan(storeId);
   if (!store) {
-    return { allowed: false, error: "Toko tidak ditemukan." };
+    return {
+      allowed: false,
+      currentCount: 0,
+      maxLimit: 50,
+      tier: "STARTER",
+      error: "Toko tidak ditemukan.",
+    };
   }
 
-  const plan = store.plan;
-  const activeCount = await prisma.product.count({
+  const tier = (store.planId || store.tier || "STARTER") as StoreTier;
+  const currentCount = await prisma.product.count({
     where: {
       storeId: store.id,
       status: { in: ["AVAILABLE", "BOOKED"] },
     },
   });
 
-  // Advance / unlimited threshold
-  const isUnlimited = plan.maxActiveProducts >= 999999;
-  if (!isUnlimited && activeCount >= plan.maxActiveProducts) {
+  const isStarter = tier === "STARTER";
+  const maxLimit = isStarter ? 50 : null;
+  const allowed = !isStarter || currentCount < 50;
+
+  return {
+    allowed,
+    currentCount,
+    maxLimit,
+    tier,
+    error: allowed
+      ? undefined
+      : "Batas 50 produk untuk Paket Starter telah tercapai. Silakan upgrade ke Paket Pro untuk menambah produk tanpa batas.",
+  };
+}
+
+/**
+ * Validasi hak akses penambahan stok produk berdasarkan kuota aktif.
+ * SSoT: Starter maks 50, Pro & Advance unlimited.
+ */
+export async function assertCanAddProduct(storeId: string): Promise<PlanGuardResult<{ activeCount: number; maxActive: number | null }>> {
+  const limitCheck = await checkProductLimit(storeId);
+  if (!limitCheck.allowed) {
     return {
       allowed: false,
-      error: `Kuota stok aktif paket ${plan.name} sudah penuh (${activeCount}/${plan.maxActiveProducts} unit). Ubah status unit terjual ke SOLD, atau upgrade ke paket yang lebih tinggi untuk menambah lebih banyak unit.`,
-      data: { activeCount, maxActive: plan.maxActiveProducts },
+      error: limitCheck.error || "Batas 50 produk untuk Paket Starter telah tercapai. Silakan upgrade ke Paket Pro untuk menambah produk tanpa batas.",
+      data: { activeCount: limitCheck.currentCount, maxActive: limitCheck.maxLimit },
     };
   }
 
   return {
     allowed: true,
-    data: { activeCount, maxActive: plan.maxActiveProducts },
+    data: { activeCount: limitCheck.currentCount, maxActive: limitCheck.maxLimit },
   };
 }
 

@@ -16,6 +16,10 @@ import {
   ChevronRight,
   Sparkles,
   Star,
+  X,
+  Rocket,
+  Lock,
+  ArrowRight,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 import { toggleProductStatus, deleteProductAction, toggleProductFeaturedAction } from "@/lib/actions";
@@ -46,6 +50,7 @@ export function ProductManagerClient({
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [featuredUpdatingId, setFeaturedUpdatingId] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Master-Detail Drawer state
   const [selectedProduct, setSelectedProduct] = useState<ProductDetailItem | null>(null);
@@ -55,9 +60,11 @@ export function ProductManagerClient({
   const liveActiveCount = products.filter(
     (p) => p.status === "AVAILABLE" || p.status === "BOOKED"
   ).length;
-  const quotaMax = maxActiveProducts === Infinity ? null : maxActiveProducts;
+
+  const isStarter = store?.tier === "STARTER" || maxActiveProducts === 50;
+  const quotaMax = isStarter ? 50 : (maxActiveProducts === Infinity ? null : maxActiveProducts);
   const quotaPercent = quotaMax ? Math.min((liveActiveCount / quotaMax) * 100, 100) : 0;
-  const isQuotaFull = quotaMax !== null && liveActiveCount >= quotaMax;
+  const isQuotaFull = isStarter && liveActiveCount >= 50;
 
   const filtered = products.filter((p) => {
     const matchStatus = filterStatus === "ALL" || p.status === filterStatus;
@@ -173,61 +180,76 @@ export function ProductManagerClient({
             Update stok, ubah status unit secara realtime, dan kelola listing HP second.
           </p>
 
-          {/* Quota Progress */}
-          <div className="mt-3 max-w-xs">
-            <div className="flex items-center justify-between text-[11px] font-semibold mb-1">
-              <span className="text-slate-500">
-                Stok Aktif:{" "}
-                <span className={isQuotaFull ? "text-red-600 font-bold" : "text-slate-800"}>
-                  {liveActiveCount}
-                </span>
-                {quotaMax !== null && (
-                  <span className="text-slate-400"> / {quotaMax} Unit</span>
-                )}
-              </span>
-              {quotaMax !== null && (
+          {/* Quota Progress / Unlimited Badge */}
+          {isStarter ? (
+            <div className="mt-3 max-w-xs space-y-1.5">
+              <div className="flex items-center gap-2">
                 <span
-                  className={
-                    isQuotaFull
-                      ? "text-red-600 font-bold"
-                      : quotaPercent >= 80
-                      ? "text-amber-600"
-                      : "text-slate-400"
-                  }
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs ${
+                    liveActiveCount >= 50
+                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                      : liveActiveCount >= 40
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  }`}
                 >
-                  {Math.round(quotaPercent)}%
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    liveActiveCount >= 50 ? "bg-rose-500" : liveActiveCount >= 40 ? "bg-amber-500" : "bg-emerald-500"
+                  }`} />
+                  <span>{liveActiveCount}/50 Produk Digunakan</span>
                 </span>
-              )}
-            </div>
-            {quotaMax !== null && (
+                {liveActiveCount >= 50 && (
+                  <span className="text-[10px] font-black uppercase text-rose-600 bg-rose-100 px-2 py-0.5 rounded-full">
+                    Penuh
+                  </span>
+                )}
+              </div>
               <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${
-                    isQuotaFull
-                      ? "bg-red-500"
-                      : quotaPercent >= 80
+                    liveActiveCount >= 50
+                      ? "bg-rose-500"
+                      : liveActiveCount >= 40
                       ? "bg-amber-500"
                       : "bg-emerald-500"
                   }`}
                   style={{ width: `${quotaPercent}%` }}
                 />
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Add Button — disabled when quota full */}
-        <div className="shrink-0">
-          {isQuotaFull ? (
-            <div
-              title="Kuota unit penuh. Upgrade paket untuk menambah unit lagi."
-              className="inline-flex items-center gap-2 bg-slate-300 text-slate-500 font-bold text-xs px-4 py-2.5 rounded-xl cursor-not-allowed select-none"
-            >
-              <PackageX className="w-4 h-4" />
-              <span>Kuota Penuh</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="mt-3 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Produk Unlimited</span>
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Add Button — triggers modal or opens form */}
+        <div className="shrink-0 flex items-center gap-2">
+          {isQuotaFull ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Form Cepat</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="inline-flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-rose-600/20 transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Tambah Unit Baru</span>
+              </button>
+            </>
+          ) : (
+            <>
               <button
                 type="button"
                 onClick={() => setIsFormOpen(!isFormOpen)}
@@ -243,22 +265,79 @@ export function ProductManagerClient({
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Tambah Produk Baru</span>
               </Link>
-            </div>
+            </>
           )}
         </div>
       </div>
 
       {/* ── Quota Full Alert ── */}
       {isQuotaFull && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-bold text-red-800">Kuota Stok Aktif Penuh</p>
-            <p className="text-xs text-red-700 mt-0.5">
-              Paket <b>{store?.tier}</b> mendukung maks <b>{quotaMax}</b> produk aktif (AVAILABLE +
-              BOOKED). Ubah status unit yang sudah terjual ke <b>SOLD</b>, atau hubungi admin untuk
-              upgrade paket.
-            </p>
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-rose-900">Batas 50 Produk Starter Telah Tercapai</p>
+              <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
+                Paket <b>Starter</b> mendukung maksimal <b>50 produk aktif</b>. Upgrade ke <b>Paket Pro</b> untuk menambah produk sepuasnya tanpa batas (Unlimited).
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowUpgradeModal(true)}
+            className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shrink-0 transition shadow-sm cursor-pointer"
+          >
+            Upgrade ke Pro →
+          </button>
+        </div>
+      )}
+
+      {/* ── Upgrade Modal ── */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-5 animate-scale-up">
+            <button
+              type="button"
+              onClick={() => setShowUpgradeModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 text-amber-600 flex items-center justify-center">
+              <Rocket className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                Batas 50 Produk Starter Telah Tercapai
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Katalog toko Anda saat ini sudah mencapai batas maksimal <b>50 produk aktif</b> untuk Paket Starter.
+                Upgrade ke <b>Paket Pro</b> untuk menikmati penambahan produk <b>tanpa batas (Unlimited)</b>, custom domain toko sendiri (.com / .id), dan performa server prioritas.
+              </p>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] text-slate-500 font-medium leading-normal">
+              💡 <b>Tips Toko:</b> Anda juga dapat mengubah status unit yang sudah laku terjual menjadi <b>SOLD</b> untuk mengosongkan kembali slot kuota produk aktif.
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+              <Link
+                href="/admin/subscription"
+                className="flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs text-center shadow-lg shadow-blue-600/20 transition flex items-center justify-center gap-1.5"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>Upgrade ke Paket Pro Sekarang</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(false)}
+                className="py-3 px-4 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                Nanti Saja
+              </button>
+            </div>
           </div>
         </div>
       )}

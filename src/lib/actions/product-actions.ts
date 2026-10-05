@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStoreOwnerOrStaff } from "@/lib/auth/session";
-import { assertCanAddProduct } from "@/lib/guards/plan-guard";
+import { assertCanAddProduct, checkProductLimit } from "@/lib/guards/plan-guard";
 
 // ─── Helper: slug generator ───────────────────────────────────────
 function slugify(text: string): string {
@@ -183,12 +183,14 @@ export async function createProductAction(input: FormData | Record<string, any>)
       return { success: false, error: "Mohon lengkapi judul/nama HP, merk, dan harga produk." };
     }
 
-    // Validasi kuota stok aktif via Plan Guard (SSoT dari database SubscriptionPlan)
-    const guardCheck = await assertCanAddProduct(store.id);
-    if (!guardCheck.allowed) {
+    // Validasi batasan kuota item produk (Starter maks 50, Pro & Advance unlimited)
+    const limitCheck = await checkProductLimit(store.id);
+    if (!limitCheck.allowed) {
       return {
         success: false,
-        error: guardCheck.error || "Batas kuota produk aktif telah tercapai.",
+        error:
+          limitCheck.error ||
+          "Batas 50 produk untuk Paket Starter telah tercapai. Silakan upgrade ke Paket Pro untuk menambah produk tanpa batas.",
       };
     }
 

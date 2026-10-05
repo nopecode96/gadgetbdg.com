@@ -99,11 +99,6 @@ export function AdminSidebar({
             isLocked: isStarter,
           },
           {
-            title: "Kelola Cabang",
-            href: "/admin/branches",
-            icon: Building2,
-          },
-          {
             title: "Paket & Billing",
             href: "/admin/subscription",
             icon: CreditCard,

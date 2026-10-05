@@ -28,7 +28,6 @@ const pageTitles: Record<string, { title: string; category?: string }> = {
   "/admin/social-tools": { title: "Generator Medsos", category: "Pemasaran" },
   "/admin/marketing/qr-stands": { title: "QR Meja & Standee", category: "Pemasaran" },
   "/admin/team": { title: "Tim & Staf Toko", category: "Manajemen" },
-  "/admin/branches": { title: "Kelola Cabang", category: "Manajemen" },
   "/admin/settings": { title: "Pengaturan Toko", category: "Konfigurasi" },
 };
 

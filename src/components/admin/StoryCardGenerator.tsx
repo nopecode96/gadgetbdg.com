@@ -1,11 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, Sparkles, Check, Tag } from "lucide-react";
+import {
+  Download,
+  Share2,
+  Copy,
+  Check,
+  Sparkles,
+  Tag,
+  Info,
+  Loader2,
+  ExternalLink,
+} from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 
 interface Product {
   id: string;
+  slug?: string;
   name: string;
   brand: string;
   price: number;
@@ -28,6 +39,8 @@ interface StoryCardGeneratorProps {
     templateId?: string;
     tier?: string;
     hasWatermark?: boolean;
+    customDomain?: string | null;
+    logoUrl?: string | null;
   };
   product: Product;
 }
@@ -37,16 +50,24 @@ type PromoPreset = "none" | "flash-sale" | "payday" | "cod-ready";
 export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [copiedCaption, setCopiedCaption] = useState(false);
   const [rendered, setRendered] = useState(false);
   const [promoPreset, setPromoPreset] = useState<PromoPreset>("none");
+  const [toast, setToast] = useState<{ type: "success" | "info" | "error"; message: string } | null>(null);
 
   const storeName = store?.name || "Official Store GadgetBdg";
   const storeSlug = store?.slug || "demo1";
   const storeAddress = store?.address || "Bandung Electronic Center (BEC), Bandung";
   const storeWa = store?.whatsapp || "62895389974414";
+  const catalogDomain = store?.customDomain || (store?.slug ? `${store.slug}.gadgetbdg.com` : "gadgetbdg.com");
+  const catalogUrl = `https://${catalogDomain}`;
 
-  // Cek hak watermark: aktif untuk paket PRO & ADVANCE atau jika hasWatermark === true
-  const showWatermark = Boolean(store?.hasWatermark || (store?.tier && store.tier !== "STARTER"));
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4500);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   useEffect(() => {
     drawStoryCanvas();
@@ -58,7 +79,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Canvas Dimensions 9:16 (1080 x 1920)
+    // Canvas Dimensions 9:16 (1080 x 1920) HD
     const W = 1080;
     const H = 1920;
     canvas.width = W;
@@ -98,15 +119,15 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     ctx.textAlign = "center";
     const headerMaxW = W - 160;
 
-    let storeNameFontSize = 48;
+    let storeNameFontSize = 46;
     if (storeName.length > 30) {
-      storeNameFontSize = 38;
+      storeNameFontSize = 36;
     } else if (storeName.length > 20) {
-      storeNameFontSize = 42;
+      storeNameFontSize = 40;
     }
     ctx.fillStyle = "#ffffff";
     ctx.font = `900 ${storeNameFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    
+
     // Auto truncate header store name if too wide
     let safeStoreName = storeName.toUpperCase();
     if (ctx.measureText(safeStoreName).width > headerMaxW) {
@@ -130,7 +151,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
 
     // Status Ribbon
     ctx.fillStyle = isGaming ? "#10b981" : "#2563eb";
-    roundRect(ctx, W / 2 - 190, 215, 380, 52, 26);
+    roundRect(ctx, W / 2 - 200, 215, 400, 52, 26);
     ctx.fill();
 
     ctx.fillStyle = isGaming ? "#022c22" : "#ffffff";
@@ -155,22 +176,20 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
 
     const drawOverlaysAndWatermark = () => {
       // 1. Watermark Protection pada Kanvas Poster
-      if (showWatermark) {
-        ctx.save();
-        ctx.translate(W / 2, imgY + imgH / 2);
-        ctx.rotate((-15 * Math.PI) / 180);
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+      ctx.save();
+      ctx.translate(W / 2, imgY + imgH / 2);
+      ctx.rotate((-15 * Math.PI) / 180);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
 
-        ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
-        roundRect(ctx, -260, -45, 520, 90, 20);
-        ctx.fill();
+      ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+      roundRect(ctx, -270, -45, 540, 90, 20);
+      ctx.fill();
 
-        ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
-        ctx.font = "900 46px -apple-system, BlinkMacSystemFont, sans-serif";
-        ctx.fillText(storeName.toUpperCase(), 0, 5);
-        ctx.restore();
-      }
+      ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.font = "900 44px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(storeName.toUpperCase(), 0, 5);
+      ctx.restore();
 
       // 2. Preset Badge Promo di Bagian Atas Gambar
       if (promoPreset !== "none") {
@@ -186,7 +205,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
           badgeText = "💸 PROMO SPESIAL GAJIAN • CASHBACK TOKO";
           badgeBg = "#059669";
         } else if (promoPreset === "cod-ready") {
-          badgeText = "⚡ SIAP COD / LANGSUNG CEK DI TOKO BEC";
+          badgeText = "⚡ SIAP COD / LANGSUNG CEK DI TOKO";
           badgeBg = "#2563eb";
         }
 
@@ -223,7 +242,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
         ctx.save();
         roundRect(ctx, imgX, imgY, imgW, imgH, 36);
         ctx.clip();
-        ctx.drawImage(img, imgX, imgY, imgW, imgH);
+        drawImageCover(ctx, img, imgX, imgY, imgW, imgH);
         ctx.restore();
 
         drawOverlaysAndWatermark();
@@ -259,14 +278,11 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
         }
       }
 
-      // Sisa kata
       if (currentLine && lines.length < maxLines) {
-        // Jika baris terakhir dan masih ada sisa kata yang belum masuk
         const processedWordsCount = lines.join(" ").split(/\s+/).filter(Boolean).length;
         const remainingWords = words.slice(processedWordsCount);
         if (remainingWords.length > 0) {
           let lastLine = remainingWords.join(" ");
-          // Jika melebihi maxWidth di baris terakhir, truncate dengan ellipsis
           while (ctx!.measureText(lastLine + "...").width > maxWidth && lastLine.length > 0) {
             lastLine = lastLine.slice(0, -1).trim();
           }
@@ -286,14 +302,13 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
 
       // 4. Product Name & Price (Multi-line wrap, safe padding & proportional typography)
       ctx.textAlign = "center";
-      const maxTextW = W - 160; // Safe horizontal padding: 80px left and right (W = 1080)
+      const maxTextW = W - 160;
       
       const rawTitle = (product.name || `${product.brand} Smartphone`).trim();
 
-      // Dynamic Font Sizing: sesuaikan jika nama sangat panjang
       let titleFontSize = 54;
       if (rawTitle.length > 40) {
-        titleFontSize = 44;
+        titleFontSize = 42;
       } else if (rawTitle.length > 28) {
         titleFontSize = 48;
       }
@@ -302,7 +317,6 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       const titleLines = wrapText(rawTitle, maxTextW, 2);
       const titleLineHeight = titleFontSize + 12;
 
-      // Hitung posisi Y agar seimbang
       const titleStartY = titleLines.length === 1 ? 1045 : 1025;
       ctx.fillStyle = "#ffffff";
       titleLines.forEach((line, idx) => {
@@ -398,7 +412,6 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       const note = product.minusNotes || "No minus, fungsi 100% normal siap pakai, garansi toko 30 hari!";
       const fullNoteText = `• ${product.completeness || "Unit"} • ${note}`;
       
-      // Auto truncate note text cleanly within max bounds
       let safeNoteText = fullNoteText;
       const maxNoteW = W - 220;
       if (ctx.measureText(safeNoteText).width > maxNoteW) {
@@ -409,7 +422,7 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
       }
       ctx.fillText(safeNoteText, 110, minusY + 84);
 
-      // 7. Footer CTA Box
+      // 7. Footer CTA Box (Link Katalog Lengkap di Bio Toko Kami)
       const ctaY = 1585;
       const ctaGrad = ctx.createLinearGradient(80, ctaY, W - 80, ctaY);
       if (isGaming) {
@@ -425,16 +438,20 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
 
       ctx.textAlign = "center";
       ctx.fillStyle = "#ffffff";
-      ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText("MINAT? SCREENSHOT STORY INI & HUBUNGI:", W / 2, ctaY + 65);
+      ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText("MINAT? SCREENSHOT STORY INI & HUBUNGI KAMI", W / 2, ctaY + 60);
 
       ctx.fillStyle = "#fef08a";
       ctx.font = '900 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText(`WhatsApp: ${storeWa}`, W / 2, ctaY + 130);
+      ctx.fillText(`WhatsApp: ${storeWa}`, W / 2, ctaY + 120);
 
-      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-      ctx.font = '600 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText(`Katalog Online: ${storeSlug}.gadgetbdg.com`, W / 2, ctaY + 188);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
+      ctx.font = '800 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText("👉 Link Katalog Lengkap di Bio Toko Kami", W / 2, ctaY + 172);
+
+      ctx.fillStyle = "#bfdbfe";
+      ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(catalogDomain, W / 2, ctaY + 208);
 
       setRendered(true);
     }
@@ -502,22 +519,174 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
     ctx.closePath();
   }
 
-  function downloadStory() {
+  // Draw image with object-fit: cover
+  function drawImageCover(
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    x: number,
+    y: number,
+    w: number,
+    h: number
+  ) {
+    const iw = img.naturalWidth || img.width;
+    const ih = img.naturalHeight || img.height;
+    if (!iw || !ih) {
+      ctx.drawImage(img, x, y, w, h);
+      return;
+    }
+
+    const imgRatio = iw / ih;
+    const targetRatio = w / h;
+    let sx = 0,
+      sy = 0,
+      sWidth = iw,
+      sHeight = ih;
+
+    if (imgRatio > targetRatio) {
+      // Image wider than target
+      sWidth = ih * targetRatio;
+      sx = (iw - sWidth) / 2;
+    } else {
+      // Image taller than target
+      sHeight = iw / targetRatio;
+      sy = (ih - sHeight) / 2;
+    }
+
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, x, y, w, h);
+  }
+
+  function triggerDownload(blob: Blob, fileName: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  // Action 1: Web Share API Native Intent
+  async function shareToStory() {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    setSharing(true);
+    try {
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob((b) => resolve(b), "image/png")
+      );
+
+      if (!blob) {
+        throw new Error("Gagal mengonversi poster ke format gambar.");
+      }
+
+      const cleanName = (product.slug || product.name || "produk").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      const timestamp = Date.now();
+      const fileName = `story-${cleanName}-${timestamp}.png`;
+      const imageFile = new File([blob], fileName, { type: "image/png" });
+
+      const shareData = {
+        title: `Promo ${product.name}`,
+        text: `Ready unit ${product.name}! Cek katalog lengkap di link bio kami: ${catalogUrl}`,
+        files: [imageFile],
+      };
+
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.canShare &&
+        navigator.canShare({ files: [imageFile] })
+      ) {
+        await navigator.share(shareData);
+        setToast({
+          type: "success",
+          message: "Native share terbuka! Pilih WhatsApp Story, Instagram Story, atau medsos lainnya.",
+        });
+      } else {
+        // Fallback otomatis jika di desktop/browser tidak mendukung:
+        triggerDownload(blob, fileName);
+        setToast({
+          type: "info",
+          message: "Browser tidak mendukung native share. Poster otomatis diunduh.",
+        });
+      }
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        console.warn("Share failed or aborted:", err);
+        downloadStory();
+      }
+    } finally {
+      setSharing(false);
+    }
+  }
+
+  // Action 2: Direct HD Download
+  async function downloadStory() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     setDownloading(true);
+    try {
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob((b) => resolve(b), "image/png")
+      );
 
-    const link = document.createElement("a");
-    const cleanName = product.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
-    link.download = `story-${storeSlug}-${cleanName}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+      const cleanName = (product.slug || product.name || "produk").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      const timestamp = Date.now();
+      const fileName = `story-${cleanName}-${timestamp}.png`;
 
-    setTimeout(() => setDownloading(false), 1500);
+      if (blob) {
+        triggerDownload(blob, fileName);
+      } else {
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
+
+      setToast({
+        type: "success",
+        message: `Poster 9:16 HD (${fileName}) berhasil diunduh ke galeri/perangkat!`,
+      });
+    } catch (err) {
+      console.error("Download error:", err);
+      setToast({
+        type: "error",
+        message: "Gagal mengunduh poster gambar.",
+      });
+    } finally {
+      setTimeout(() => setDownloading(false), 800);
+    }
+  }
+
+  // Action 3: Copy Format Caption
+  function copyStoryCaption() {
+    const cleanWa = (store?.whatsapp || "081234567890").replace(/\D/g, "").replace(/^0/, "62");
+    const caption =
+      `🔥 READY UNIT ISTIMEWA: ${product.name} 🔥\n\n` +
+      `💰 Harga: ${formatRupiah(product.price)}\n` +
+      `📱 Varian: ${product.ramRom}\n` +
+      `✨ Kondisi: ${product.condition}\n` +
+      `🛡️ Garansi IMEI: ${product.imeiStatus || "Resmi Terdaftar"}\n` +
+      (product.batteryHealth ? `🔋 Battery Health: ${product.batteryHealth}%\n` : "") +
+      `📦 Kelengkapan: ${product.completeness}\n` +
+      (product.minusNotes ? `⚠️ Catatan: ${product.minusNotes}\n` : "✅ Jaminan tested normal 100% siap pakai!\n") +
+      `\n👉 Cek foto detail & stok katalog lengkap di Link Bio:\n` +
+      `🔗 ${catalogUrl}\n\n` +
+      `📲 WhatsApp Fast Response: https://wa.me/${cleanWa}?text=${encodeURIComponent(`Halo min, saya tertarik dengan unit ${product.name} di story katalog.`)}`;
+
+    navigator.clipboard.writeText(caption);
+    setCopiedCaption(true);
+    setToast({
+      type: "success",
+      message: "Format caption story siap posting berhasil disalin ke clipboard!",
+    });
+    setTimeout(() => setCopiedCaption(false), 2500);
   }
 
   return (
     <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+      {/* Header Info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-600 flex items-center justify-center">
@@ -526,58 +695,123 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-sm text-slate-900">Poster Story Medsos (9:16 HD)</h3>
-              {showWatermark && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  Watermark Aktif
-                </span>
-              )}
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                Watermark Toko Aktif
+              </span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Format portrait 1080x1920 siap share ke WhatsApp Story & Instagram Story
+              Format portrait 1080x1920 siap share ke WhatsApp Story, Instagram Story, TikTok, & Facebook
             </p>
           </div>
         </div>
 
+        {/* Preset Selector */}
+        <div className="flex items-center gap-2 text-xs">
+          <Tag className="w-3.5 h-3.5 text-slate-400" />
+          <select
+            value={promoPreset}
+            onChange={(e) => setPromoPreset(e.target.value as PromoPreset)}
+            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="none">Normal (Spesifikasi Unit)</option>
+            <option value="flash-sale">🔥 Flash Sale Terbatas</option>
+            <option value="payday">💸 Promo Gajian (Payday)</option>
+            <option value="cod-ready">⚡ Siap COD / Toko BEC</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Toast Notification Banner */}
+      {toast && (
+        <div
+          className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between gap-2 border transition ${
+            toast.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : toast.type === "error"
+              ? "bg-rose-50 text-rose-800 border-rose-200"
+              : "bg-blue-50 text-blue-800 border-blue-200"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {toast.type === "success" ? (
+              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : toast.type === "error" ? (
+              <Info className="w-4 h-4 text-rose-600 shrink-0" />
+            ) : (
+              <Info className="w-4 h-4 text-blue-600 shrink-0" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+          <button
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-slate-600 text-xs px-1 font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* ACTION BAR: DUAL ACTION + CAPTION COPY */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Tombol 1: Bagikan ke Story (Web Share API Native Intent) */}
+        <button
+          onClick={shareToStory}
+          disabled={!rendered || sharing}
+          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white flex items-center justify-center gap-2 shadow-sm transition disabled:opacity-50"
+        >
+          {sharing ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Menyiapkan Share...</span>
+            </>
+          ) : (
+            <>
+              <Share2 className="w-4 h-4" />
+              <span>Bagikan ke Story</span>
+            </>
+          )}
+        </button>
+
+        {/* Tombol 2: Unduh Gambar 9:16 (HD) */}
         <button
           onClick={downloadStory}
           disabled={!rendered || downloading}
-          className="px-4 py-2 bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition disabled:opacity-50"
+          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center gap-2 shadow-sm transition disabled:opacity-50"
         >
           {downloading ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-300" />
+              <Check className="w-4 h-4 text-emerald-400" />
               <span>Mengunduh...</span>
             </>
           ) : (
             <>
-              <Download className="w-3.5 h-3.5" />
-              <span>Download Poster (PNG)</span>
+              <Download className="w-4 h-4" />
+              <span>Unduh Gambar (HD)</span>
+            </>
+          )}
+        </button>
+
+        {/* Tombol 3: Salin Format Caption */}
+        <button
+          onClick={copyStoryCaption}
+          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center gap-2 shadow-sm transition"
+        >
+          {copiedCaption ? (
+            <>
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span className="text-emerald-700 font-bold">Caption Tersalin!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-4 h-4 text-slate-500" />
+              <span>Salin Format Caption</span>
             </>
           )}
         </button>
       </div>
 
-      {/* Preset Badge Promo Selector */}
-      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 font-bold text-slate-700">
-          <Tag className="w-4 h-4 text-blue-600" />
-          <span>Preset Banner Promo Poster:</span>
-        </div>
-
-        <select
-          value={promoPreset}
-          onChange={(e) => setPromoPreset(e.target.value as PromoPreset)}
-          className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="none">Normal (Spesifikasi Unit)</option>
-          <option value="flash-sale">🔥 Flash Sale Terbatas</option>
-          <option value="payday">💸 Promo Gajian (Payday)</option>
-          <option value="cod-ready">⚡ Siap COD / Toko BEC</option>
-        </select>
-      </div>
-
       {/* Canvas Preview Container (Scaled Down for UI) */}
-      <div className="flex justify-center bg-slate-900/90 rounded-2xl p-4 sm:p-6 overflow-hidden">
+      <div className="flex flex-col items-center justify-center bg-slate-950/95 rounded-2xl p-4 sm:p-6 overflow-hidden">
         <div className="relative shadow-2xl rounded-2xl overflow-hidden border border-slate-700/60 max-w-[280px] sm:max-w-[320px]">
           <canvas
             ref={canvasRef}
@@ -585,6 +819,10 @@ export function StoryCardGenerator({ store, product }: StoryCardGeneratorProps) 
             style={{ aspectRatio: "9/16" }}
           />
         </div>
+        <p className="text-[11px] text-slate-400 mt-3 flex items-center gap-1.5">
+          <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
+          Preview poster 1080x1920 (HD). Klik tombol di atas untuk share atau unduh.
+        </p>
       </div>
     </div>
   );

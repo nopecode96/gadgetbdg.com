@@ -67,6 +67,9 @@ export function SocialGeneratorClient({
     );
   }
 
+  const catalogDomain = store?.customDomain || (store?.slug ? `${store.slug}.gadgetbdg.com` : "gadgetbdg.com");
+  const catalogUrl = `https://${catalogDomain}`;
+
   // Construct captions
   const fbMarketplaceCaption =
     `🔥 DIJUAL: ${product.name} 🔥\n\n` +
@@ -79,6 +82,7 @@ export function SocialGeneratorClient({
     (product.batteryHealth ? `✅ Battery Health: ${product.batteryHealth}%\n` : "") +
     (product.minusNotes ? `⚠️ Catatan Minus: ${product.minusNotes}\n` : "✅ Minus: Tidak ada (Mulus normal siap pakai)\n") +
     `\n📍 Lokasi Toko: ${store?.address || "Bandung Electronic Center (BEC)"}\n` +
+    `🌐 Web Katalog Toko: ${catalogUrl}\n` +
     `📲 WhatsApp Fast Response: ${store?.whatsapp || "081234567890"}\n` +
     `🤝 Siap COD Toko / Kirim se-Bandung Raya via GoSend`;
 
@@ -93,8 +97,9 @@ export function SocialGeneratorClient({
     `• IMEI: ${product.imeiStatus}\n` +
     (product.batteryHealth ? `• Battery Health: ${product.batteryHealth}%\n` : "") +
     (product.minusNotes ? `• Minus: ${product.minusNotes}\n` : "• No minus, 100% tested\n") +
-    `\nBerminat langsung klik link di bio / WhatsApp admin yaa! 👇\n` +
-    `WA: ${store?.whatsapp || "081234567890"}\n\n` +
+    `\nBerminat langsung klik link di bio kami / WhatsApp admin yaa! 👇\n` +
+    `🌐 Web Katalog: ${catalogUrl}\n` +
+    `📲 WA: ${store?.whatsapp || "081234567890"}\n\n` +
     `#hpsecondbandung #gadgetbandung #jualhpsecond #applebandung #samsungbandung #becbandung`;
 
   return (

@@ -13,7 +13,6 @@ import {
   ExternalLink,
   ShieldCheck,
   Lock,
-  Building2,
   ArrowRight,
   UploadCloud,
   Trash2,
@@ -279,8 +278,6 @@ export function SettingsClient({ store }: SettingsClientProps) {
           Kustomisasi identitas toko, nomor kontak WhatsApp, tema storefront, dan konfigurasi domain pribadi.
         </p>
       </div>
-
-
 
       {success && (
         <div className="p-4 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs flex items-center gap-2">

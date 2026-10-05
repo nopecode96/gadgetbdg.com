@@ -144,9 +144,6 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
           </div>
 
           <nav className="hidden md:flex items-center gap-7 text-sm font-bold text-slate-600">
-            <a href="#fitur" className="hover:text-blue-600 transition-colors">
-              3 Pilar Utama
-            </a>
             <a href="#qr-kasir" className="hover:text-blue-600 transition-colors">
               QR Meja Kasir
             </a>

@@ -418,3 +418,14 @@ export async function updateStoreSettingsAction(formData: FormData) {
   return updateStoreSettings(formData);
 }
 
+export async function uploadStoreLogoAction(formData: FormData) {
+  const { uploadStoreLogoAction: uploadAction } = await import("@/lib/actions/store-actions");
+  return uploadAction(formData);
+}
+
+export async function deleteStoreLogoAction(storeId: string) {
+  const { deleteStoreLogoAction: deleteAction } = await import("@/lib/actions/store-actions");
+  return deleteAction(storeId);
+}
+
+

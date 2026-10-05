@@ -33,7 +33,7 @@ export function ImageUpload({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setError("Hanya format file gambar (JPG, PNG, WebP) yang diperbolehkan.");
+      setError("Hanya format file gambar (JPG, PNG, WebP, SVG) yang diperbolehkan.");
       return;
     }
 
@@ -113,7 +113,7 @@ export function ImageUpload({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/jpg"
+          accept="image/png,image/jpeg,image/webp,image/jpg,image/svg+xml"
           className="hidden"
           disabled={disabled || isUploading}
           onChange={(e) => {

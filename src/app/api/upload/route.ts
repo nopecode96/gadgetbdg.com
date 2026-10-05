@@ -117,25 +117,55 @@ export async function POST(req: NextRequest) {
       const bytes = await file.arrayBuffer();
       const inputBuffer = Buffer.from(bytes);
 
-      // Inisialisasi sharp pipeline dengan EXIF auto-rotate
-      let imagePipeline = sharp(inputBuffer).rotate();
-
       if (type === "store-logo") {
-        imagePipeline = imagePipeline.resize({
-          width: 500,
-          height: 500,
-          fit: "cover",
-          withoutEnlargement: true,
-        });
-      } else {
-        // Rasio 16:9 untuk foto storefront fisik gerai konter
-        imagePipeline = imagePipeline.resize({
-          width: 1280,
-          height: 720,
-          fit: "cover",
-          withoutEnlargement: true,
+        if (file.size > 2 * 1024 * 1024) {
+          return NextResponse.json({ error: "Ukuran file logo maksimal 2MB." }, { status: 400 });
+        }
+
+        const isSvg = file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg");
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "logos");
+        await mkdir(uploadDir, { recursive: true });
+
+        let filename = `${user.storeId || "logo"}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
+        if (isSvg) {
+          filename = `${user.storeId || "logo"}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.svg`;
+          await writeFile(path.join(uploadDir, filename), inputBuffer);
+        } else {
+          const outputBuffer = await sharp(inputBuffer)
+            .rotate()
+            .resize({
+              width: 500,
+              height: 500,
+              fit: "cover",
+              withoutEnlargement: true,
+            })
+            .webp({ quality: 90 })
+            .toBuffer();
+          await writeFile(path.join(uploadDir, filename), outputBuffer);
+        }
+
+        const savedUrl = `/uploads/logos/${filename}`;
+        if (user.storeId) {
+          await prisma.store.update({
+            where: { id: user.storeId },
+            data: { logoUrl: savedUrl },
+          });
+        }
+
+        return NextResponse.json({
+          success: true,
+          url: savedUrl,
         });
       }
+
+      // Rasio 16:9 untuk foto storefront fisik gerai konter / cabang
+      let imagePipeline = sharp(inputBuffer).rotate();
+      imagePipeline = imagePipeline.resize({
+        width: 1280,
+        height: 720,
+        fit: "cover",
+        withoutEnlargement: true,
+      });
 
       const outputBuffer = await imagePipeline.webp({ quality: 85 }).toBuffer();
       const subFolder = type === "branch-profile" ? "branches" : "stores";

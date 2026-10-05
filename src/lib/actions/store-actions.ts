@@ -110,6 +110,10 @@ export async function updateStoreSettings(formData: FormData) {
     let cleanWa = whatsapp.replace(/\D/g, "");
     if (cleanWa.startsWith("0")) cleanWa = "62" + cleanWa.slice(1);
 
+    const bankName = formData.get("bankName") as string | null;
+    const bankAccount = formData.get("bankAccount") as string | null;
+    const bankHolder = formData.get("bankHolder") as string | null;
+
     const storeImage = formData.get("storeImage") as string | null;
     const logoUrl = formData.get("logoUrl") as string | null;
     const operationalHours = formData.get("operationalHours") as string;
@@ -136,6 +140,9 @@ export async function updateStoreSettings(formData: FormData) {
         address: address || null,
         mapsUrl: mapsUrl || null,
         googleReviewUrl: googleReviewUrl || null,
+        bankName: bankName !== null && bankName !== undefined ? (bankName.trim() || null) : currentStore.bankName,
+        bankAccount: bankAccount !== null && bankAccount !== undefined ? (bankAccount.trim() || null) : currentStore.bankAccount,
+        bankHolder: bankHolder !== null && bankHolder !== undefined ? (bankHolder.trim() || null) : currentStore.bankHolder,
         ...(logoUrl !== null && logoUrl !== undefined ? { logoUrl: logoUrl || null } : {}),
         ...(canCustom && storeImage !== null && storeImage !== undefined ? { storeImage: storeImage || null } : {}),
         operationalHours: operationalHours !== undefined ? (operationalHours || null) : currentStore.operationalHours,

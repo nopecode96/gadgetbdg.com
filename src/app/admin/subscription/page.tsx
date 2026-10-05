@@ -21,6 +21,7 @@ export default async function AdminSubscriptionPage() {
         store={result.store}
         usage={result.usage}
         plans={result.plans}
+        payments={(result as any).payments || []}
         platformSetting={result.platformSetting}
       />
     </div>

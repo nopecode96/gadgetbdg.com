@@ -299,8 +299,13 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
                             <Store className="w-4 h-4" />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-bold text-white group-hover:text-indigo-300 transition flex items-center gap-2 truncate">
+                            <div className="font-bold text-white group-hover:text-indigo-300 transition flex items-center gap-1.5 truncate">
                               <span className="truncate">{store.name}</span>
+                              {store.verifiedBadge && (
+                                <span className="inline-flex items-center text-sky-400 shrink-0" title="Toko Terverifikasi">
+                                  <CheckCircle2 className="w-3.5 h-3.5 fill-sky-500/20 text-sky-400" />
+                                </span>
+                              )}
                               {store.isDemo && (
                                 <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-900/60 text-purple-300 border border-purple-500/40 tracking-wider shrink-0">
                                   DEMO
@@ -351,7 +356,7 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
                             <span
                               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${cycle.badgeClass}`}
                             >
-                              <Clock className="w-3 h-3 shrink-0" />
+                              <Clock className="w-3.5 h-3.5 shrink-0" />
                               {cycle.badgeText}
                             </span>
                           </div>
@@ -360,10 +365,17 @@ export function StoreManagementClient({ initialStores }: { initialStores: StoreA
 
                       {/* 4. Katalog */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="font-mono text-xs font-bold text-white">
-                          {store._count?.products ?? 0}
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-mono text-xs font-bold text-white">
+                            {store.activeProductCount ?? 0}
+                          </span>
+                          <span className="font-mono text-xs text-slate-400">
+                            / {store.tier === "STARTER" ? "50" : "∞"}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                          Unit Aktif
                         </span>
-                        <span className="text-[11px] text-slate-400 ml-1">Unit HP</span>
                       </td>
 
                       {/* 5. Status */}

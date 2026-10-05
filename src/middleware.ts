@@ -128,6 +128,11 @@ export default async function middleware(req: NextRequest) {
     currentHost === "127.0.0.1";
 
   if (isApexOrLocalApex) {
+    // Fallback: Jika rute /product/... diakses langsung di apex domain, redirect ke demo2
+    if (pathname.startsWith("/product/")) {
+      return NextResponse.redirect(new URL(`/demo2${path}`, req.url), 302);
+    }
+
     // Sajikan landing page utama, pricing, modal pendaftaran, dan rute /login
     const res = NextResponse.next();
     if (isProtectedAdminRoute) {

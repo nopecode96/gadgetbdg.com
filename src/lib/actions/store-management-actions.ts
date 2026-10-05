@@ -20,6 +20,8 @@ export interface StoreAdminListItem {
   subscriptionExpiresAt: string | null;
   isActive: boolean;
   isDemo: boolean;
+  verifiedBadge: boolean;
+  activeProductCount: number;
   template: string;
   address: string | null;
   createdAt: string;
@@ -114,6 +116,22 @@ export async function getAllStoresAction(filters?: {
     orderBy: { createdAt: "desc" },
   });
 
+  // Hitung jumlah produk berstatus aktif (AVAILABLE & BOOKED) per toko
+  const activeProducts = await prisma.product.groupBy({
+    by: ["storeId"],
+    where: {
+      status: { in: ["AVAILABLE", "BOOKED"] },
+    },
+    _count: {
+      id: true,
+    },
+  });
+
+  const activeCountMap = new Map<string, number>();
+  for (const item of activeProducts) {
+    activeCountMap.set(item.storeId, item._count.id);
+  }
+
   return storesRaw.map((s) => {
     const owner = s.users.length > 0 ? s.users[0] : null;
     const sales = s.referredBySales || s.salesUser?.salesPartner || null;
@@ -133,6 +151,8 @@ export async function getAllStoresAction(filters?: {
       subscriptionExpiresAt: s.subscriptionExpiresAt ? s.subscriptionExpiresAt.toISOString() : null,
       isActive: s.isActive,
       isDemo: Boolean(s.isDemo),
+      verifiedBadge: Boolean(s.verifiedBadge),
+      activeProductCount: activeCountMap.get(s.id) ?? 0,
       template: s.template || "minimal-clean",
       address: s.address,
       createdAt: s.createdAt.toISOString(),
@@ -308,5 +328,67 @@ export async function resetTemplateCooldownAction(storeId: string) {
   } catch (error: any) {
     console.error("resetTemplateCooldownAction error:", error);
     return { success: false, error: error?.message || "Gagal mereset cooldown tema." };
+  }
+}
+
+/**
+ * 6. toggleStoreVerifiedBadgeAction(storeId: string, verifiedBadge: boolean)
+ * Toggles the verified badge status of a store.
+ */
+export async function toggleStoreVerifiedBadgeAction(storeId: string, verifiedBadge: boolean) {
+  try {
+    await requireSaasAdmin();
+
+    const updated = await prisma.store.update({
+      where: { id: storeId },
+      data: { verifiedBadge },
+    });
+
+    revalidatePath("/super-admin");
+    revalidatePath("/super-admin/stores");
+    revalidatePath(`/${updated.slug}`);
+
+    return {
+      success: true,
+      message: `Verified badge toko ${updated.name} berhasil ${verifiedBadge ? "diaktifkan" : "dinonaktifkan"}.`,
+      store: {
+        id: updated.id,
+        verifiedBadge: updated.verifiedBadge,
+      },
+    };
+  } catch (error: any) {
+    console.error("toggleStoreVerifiedBadgeAction error:", error);
+    return { success: false, error: error?.message || "Gagal mengubah status verified badge." };
+  }
+}
+
+/**
+ * 7. toggleStoreDemoAction(storeId: string, isDemo: boolean)
+ * Toggles whether a store is marked as a demo store.
+ */
+export async function toggleStoreDemoAction(storeId: string, isDemo: boolean) {
+  try {
+    await requireSaasAdmin();
+
+    const updated = await prisma.store.update({
+      where: { id: storeId },
+      data: { isDemo },
+    });
+
+    revalidatePath("/super-admin");
+    revalidatePath("/super-admin/stores");
+    revalidatePath(`/${updated.slug}`);
+
+    return {
+      success: true,
+      message: `Status demo toko ${updated.name} berhasil ${isDemo ? "diaktifkan" : "dinonaktifkan"}.`,
+      store: {
+        id: updated.id,
+        isDemo: updated.isDemo,
+      },
+    };
+  } catch (error: any) {
+    console.error("toggleStoreDemoAction error:", error);
+    return { success: false, error: error?.message || "Gagal mengubah status demo toko." };
   }
 }

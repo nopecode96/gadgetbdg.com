@@ -23,6 +23,8 @@ import {
   ChevronRight,
   TrendingUp,
   BellRing,
+  CheckCircle2,
+  BadgeCheck,
 } from "lucide-react";
 import {
   StoreAdminListItem,
@@ -30,6 +32,8 @@ import {
   toggleStoreStatusAction,
   extendStoreSubscriptionAction,
   resetTemplateCooldownAction,
+  toggleStoreVerifiedBadgeAction,
+  toggleStoreDemoAction,
 } from "@/lib/actions/store-management-actions";
 import { resetStoreOwnerPasswordAction } from "@/lib/actions/saas-admin-actions";
 
@@ -207,6 +211,38 @@ export function StoreDetailDrawer({ store, onClose, onStoreUpdated }: StoreDetai
       showToast("success", "Password owner toko berhasil direset ke 'Admin123!'");
     } else {
       showToast("error", res.error || "Gagal mereset password owner.");
+    }
+  };
+
+  // 6. Toggle verified badge
+  const handleToggleVerifiedBadge = async () => {
+    const nextBadge = !store.verifiedBadge;
+    setLoadingAction("toggleVerified");
+    const res = await toggleStoreVerifiedBadgeAction(store.id, nextBadge);
+    setLoadingAction(null);
+
+    if (res.success && res.store) {
+      const updated = { ...store, verifiedBadge: res.store.verifiedBadge };
+      onStoreUpdated(updated);
+      showToast("success", res.message || "Verified badge berhasil diperbarui.");
+    } else {
+      showToast("error", res.error || "Gagal mengubah verified badge.");
+    }
+  };
+
+  // 7. Toggle demo store
+  const handleToggleDemo = async () => {
+    const nextDemo = !store.isDemo;
+    setLoadingAction("toggleDemo");
+    const res = await toggleStoreDemoAction(store.id, nextDemo);
+    setLoadingAction(null);
+
+    if (res.success && res.store) {
+      const updated = { ...store, isDemo: res.store.isDemo };
+      onStoreUpdated(updated);
+      showToast("success", res.message || "Status demo toko berhasil diperbarui.");
+    } else {
+      showToast("error", res.error || "Gagal mengubah status demo.");
     }
   };
 
@@ -428,7 +464,7 @@ export function StoreDetailDrawer({ store, onClose, onStoreUpdated }: StoreDetai
                 <Layers className="w-3.5 h-3.5 text-amber-400" /> Langganan & Durasi Toko
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {/* Dropdown Tier */}
                 <div>
                   <label className="text-[11px] font-semibold text-slate-400 block mb-1">
@@ -454,6 +490,17 @@ export function StoreDetailDrawer({ store, onClose, onStoreUpdated }: StoreDetai
                   <div className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs font-bold text-white flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                     <span className="truncate">{cycle.badgeText}</span>
+                  </div>
+                </div>
+
+                {/* Kuota Produk */}
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">
+                    Kuota Produk Aktif
+                  </label>
+                  <div className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs font-bold text-white flex items-center gap-1.5">
+                    <span className="font-mono text-emerald-400">{store.activeProductCount ?? 0}</span>
+                    <span className="text-slate-400">/ {store.tier === "STARTER" ? "50 Unit" : "Unlimited (∞)"}</span>
                   </div>
                 </div>
               </div>
@@ -495,6 +542,71 @@ export function StoreDetailDrawer({ store, onClose, onStoreUpdated }: StoreDetai
                     className="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold py-2 rounded-lg border border-emerald-500/30 transition disabled:opacity-50"
                   >
                     Selamanya
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Status Verifikasi & Flag Demo */}
+            <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <BadgeCheck className="w-3.5 h-3.5 text-sky-400" /> Verifikasi & Status Demo
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                {/* Verified Badge Toggle */}
+                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-white flex items-center gap-1.5">
+                      <span>Verified Store Badge</span>
+                      {store.verifiedBadge && (
+                        <CheckCircle2 className="w-3.5 h-3.5 fill-sky-500/20 text-sky-400" />
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      {store.verifiedBadge ? "Lencana biru aktif" : "Belum terverifikasi"}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={loadingAction === "toggleVerified"}
+                    onClick={handleToggleVerifiedBadge}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer ${
+                      store.verifiedBadge
+                        ? "bg-sky-600/20 text-sky-300 border-sky-500/40 hover:bg-sky-600/30"
+                        : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white"
+                    } disabled:opacity-50`}
+                  >
+                    {store.verifiedBadge ? "Nonaktifkan" : "Verifikasi"}
+                  </button>
+                </div>
+
+                {/* Demo Store Toggle */}
+                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-white flex items-center gap-1.5">
+                      <span>Toko Demo Platform</span>
+                      {store.isDemo && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-purple-900/60 text-purple-300 border border-purple-500/40">
+                          DEMO
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      {store.isDemo ? "Eksklusif demo landing page" : "Toko klien operasional riil"}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={loadingAction === "toggleDemo"}
+                    onClick={handleToggleDemo}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer ${
+                      store.isDemo
+                        ? "bg-purple-600/20 text-purple-300 border-purple-500/40 hover:bg-purple-600/30"
+                        : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white"
+                    } disabled:opacity-50`}
+                  >
+                    {store.isDemo ? "Set Klien Riil" : "Set Demo"}
                   </button>
                 </div>
               </div>

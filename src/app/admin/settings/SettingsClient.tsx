@@ -20,6 +20,7 @@ import {
   RefreshCw,
   Smartphone,
   Image as ImageIcon,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { updateStoreSettingsAction } from "@/lib/actions";
@@ -363,6 +364,52 @@ export function SettingsClient({ store }: SettingsClientProps) {
                   <b>Cara salin link ulasan Google Bisnis:</b> Buka profil Google Bisnis Toko Anda di Google Maps ➔ Klik tombol <b>&quot;Minta Ulasan&quot; (Ask for reviews)</b> ➔ Salin tautan pendek (contoh: <code>https://g.page/r/.../review</code>) lalu tempel di sini.
                 </span>
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Section: Rekening Bank Toko */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-emerald-600" />
+              <span>Informasi Rekening Bank Toko</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Rekening bank resmi toko untuk menerima pembayaran transfer langsung dari pembeli via invoice / nota WhatsApp.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Nama Bank / e-Wallet</label>
+              <input
+                type="text"
+                name="bankName"
+                defaultValue={store.bankName || ""}
+                placeholder="BCA, Mandiri, BRI, BNI, Seabank, dll"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Nomor Rekening</label>
+              <input
+                type="text"
+                name="bankAccount"
+                defaultValue={store.bankAccount || ""}
+                placeholder="Contoh: 1234567890"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Atas Nama Pemilik Rekening</label>
+              <input
+                type="text"
+                name="bankHolder"
+                defaultValue={store.bankHolder || ""}
+                placeholder="Nama pemilik rekening bank"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
             </div>
           </div>
         </div>

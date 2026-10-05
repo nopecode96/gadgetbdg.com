@@ -345,12 +345,19 @@ export async function getStoreSubscriptionStatusAction(storeId: string) {
       return { success: false, error: "Toko tidak ditemukan." };
     }
 
-    const activeProductCount = await prisma.product.count({
-      where: {
-        storeId,
-        status: { in: ["AVAILABLE", "BOOKED"] },
-      },
-    });
+    const [activeProductCount, payments] = await Promise.all([
+      prisma.product.count({
+        where: {
+          storeId,
+          status: { in: ["AVAILABLE", "BOOKED"] },
+        },
+      }),
+      prisma.subscriptionPayment.findMany({
+        where: { storeId },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+      }),
+    ]);
 
     return {
       success: true,
@@ -382,6 +389,16 @@ export async function getStoreSubscriptionStatusAction(storeId: string) {
         ...p,
         price: Number(p.price),
         originalPrice: Number(p.originalPrice),
+      })),
+      payments: payments.map((p) => ({
+        id: p.id,
+        tier: p.tier,
+        amount: Number(p.amount),
+        status: p.status,
+        receiptUrl: p.receiptUrl,
+        notes: p.notes,
+        createdAt: p.createdAt.toISOString(),
+        paidAt: p.paidAt ? p.paidAt.toISOString() : null,
       })),
       platformSetting: platformSetting
         ? {

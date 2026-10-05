@@ -490,7 +490,7 @@ export function LandingClient({ initialData }: { initialData: LandingPageData })
                     <div>
                       <div className="font-black text-emerald-200">Biaya Ringan &amp; Pasti</div>
                       <p className="text-slate-300 mt-0.5 leading-relaxed">
-                        Cuma sewa sistem flat mulai Rp250.000/bulan. <b className="text-emerald-400">Cukup dari keuntungan jual 1 unit HP bekas sebulan.</b>
+                        Cuma sewa sistem flat mulai Rp300.000/bulan. <b className="text-emerald-400">Cukup dari keuntungan jual 1 unit HP bekas sebulan.</b>
                       </p>
                     </div>
                   </div>
